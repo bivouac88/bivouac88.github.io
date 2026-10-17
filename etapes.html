@@ -322,6 +322,27 @@
   border-left: 1px solid var(--trait-subtil);
   padding-left: 14px;
 }
+    .like-bloc {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font: 500 12px var(--mono);
+}
+.like-btn {
+  background: none;
+  border: 1px solid var(--trait);
+  border-radius: 6px;
+  padding: 4px 10px;
+  color: var(--discret);
+  cursor: pointer;
+  font: 500 12px var(--mono);
+  transition: color 0.15s, border-color 0.15s;
+}
+.like-btn.vote {
+  color: var(--accent);
+  border-color: var(--accent-trait);
+}
 </style>
 </head>
 <body>
@@ -445,6 +466,12 @@ html += '<div class="comments-inline">';
 html += '<div class="comments-list" id="comments-' + e.jour + '"></div>';
 html += '<a class="comments-more" href="#">···</a>';
 html += '</div>';
+                  var aDejaVote = false;
+try { aDejaVote = localStorage.getItem('like-' + e.jour) === '1'; } catch(e2) {}
+html += '<div class="like-bloc">';
+html += '<button class="like-btn' + (aDejaVote ? ' vote' : '') + '" onclick="toggleLike(' + e.jour + ', this)">👍</button>';
+html += '<span id="like-count-' + e.jour + '" style="color:var(--discret)">–</span>';
+html += '</div>';
 html += '<div class="comment-form">';
 html += '<input type="text" placeholder="Ton nom" id="nom-' + e.jour + '" maxlength="30">';
 html += '<input type="text" placeholder="Ton commentaire" id="comment-' + e.jour + '">';
@@ -526,6 +553,26 @@ function postComment(jour) {
 function toutAfficher() {
   afficherJournal(toutesEtapes, true);
   toutesEtapes.forEach(function(e) { if (e.fait) loadComments(e.jour); });
+}
+function toggleLike(jour, btn) {
+  var aVote = false;
+  try { aVote = localStorage.getItem('like-' + jour) === '1'; } catch(e) {}
+  if (aVote) return; // un seul vote par appareil
+  try { localStorage.setItem('like-' + jour, '1'); } catch(e) {}
+  btn.classList.add('vote');
+  fetch(API, {
+    method: 'POST',
+    body: JSON.stringify({ action: 'like', etape: jour })
+  }).then(function() { loadLikes(jour); });
+}
+
+function loadLikes(jour) {
+  fetch(API + '?likes=' + jour)
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      var el = document.getElementById('like-count-' + jour);
+      if (el) el.textContent = d.likes + ' 👍';
+    }).catch(function() {});
 }
 </script>
 </body>
