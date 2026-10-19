@@ -42,7 +42,20 @@
       (document.querySelector('main') || document.body).prepend(b);
     }
     majIcone();
-    b.onclick = function () { appliquer(themeActuel() === 'light' ? 'dark' : 'light', true); };
+        b.onclick = function () { appliquer(themeActuel() === 'light' ? 'dark' : 'light', true); };
+
+    // Pied de page commun (ajouté seulement s'il n'y en a pas déjà un dans la page)
+    if (!document.querySelector('.pied')) {
+      var f = document.createElement('footer');
+      f.className = 'pied';
+      f.innerHTML =
+        '<a href="index.html">Bivouac88</a>' +
+        ' · <img src="Aventure cycliste au coucher du soleil.png" alt="Lost but Free" style="height:20px;vertical-align:middle;">' +
+        ' <a href="#">Lost but Free</a>' +
+        ' · <a href="https://www.leetchi.com/fr/c/bivouac88-4670104" target="_blank" rel="noopener">Soutenir</a>' +
+        '<br>Made with ♥ by Tito';
+      (document.querySelector('main') || document.body).appendChild(f);
+    }
   });
 
   // Suit le thème du système tant que la personne n'a rien choisi
