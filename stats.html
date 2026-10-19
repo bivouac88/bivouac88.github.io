@@ -396,7 +396,37 @@
     gt.appendChild(carte('Déjà roulé', formaterDuree(minFait), pluriel(faites.length, 'étape') + ' faite' + (faites.length > 1 ? 's' : ''), 'carte-stat'));
     gt.appendChild(carte('Reste à rouler', formaterDuree(minTotal - minFait), pluriel(restants, 'étape') + ' restante' + (restants > 1 ? 's' : ''), 'carte-stat'));
     if (plusLongueDuree) gt.appendChild(carte('Plus longue durée', formaterDuree(minDe(plusLongueDuree)), trajet(plusLongueDuree), 'carte-stat'));
+    // --- Météo ---
+    var avecMeteo = etapes.filter(function (e) { return e.fait && e.meteo; });
+    if (avecMeteo.length) {
+      $('section-meteo').style.display = '';
+      $('meteo-compteur').textContent = pluriel(avecMeteo.length, 'étape');
+      var gme = $('grille-meteo');
+      var sur = 'sur ' + pluriel(avecMeteo.length, 'étape');
+      var tmin = function (e) { return Number(e.meteo.tmin); };
+      var tmax = function (e) { return Number(e.meteo.tmax); };
+      var pluieDe = function (e) { return Number(e.meteo.pluie) || 0; };
+      var rafDe = function (e) { return Number(e.meteo.rafales) || 0; };
+      var tMoy = somme(avecMeteo, function (e) { return (tmin(e) + tmax(e)) / 2; }) / avecMeteo.length;
+      var plusChaud = avecMeteo.reduce(function (a, e) { return tmax(e) > tmax(a) ? e : a; });
+      var plusFroid = avecMeteo.reduce(function (a, e) { return tmin(e) < tmin(a) ? e : a; });
+      var joursPluie = avecMeteo.filter(function (e) { return pluieDe(e) >= 1; }).length;
+      var joursSoleil = avecMeteo.filter(function (e) {
+        var c = (e.meteo.conditions && e.meteo.conditions[0]) || '';
+        return c.indexOf('Dégagé') >= 0 || c.indexOf('Peu nuageux') >= 0;
+      }).length;
+      var plusPluvieux = extreme(avecMeteo, pluieDe, true);
+      var plusVenteux = extreme(avecMeteo, rafDe, true);
 
+      gme.appendChild(carte('Température moyenne', fmtDec(tMoy, 1) + '°', sur, 'carte-stat'));
+      gme.appendChild(carte('Jour le plus chaud', fmtDec(tmax(plusChaud), 0) + '°', trajet(plusChaud), 'carte-stat'));
+      gme.appendChild(carte('Jour le plus froid', fmtDec(tmin(plusFroid), 0) + '°', trajet(plusFroid), 'carte-stat'));
+      gme.appendChild(carte('Pluie totale', fmtDec(somme(avecMeteo, pluieDe), 1) + ' mm', sur, 'carte-stat'));
+      gme.appendChild(carte('Jours de pluie', String(joursPluie), sur, 'carte-stat'));
+      gme.appendChild(carte('Jours ensoleillés', String(joursSoleil), sur, 'carte-stat'));
+      if (plusPluvieux) gme.appendChild(carte('Jour le plus pluvieux', fmtDec(pluieDe(plusPluvieux), 1) + ' mm', trajet(plusPluvieux), 'carte-stat'));
+      if (plusVenteux) gme.appendChild(carte('Rafales max', fmtDec(rafDe(plusVenteux), 0) + ' km/h', trajet(plusVenteux), 'carte-stat'));
+    }
     // --- Graphiques ---
     graphique('graph-km', 'info-km', etapes, kmDe, function (v) { return fmtDec(v, 1) + ' km'; });
     graphique('graph-d', 'info-d', etapes, denDe, function (v) { return '+' + fmt(v) + ' m'; });
