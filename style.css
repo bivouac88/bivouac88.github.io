@@ -2,7 +2,7 @@
    Bivouac88 · style commun (repris de la page index)
    À charger avant le <style> propre à chaque page.
    ============================================================ */
-
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap');
 :root {
   --fond: #12100e;
   --carte: #1b1612;
