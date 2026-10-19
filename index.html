@@ -15,16 +15,7 @@
   <meta property="og:image" content="https://bivouac88.github.io/og-image.png">
   <meta name="twitter:card" content="summary">
   <meta name="theme-color" content="#e58e26">
-  <script>
-    (function () {
-      var stocke = null;
-      try {
-        stocke = localStorage.getItem('theme');
-      } catch (e) {}
-      var theme = stocke || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'dark');
-      document.documentElement.setAttribute('data-theme', theme);
-    })();
-  </script>
+    <script src="commun.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
