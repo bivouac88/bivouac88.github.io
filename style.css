@@ -148,9 +148,9 @@ main {
   color: inherit;
 }
 .marque img {
-  width: 36px;
-  height: 36px;
-  border-radius: 9px;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
   border: 1px solid var(--trait);
 }
 .marque span {
