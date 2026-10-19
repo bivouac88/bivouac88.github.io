@@ -295,16 +295,17 @@
           '<span>' + (e.temps || '–') + '</span>' +
         '</div>';
 
-      if (e.fait && e.meteo) {
+        if (e.fait && e.meteo) {
         var m = e.meteo;
         html += '<div class="meteo-bloc">' +
           '<div class="meteo-conditions">' + m.conditions.join(' · ') + '</div>' +
           '<div class="meta">' +
-            '<span>' + fmtDec(m.tmin, 0) + '° / ' + fmtDec(m.tmax, 0) + '°</span>' +
-            '<span class="sep">·</span>' +
-            '<span>' + fmtDec(m.pluie, 1) + ' mm</span>' +
-            '<span class="sep">·</span>' +
-            '<span>vent ' + fmtDec(m.vent, 0) + ' km/h (rafales ' + fmtDec(m.rafales, 0) + ')</span>' +
+          '<span>' + fmtDec(m.tmin, 0) + '° / ' + fmtDec(m.tmax, 0) + '°</span>' +
+          '<span class="sep">·</span>' +
+          '<span>' + fmtDec(m.pluie, 1) + ' mm</span>' +
+          '</div>' +
+          '<div class="meta">' +
+            '<span>Vent ' + fmtDec(m.vent, 0) + ' km/h (Rafales ' + fmtDec(m.rafales, 0) + ')</span>' +
           '</div></div>';
       }
 
