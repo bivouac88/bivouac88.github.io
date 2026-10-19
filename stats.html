@@ -261,7 +261,6 @@
     <h2 class="titre-section">Météo <small id="meteo-compteur"></small></h2>
     <div class="grille" id="grille-meteo"></div>
   </section>
-
   <section class="section">
     <h2 class="titre-section">Distance par étape <small>km</small></h2>
     <div class="graphique">
@@ -270,7 +269,6 @@
       <div class="legende"><span><i style="background: var(--accent)"></i>Faite</span><span><i style="background: var(--trait-actif)"></i>À venir</span></div>
     </div>
   </section>
-
   <section class="section">
     <h2 class="titre-section">Dénivelé par étape <small>m</small></h2>
     <div class="graphique">
@@ -279,9 +277,15 @@
       <div class="legende"><span><i style="background: var(--accent)"></i>Faite</span><span><i style="background: var(--trait-actif)"></i>À venir</span></div>
     </div>
   </section>
+    <section class="section" id="section-graph-temp" style="display: none;">
+    <h2 class="titre-section">Température max par étape <small>°C</small></h2>
+    <div class="graphique">
+      <div class="barres-defilement"><div class="barres" id="graph-t"></div></div>
+      <div class="graphique-info" id="info-t">Touche ou survole une barre pour voir l'étape.</div>
+    </div>
+  </section>
   <a class="bouton-lien" href="etapes.html">Voir toutes les étapes</a>
 </main>
-
 <script>
   // ---- Outils ----
   var API = 'https://script.google.com/macros/s/AKfycbyptX2-OXsxh8yXqk9Hi_ygvcxP1_4vD0AT-KzZPcTFzR9AfEKHbQnBvgi3Pvw5a-LL/exec';
@@ -315,7 +319,6 @@
     if (texte !== undefined) el.textContent = texte;
     return el;
   }
-
   // Une case de stats (href => la case devient un lien)
   function carte(label, valeur, detail, classe, href) {
     var el = creer(href ? 'a' : 'div', classe);
@@ -325,11 +328,9 @@
     el.appendChild(creer('div', 'detail', detail || ''));
     return el;
   }
-
   function trajet(e) {
     return e ? ('Étape ' + e.jour + ' · ' + e.depart + ' → ' + e.arrivee) : '';
   }
-
   // Étape avec la plus grande (ou petite) valeur > 0
   function extreme(etapes, f, plusGrand) {
     var meilleure = null;
