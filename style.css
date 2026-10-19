@@ -29,13 +29,13 @@
 }
 
 [data-theme="light"] {
-  --fond: #f7f3eb;
-  --carte: #ede7dc;
-  --carte-hover: #e4dccf;
-  --carte-prochaine: #efe8db;
-  --trait: #d6ccbe;
-  --trait-subtil: #e5dccf;
-  --trait-actif: #b8ab9a;
+  --fond: #ebe3d2;
+  --carte: #e1d8c4;
+  --carte-hover: #d9cfb9;
+  --carte-prochaine: #e5dcc8;
+  --trait: #cbbfa8;
+  --trait-subtil: #d8cdb7;
+  --trait-actif: #ac9e86;
   --papier: #2c241c;
   --papier-doux: #44392e;
   --discret: #7d7263;
@@ -47,7 +47,7 @@
   --succes: #4a8c5c;
   --lueur: rgba(212, 123, 25, 0.16);
   --opacite-texture: 0.16;
-  --fond-carte-leaflet: #e8e2d5;
+   --fond-carte-leaflet: #ddd4c0;
   --filtre-tuiles: none;
 }
 
