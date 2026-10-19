@@ -705,34 +705,6 @@
         min-width: 340px;
       }
     }
-      body {
-      background:
-        radial-gradient(ellipse 80% 420px at 50% -80px, rgba(229, 142, 38, 0.16), transparent 70%),
-        var(--fond);
-      background-repeat: no-repeat;
-    }
-    [data-theme="light"] body {
-      background:
-        radial-gradient(ellipse 80% 420px at 50% -80px, rgba(212, 123, 25, 0.16), transparent 70%),
-        var(--fond);
-      background-repeat: no-repeat;
-    }
-      body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-      opacity: 0.05;
-      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='320' height='320' viewBox='0 0 320 320'><g fill='none' stroke='%23e58e26' stroke-width='1'><path d='M-20 60 C 40 20, 100 110, 170 70 S 290 30, 340 80'/><path d='M-20 90 C 40 55, 100 140, 170 100 S 290 65, 340 110'/><path d='M-20 120 C 40 90, 100 170, 170 130 S 290 100, 340 140'/><path d='M-20 220 C 50 180, 110 270, 180 230 S 280 190, 340 240'/><path d='M-20 250 C 50 215, 110 300, 180 260 S 280 225, 340 270'/><path d='M-20 280 C 50 250, 110 330, 180 290 S 280 260, 340 300'/></g></svg>");
-      background-size: 320px 320px;
-    }
-    main {
-      z-index: 1;
-    }
-      [data-theme="light"] body::before {
-      opacity: 0.16;
-    }
       .pied {
       margin-top: 14px;
       padding-bottom: 6px;
