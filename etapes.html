@@ -285,6 +285,19 @@
           '<span>' + (e.temps || '–') + '</span>' +
         '</div>';
 
+      if (e.fait && e.meteo) {
+        var m = e.meteo;
+        html += '<div class="meteo-bloc">' +
+          '<div class="meteo-conditions">' + m.conditions.join(' · ') + '</div>' +
+          '<div class="meta">' +
+            '<span>' + fmtDec(m.tmin, 0) + '° / ' + fmtDec(m.tmax, 0) + '°</span>' +
+            '<span class="sep">·</span>' +
+            '<span>' + fmtDec(m.pluie, 1) + ' mm</span>' +
+            '<span class="sep">·</span>' +
+            '<span>vent ' + fmtDec(m.vent, 0) + ' km/h (rafales ' + fmtDec(m.rafales, 0) + ')</span>' +
+          '</div></div>';
+      }
+
       if (e.fait && e.note && (e.note.avis || e.note.commentaire || e.note.photo)) {
         html += '<div class="avis-bloc">';
         if (e.note.avis) {
