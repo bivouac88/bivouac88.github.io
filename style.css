@@ -148,8 +148,8 @@ main {
   color: inherit;
 }
 .marque img {
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
   border-radius: 12px;
   border: 1px solid var(--trait);
 }
