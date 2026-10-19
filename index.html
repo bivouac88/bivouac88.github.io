@@ -640,10 +640,11 @@
     .prochaine-meta {
       font-size: 12px;
     }
-        .marque {
+            .marque {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
-      gap: 10px;
+      gap: 6px 10px;
       margin-bottom: 12px;
       padding-right: 52px;
     }
@@ -652,6 +653,7 @@
       color: var(--discret);
       letter-spacing: 0.04em;
       margin-left: 6px;
+      white-space: nowrap;
     }
         @media (min-width: 900px) {
       .ligne-haut {
