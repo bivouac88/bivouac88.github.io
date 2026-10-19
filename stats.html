@@ -427,6 +427,8 @@
       gme.appendChild(carte('Jours ensoleillés', String(joursSoleil), sur, 'carte-stat'));
       if (plusPluvieux) gme.appendChild(carte('Jour le plus pluvieux', fmtDec(pluieDe(plusPluvieux), 1) + ' mm', trajet(plusPluvieux), 'carte-stat'));
       if (plusVenteux) gme.appendChild(carte('Rafales max', fmtDec(rafDe(plusVenteux), 0) + ' km/h', trajet(plusVenteux), 'carte-stat'));
+      $('section-graph-temp').style.display = '';
+      graphique('graph-t', 'info-t', avecMeteo, tmax, function (v) { return fmtDec(v, 0) + '°'; });
     }
     // --- Graphiques ---
     graphique('graph-km', 'info-km', etapes, kmDe, function (v) { return fmtDec(v, 1) + ' km'; });
