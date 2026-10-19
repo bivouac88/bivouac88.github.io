@@ -1,0 +1,243 @@
+/* ============================================================
+   Bivouac88 · style commun (repris de la page index)
+   À charger avant le <style> propre à chaque page.
+   ============================================================ */
+
+:root {
+  --fond: #12100e;
+  --carte: #1b1612;
+  --carte-hover: #231d17;
+  --carte-prochaine: #201a14;
+  --trait: #342a22;
+  --trait-subtil: #251e18;
+  --trait-actif: #5c4a3b;
+  --papier: #f2ebd9;
+  --papier-doux: #ded2bd;
+  --discret: #9c907b;
+  --discret-sombre: #665c4c;
+  --accent: #e58e26;
+  --accent-hover: #f39c38;
+  --accent-fond: rgba(229, 142, 38, 0.12);
+  --accent-trait: rgba(229, 142, 38, 0.35);
+  --succes: #5ba370;
+  --lueur: rgba(229, 142, 38, 0.16);
+  --opacite-texture: 0.05;
+  --fond-carte-leaflet: #15120f;
+  --filtre-tuiles: invert(1) hue-rotate(180deg) brightness(0.86) contrast(1.1) saturate(0.4);
+  --serif: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --mono: 'IBM Plex Mono', 'Courier New', monospace;
+}
+
+[data-theme="light"] {
+  --fond: #f7f3eb;
+  --carte: #ede7dc;
+  --carte-hover: #e4dccf;
+  --carte-prochaine: #efe8db;
+  --trait: #d6ccbe;
+  --trait-subtil: #e5dccf;
+  --trait-actif: #b8ab9a;
+  --papier: #2c241c;
+  --papier-doux: #44392e;
+  --discret: #7d7263;
+  --discret-sombre: #a69a8b;
+  --accent: #d47b19;
+  --accent-hover: #bd6a0f;
+  --accent-fond: rgba(212, 123, 25, 0.12);
+  --accent-trait: rgba(212, 123, 25, 0.35);
+  --succes: #4a8c5c;
+  --lueur: rgba(212, 123, 25, 0.16);
+  --opacite-texture: 0.16;
+  --fond-carte-leaflet: #e8e2d5;
+  --filtre-tuiles: none;
+}
+
+/* ---------- Base ---------- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  background: var(--fond);
+  scroll-behavior: smooth;
+}
+
+body {
+  color: var(--papier);
+  font-family: var(--serif);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background:
+    radial-gradient(ellipse 80% 420px at 50% -80px, var(--lueur), transparent 70%),
+    var(--fond);
+  background-repeat: no-repeat;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Texture de courbes de niveau en fond */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: var(--opacite-texture);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='320' height='320' viewBox='0 0 320 320'><g fill='none' stroke='%23e58e26' stroke-width='1'><path d='M-20 60 C 40 20, 100 110, 170 70 S 290 30, 340 80'/><path d='M-20 90 C 40 55, 100 140, 170 100 S 290 65, 340 110'/><path d='M-20 120 C 40 90, 100 170, 170 130 S 290 100, 340 140'/><path d='M-20 220 C 50 180, 110 270, 180 230 S 280 190, 340 240'/><path d='M-20 250 C 50 215, 110 300, 180 260 S 280 225, 340 270'/><path d='M-20 280 C 50 250, 110 330, 180 290 S 280 260, 340 300'/></g></svg>");
+  background-size: 320px 320px;
+}
+
+/* Largeur de la page : 900px par défaut, une page peut changer --largeur */
+main {
+  position: relative;
+  z-index: 1;
+  max-width: var(--largeur, 900px);
+  margin: 0 auto;
+  padding: 18px 16px 64px;
+}
+@media (min-width: 768px) {
+  main { padding: 24px 24px 64px; }
+}
+
+/* ---------- Bouton thème ---------- */
+.bouton-theme {
+  position: absolute;
+  top: 18px;
+  right: 16px;
+  z-index: 100;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: var(--carte);
+  border: 1px solid var(--trait);
+  border-radius: 9px;
+  color: var(--papier);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.bouton-theme:hover {
+  background: var(--carte-hover);
+  border-color: var(--trait-actif);
+  color: var(--accent);
+}
+.bouton-theme:active { transform: scale(0.92); }
+.bouton-theme svg { width: 17px; height: 17px; display: block; }
+
+/* ---------- En-tête de page ---------- */
+.ligne-haut {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding-right: 52px;
+}
+
+.marque {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.marque .logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+}
+.marque img {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  border: 1px solid var(--trait);
+}
+.marque span {
+  font-weight: 600;
+  font-size: 20px;
+  letter-spacing: -0.01em;
+  color: var(--papier);
+}
+.marque em { font-style: normal; color: var(--accent); }
+.marque small {
+  font: 400 12px var(--mono);
+  color: var(--discret);
+  letter-spacing: 0.04em;
+}
+
+/* Petits boutons "Soutenir", "Partager"… */
+.pastille {
+  font: 500 11px var(--mono);
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  opacity: 0.75;
+  background: none;
+  border: 1px solid var(--accent-trait);
+  border-radius: 6px;
+  padding: 3px 8px;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+.pastille:hover { opacity: 1; }
+
+.retour {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  color: var(--discret);
+  font: 500 12px var(--mono);
+  letter-spacing: 0.04em;
+  border: 1px solid var(--trait);
+  border-radius: 8px;
+  padding: 7px 12px;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.retour:hover { color: var(--accent); border-color: var(--accent-trait); }
+
+/* ---------- Titres de page ---------- */
+h1.titre-page {
+  font-size: clamp(24px, 4vw, 32px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+}
+.sous-titre-page {
+  color: var(--discret);
+  font: 400 13px var(--mono);
+  margin-bottom: 20px;
+}
+
+/* ---------- Message d'erreur ---------- */
+#erreur {
+  display: none;
+  color: var(--accent);
+  font: 14px var(--mono);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  background: var(--accent-fond);
+  border: 1px solid var(--accent-trait);
+  border-radius: 8px;
+}
+
+/* ---------- Pied de page ---------- */
+.pied {
+  margin-top: 28px;
+  text-align: center;
+  font: 400 11px var(--mono);
+  letter-spacing: 0.1em;
+  color: var(--discret-sombre);
+}
+.pied a { color: inherit; text-decoration: none; }
+.pied a:hover { color: var(--accent); }
+
+/* ---------- Accessibilité ---------- */
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { transition: none !important; }
+}
