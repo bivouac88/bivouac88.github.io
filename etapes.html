@@ -319,7 +319,11 @@
         }
         html += '<div class="avis-texte">';
         if (e.note.commentaire) {
-          html += '<div class="avis-commentaire">' + e.note.commentaire + '</div>';
+          var commentaire = String(e.note.commentaire);
+if (commentaire.length > 100) {
+  commentaire = commentaire.substring(0, 100).trimEnd() + '...';
+}
+html += '<div class="avis-commentaire">' + commentaire + '</div>';
         }
         var photos = [e.note.photo, e.note.photo2, e.note.photo3, e.note.photo4].filter(Boolean);
 if (photos.length) {
