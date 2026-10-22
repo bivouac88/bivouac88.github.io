@@ -419,9 +419,13 @@ function postComment(jour) {
     .then(function(d) {
       var el = document.getElementById('comments-' + jour);
       if (!el) return;
-      el.innerHTML = d.comments.map(function(c) {
-        return '<div class="comment"><strong>' + c.nom + '</strong> ' + c.commentaire + '</div>';
-      }).join('');
+      el.innerHTML = d.comments.slice(-3).map(function(c) {
+  var texte = String(c.commentaire || '');
+  if (texte.length > 50) {
+    texte = texte.substring(0, 50).trimEnd() + '...';
+  }
+  return '<div class="comment"><strong>' + c.nom + '</strong> ' + texte + '</div>';
+}).join('');
     });
 }
 function toutAfficher() {
