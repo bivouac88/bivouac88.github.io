@@ -781,6 +781,8 @@
   #poissons-mois .pm-ligne-info { font: 400 12px var(--mono); color: var(--discret); padding: 3px 0; }
   #poissons-mois .pm-ligne-info a { color: var(--accent); }
   #poissons-mois .pm-avert { margin-top: 10px; font: 400 11px var(--mono); color: var(--discret); line-height: 1.5; }
+  .heures, #poissons-mois .pm-ligne { scrollbar-width: none; -ms-overflow-style: none; }
+.heures::-webkit-scrollbar, #poissons-mois .pm-ligne::-webkit-scrollbar { display: none; }
 </style>
 <script>
 (function () {
@@ -809,7 +811,6 @@
       return r[3].charAt(mois) === '1' && (groupe === 'tous' || r[2] === groupe);
     }).sort(function (a, b) { return rang(a) - rang(b) || a[0].localeCompare(b[0], 'fr'); });
   }
-
   function detail(r) {
     var an = '';
     for (var k = 0; k < 12; k++) {
@@ -826,7 +827,6 @@
       + (alerte(r) ? '<div class="pm-ligne-info alerte" style="color:var(--accent)">⚠ Vérifie impérativement les interdictions de capture et de détention.</div>' : '')
       + '<div class="pm-ligne-info">' + liens + '</div></div>';
   }
-
   function dessiner() {
     var tab = especesDuMois();
     var html = '<div class="pm-tete"><button type="button" class="pm-nav" data-act="prec" aria-label="Mois précédent">‹</button>'
@@ -850,7 +850,6 @@
     html += '<p class="pm-avert">Saison biologique indicative, pas une autorisation de pêche. Vérifie les fermetures, tailles minimales et règles de ton cours d\'eau avant de partir.</p>';
     sec.innerHTML = html;
   }
-
   sec.addEventListener('click', function (e) {
     var b = e.target.closest ? e.target.closest('button') : null;
     if (!b) return;
@@ -861,7 +860,6 @@
     else return;
     dessiner();
   });
-
   fetch('poissons.json', { cache: 'no-cache' })
     .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
     .then(function (d) { liste = d.especes || []; dessiner(); })
@@ -870,6 +868,5 @@
     });
 })();
 </script>
-
 </body>
 </html>
