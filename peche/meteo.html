@@ -755,5 +755,121 @@
   );
 })();
 </script>
+  <!-- ===== BLOC « À PÊCHER EN [MOIS] » : à coller juste avant </body> de meteo.html ===== -->
+<style>
+  #poissons-mois { margin-top: 28px; }
+  #poissons-mois .pm-tete { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  #poissons-mois .pm-titre { flex: 1; font: 600 17px var(--serif); letter-spacing: -0.01em; }
+  #poissons-mois .pm-nav, #poissons-mois .pm-chip { font: 500 12px var(--mono); color: var(--discret); background: var(--carte); border: 1px solid var(--trait); border-radius: 8px; padding: 6px 12px; cursor: pointer; }
+  #poissons-mois .pm-chip[aria-pressed="true"] { color: var(--accent); border-color: var(--accent-trait); background: var(--accent-fond); }
+  #poissons-mois .pm-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  #poissons-mois .pm-ligne { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; scroll-snap-type: x proximity; }
+  #poissons-mois .pm-carte { flex: 0 0 150px; scroll-snap-align: start; text-align: left; color: var(--papier); background: var(--carte); border: 1px solid var(--trait); border-radius: 12px; padding: 12px; cursor: pointer; display: flex; flex-direction: column; gap: 2px; }
+  #poissons-mois .pm-carte:hover { border-color: var(--accent-trait); background: var(--carte-hover); }
+  #poissons-mois .pm-carte[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-fond); }
+  #poissons-mois .pm-ico { font-size: 30px; line-height: 1.2; }
+  #poissons-mois .pm-nom { font: 600 15px var(--serif); line-height: 1.2; }
+  #poissons-mois .pm-sci { font: italic 400 11px var(--mono); color: var(--discret); }
+  #poissons-mois .pm-tag { margin-top: 4px; font: 400 10px var(--mono); color: var(--discret); }
+  #poissons-mois .pm-tag.alerte { color: var(--accent); }
+  #poissons-mois .pm-detail { background: var(--carte); border: 1px solid var(--trait); border-radius: 12px; padding: 14px 16px; margin-top: 4px; }
+  #poissons-mois .pm-detail h3 { font: 600 18px var(--serif); }
+  #poissons-mois .pm-an { display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; margin: 10px 0; }
+  #poissons-mois .pm-an span { text-align: center; font: 400 10px var(--mono); padding: 5px 0; border-radius: 4px; background: var(--trait-subtil); color: var(--discret-sombre); }
+  #poissons-mois .pm-an span.on { background: var(--accent-trait); color: var(--papier); }
+  #poissons-mois .pm-an span.now { outline: 1.5px solid var(--accent); }
+  #poissons-mois .pm-ligne-info { font: 400 12px var(--mono); color: var(--discret); padding: 3px 0; }
+  #poissons-mois .pm-ligne-info a { color: var(--accent); }
+  #poissons-mois .pm-avert { margin-top: 10px; font: 400 11px var(--mono); color: var(--discret); line-height: 1.5; }
+</style>
+<script>
+(function () {
+  var MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+  var MOIS_C = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
+  var GROUPES = { tous: 'Tous', carnassiers: 'Carnassiers', carpes: 'Carpes', blancs: 'Blancs', autres: 'Autres' };
+  var LIEN_REGLES = 'https://environnement.wallonie.be/';
+
+  var hote = document.getElementById('tab-meteo');
+  if (!hote) return;
+  var sec = document.createElement('section');
+  sec.id = 'poissons-mois';
+  sec.innerHTML = '<div class="etat">Chargement des espèces…</div>';
+  hote.appendChild(sec);
+
+  var mois = new Date().getMonth(), moisNow = mois, groupe = 'tous', choisi = null, liste = [];
+
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  // r = [nom, scientifique, groupe, "010101010101", fermeture légale, remarque, source]
+  function statut(r) { var m = /Statut : ([^.]*)\./.exec(r[5] || ''); return m ? m[1] : ''; }
+  function rang(r) { var s = statut(r).toLowerCase(); return s.indexOf('commune') === 0 ? 0 : (s.indexOf('indigène') === 0 ? 1 : 2); }
+  function alerte(r) { return (r[5] || '').indexOf('Vérifier impérativement') >= 0; }
+
+  function especesDuMois() {
+    return liste.filter(function (r) {
+      return r[3].charAt(mois) === '1' && (groupe === 'tous' || r[2] === groupe);
+    }).sort(function (a, b) { return rang(a) - rang(b) || a[0].localeCompare(b[0], 'fr'); });
+  }
+
+  function detail(r) {
+    var an = '';
+    for (var k = 0; k < 12; k++) {
+      an += '<span class="' + (r[3].charAt(k) === '1' ? 'on' : '') + (k === moisNow ? ' now' : '') + '" title="' + MOIS[k] + '">' + MOIS_C[k] + '</span>';
+    }
+    var note = (r[5] || '').replace(/^Statut : [^.]*\.\s*/, '');
+    var liens = '<a href="' + LIEN_REGLES + '" target="_blank" rel="noopener">Réglementation (Wallonie)</a>';
+    if (/^https:\/\//.test(r[6] || '')) liens += ' · <a href="' + esc(r[6]) + '" target="_blank" rel="noopener">Fiche FishBase</a>';
+    return '<div class="pm-detail"><h3>' + esc(r[0]) + '</h3><div class="pm-sci">' + esc(r[1]) + '</div>'
+      + '<div class="pm-an">' + an + '</div>'
+      + '<div class="pm-ligne-info">Groupe : ' + esc(r[2]) + (statut(r) ? ' · ' + esc(statut(r)) : '') + '</div>'
+      + (note ? '<div class="pm-ligne-info">' + esc(note) + '</div>' : '')
+      + '<div class="pm-ligne-info">Fermeture légale : ' + esc(r[4] || 'à vérifier') + '</div>'
+      + (alerte(r) ? '<div class="pm-ligne-info alerte" style="color:var(--accent)">⚠ Vérifie impérativement les interdictions de capture et de détention.</div>' : '')
+      + '<div class="pm-ligne-info">' + liens + '</div></div>';
+  }
+
+  function dessiner() {
+    var tab = especesDuMois();
+    var html = '<div class="pm-tete"><button type="button" class="pm-nav" data-act="prec" aria-label="Mois précédent">‹</button>'
+      + '<div class="pm-titre">À pêcher en ' + MOIS[mois] + ' <span class="pm-sci">· ' + tab.length + ' espèce' + (tab.length > 1 ? 's' : '') + '</span></div>'
+      + '<button type="button" class="pm-nav" data-act="suiv" aria-label="Mois suivant">›</button></div>'
+      + '<div class="pm-chips">' + Object.keys(GROUPES).map(function (g) {
+          return '<button type="button" class="pm-chip" data-g="' + g + '" aria-pressed="' + (g === groupe) + '">' + GROUPES[g] + '</button>';
+        }).join('') + '</div>';
+    if (!tab.length) {
+      html += '<div class="etat">Aucune espèce listée ce mois-ci pour ce groupe.</div>';
+    } else {
+      html += '<div class="pm-ligne">' + tab.map(function (r) {
+        var i = liste.indexOf(r);
+        var tag = alerte(r) ? '⚠ à vérifier' : statut(r);
+        return '<button type="button" class="pm-carte" data-i="' + i + '" aria-pressed="' + (choisi === i) + '">'
+          + '<span class="pm-ico">🐟</span><span class="pm-nom">' + esc(r[0]) + '</span><span class="pm-sci">' + esc(r[1]) + '</span>'
+          + (tag ? '<span class="pm-tag' + (alerte(r) ? ' alerte' : '') + '">' + esc(tag) + '</span>' : '') + '</button>';
+      }).join('') + '</div>';
+    }
+    if (choisi !== null && liste[choisi]) html += detail(liste[choisi]);
+    html += '<p class="pm-avert">Saison biologique indicative, pas une autorisation de pêche. Vérifie les fermetures, tailles minimales et règles de ton cours d\'eau avant de partir.</p>';
+    sec.innerHTML = html;
+  }
+
+  sec.addEventListener('click', function (e) {
+    var b = e.target.closest ? e.target.closest('button') : null;
+    if (!b) return;
+    if (b.getAttribute('data-act') === 'prec') { mois = (mois + 11) % 12; choisi = null; }
+    else if (b.getAttribute('data-act') === 'suiv') { mois = (mois + 1) % 12; choisi = null; }
+    else if (b.getAttribute('data-g')) { groupe = b.getAttribute('data-g'); choisi = null; }
+    else if (b.getAttribute('data-i') !== null) { var i = Number(b.getAttribute('data-i')); choisi = (choisi === i) ? null : i; }
+    else return;
+    dessiner();
+  });
+
+  fetch('poissons.json', { cache: 'no-cache' })
+    .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function (d) { liste = d.especes || []; dessiner(); })
+    .catch(function (e) {
+      sec.innerHTML = '<div class="etat">Liste des espèces indisponible (poissons.json : ' + esc(e.message) + ').</div>';
+    });
+})();
+</script>
+
 </body>
 </html>
