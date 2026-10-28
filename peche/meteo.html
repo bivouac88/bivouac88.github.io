@@ -470,8 +470,12 @@
       + '<div class="panneau"><h3>UV · 24 h</h3>' + barres(uv, et, Math.max(8, pic))
       + l('Pic', pic > 0 ? n(pic, 1) + ' à ' + et[hpic] + ' h' : 'nul')
       + l('Niveau', pic > 0 ? niveauUV : 'nul') + '</div>'
-      + '<div class="panneau"><h3>Lune</h3><div class="gros">' + lu.icone + ' ' + lu.ill + '<small>%</small></div>'
-      + '<div class="sous">' + lu.nom + ' · ' + n(lu.age, 1) + ' j</div>'
+      + '<div class="panneau"><h3>Lune</h3><div class="gros">' + lu.icone + ' ' + lu.ill + '<small>% éclairée</small></div>'
+      + '<div class="sous">' + lu.nom + '</div>'
+      + l('Phase', lu.sens)
+      + l('Âge', n(lu.age, 1) + ' jours sur 29,5')
+      + l('Prochaine pleine lune', lu.pleine)
+      + l('Prochaine nouvelle lune', lu.nouvelle)
       + l('Rôle', 'information seulement') + '</div>';
   }
 
