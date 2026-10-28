@@ -621,7 +621,7 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
         var c = d.current, hh = d.hourly, j = d.daily, i = 0, k;
         for (k = 0; k < hh.time.length; k++) { if (hh.time[k].slice(0, 13) === c.time.slice(0, 13)) { i = k; break; } }
         var html = '';
-        // 1. Bandeau « Maintenant » (j[1] = aujourd'hui, la requête inclut past_days=1)
+    // 1. Bandeau « Maintenant » (j[1] = aujourd'hui, la requête inclut past_days=1)
         html += '<section><div class="hero">'
           + '<div class="carte-bloc hero-meteo"><div class="panneau" style="border:0;padding:0;background:none"><h3>Maintenant</h3></div>'
           + '<div class="temp">' + n(c.temperature_2m, 1) + '°</div>'
@@ -636,7 +636,8 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
           + '</div></div>'
           + '<div class="carte-bloc panneau" id="hero-peche"></div>'
           + '</div><div class="hero2" id="hero2"></div></section>';
-        // 2. Prochaines 24 h
+    // 2. Prochaines 24 h
+        html += '<div id="slot-poissons"></div>';
         html += '<section><h2 class="bloc">Prochaines 24 h</h2><div class="heures">';
         for (var a = i; a < Math.min(i + 25, hh.time.length); a++) {
           var risque = hh.precipitation_probability[a], raf = hh.wind_gusts_10m[a];
@@ -669,7 +670,8 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
         // 5. Détails
         html += '<section><h2 class="bloc">Détails</h2><div class="details" id="details"></div></section>';
         app.innerHTML = html;
-        METEO = { c: c, hh: hh, j: j, i: i };
+        var slot = $('slot-poissons'), pm = $('poissons-mois');
+        if (slot && pm) slot.appendChild(pm);        METEO = { c: c, hh: hh, j: j, i: i };
         dessinerDetails();
         appliquerFond(c.weather_code, c.is_day);
         dessinerPeche();
