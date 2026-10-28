@@ -750,7 +750,8 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
       + (alerte(r) ? '<div class="pm-ligne-info" style="color:var(--accent)">⚠ Vérifie impérativement les interdictions de capture et de détention.</div>' : '')
       + '<div class="pm-ligne-info">' + liens + '</div></div>';
   }
-  function dessiner() {
+  function dessiner(garder) {
+    var ancienne = sec.querySelector('.pm-ligne'), scrollAvant = (garder && ancienne) ? ancienne.scrollLeft : 0;
     var tab = especesDuMois();
     var html = '<div class="pm-tete"><button type="button" class="pm-nav" data-act="prec" aria-label="Mois précédent">‹</button>'
       + '<div class="pm-titre">À pêcher en ' + MOIS[mois] + ' <span class="pm-sci">· ' + tab.length + ' espèce' + (tab.length > 1 ? 's' : '') + '</span></div>'
@@ -768,7 +769,8 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
     if (choisi !== null && liste[choisi]) html += detail(liste[choisi]);
     html += '<p class="pm-avert">Saison biologique indicative, pas une autorisation de pêche. Vérifie les fermetures, tailles minimales et règles de ton cours d\'eau avant de partir.</p>';
     sec.innerHTML = html;
-  }
+    var nouvelle = sec.querySelector('.pm-ligne');
+    if (nouvelle) nouvelle.scrollLeft = scrollAvant;  }
   sec.addEventListener('click', function (e) {
     var b = e.target.closest ? e.target.closest('button') : null;
     if (!b) return;
@@ -777,7 +779,7 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
     else if (b.getAttribute('data-g')) { groupe = b.getAttribute('data-g'); choisi = null; }
     else if (b.getAttribute('data-i') !== null) { var i = Number(b.getAttribute('data-i')); choisi = (choisi === i) ? null : i; }
     else return;
-    dessiner();
+    dessiner(b.getAttribute('data-i') !== null);
   });
   fetch('poissons.json', { cache: 'no-cache' })
     .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
