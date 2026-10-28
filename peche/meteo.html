@@ -76,31 +76,28 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
 .heure .temp { font: 600 24px var(--serif); margin: 2px 0 6px; }
 .heure .m { padding: 4px 0; border-top: 1px solid var(--trait-subtil); }
 .heure .d { color: var(--discret); font-size: 11px; }
-
 /* Barres */
-.barres { display: flex; gap: 2px; height: 90px; margin: 4px 0 12px; }
-.bc { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-.bz { flex: 1; display: flex; align-items: flex-end; }
-.b { width: 100%; background: var(--accent-trait); border-radius: 2px 2px 0 0; min-height: 2px; }
-.b.n3 { background: var(--succes); } .b.n2 { background: var(--accent); } .b.n1 { background: var(--trait-actif); }
-.bc span { height: 12px; font: 400 9px var(--mono); color: var(--discret); text-align: center; }
+.courbe { display: block; width: 100%; height: 90px; margin-top: 4px; overflow: visible; }
+.courbe .z { fill: var(--accent); opacity: .15; }
+.courbe .t { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.courbe line { stroke: var(--trait); stroke-width: 1; stroke-dasharray: 3 3; vector-effect: non-scaling-stroke; }
+.courbe-et { display: flex; margin-bottom: 12px; }
+.courbe-et span { flex: 1; text-align: center; font: 400 9px var(--mono); color: var(--discret); }
+.details .courbe { height: 64px; }
 .peche-corps details { margin-top: 12px; font: 400 12px var(--mono); color: var(--discret); }
 .peche-corps summary { cursor: pointer; }
 .peche-corps details p { margin-top: 6px; line-height: 1.5; }
-
 /* 7 jours */
 .jours { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
-.jour { background: var(--carte); border: 1px solid var(--trait); border-radius: 14px; padding: 14px 16px; }
+@media (min-width: 1100px) { .jours { grid-template-columns: repeat(7, 1fr); gap: 8px; } .jour { padding: 12px; } }.jour { background: var(--carte); border: 1px solid var(--trait); border-radius: 14px; padding: 14px 16px; }
 .jour .nom { font: 600 15px var(--serif); text-transform: capitalize; }
 .jour .ciel { font: 400 12px var(--mono); color: var(--discret); margin-bottom: 4px; }
 .jour .minmax { font: 600 22px var(--serif); margin-bottom: 6px; }
 .jour .minmax small { font: 400 13px var(--mono); color: var(--discret); }
 .jour .l { font-size: 12px; padding: 5px 0; }
-
 /* Détails */
 .details { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; align-items: start; }
 .details .barres { height: 64px; }
-
 /* Fond selon le temps */
 #fond-meteo { position: fixed; inset: 0; z-index: 0; pointer-events: none; transition: background 1.2s ease; }
 [data-theme="light"] #fond-meteo { opacity: .7; }
@@ -117,7 +114,6 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
   #fond-meteo[data-fond="pluie"]::after, #fond-meteo[data-fond="orage"]::after { animation: pluie .9s linear infinite; }
   @keyframes pluie { to { background-position: -24px 96px; } }
 }
-
 /* Filtres, liste, carte */
 .filtres { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; margin-bottom: 12px; font: 400 12px var(--mono); color: var(--discret); }
 .filtres label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
@@ -139,7 +135,6 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
 .pop .nom { font: 600 15px var(--serif); margin-bottom: 2px; }
 .pop .info { font: 400 12px var(--mono); color: var(--discret); margin-bottom: 8px; }
 .pop a.gm { display: inline-block; font: 500 12px var(--mono); color: var(--accent); border: 1px solid var(--accent-trait); border-radius: 6px; padding: 6px 10px; text-decoration: none; }
-
 /* À pêcher en [mois] */
 #poissons-mois .pm-tete { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
 #poissons-mois .pm-titre { flex: 1; font: 600 18px var(--serif); letter-spacing: -0.01em; }
@@ -165,7 +160,6 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
 #poissons-mois .pm-ligne-info { font: 400 12px var(--mono); color: var(--discret); padding: 3px 0; }
 #poissons-mois .pm-ligne-info a { color: var(--accent); }
 #poissons-mois .pm-avert { margin-top: 10px; font: 400 11px var(--mono); color: var(--discret); line-height: 1.5; }
-
 @media (max-width: 900px) {
   .hero { grid-template-columns: 1fr; }
   .hero-meteo .temp { font-size: 54px; }
@@ -187,23 +181,18 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
       <button class="pastille" id="btn-partager" type="button" title="Partager">Partager</button>
     </div>
   </div>
-
   <h1 class="titre-page">Météo &amp; pêche</h1>
   <p class="sous-titre-page">Météo en direct et plans d'eau proches de toi <span class="pos warn" id="pos">position…</span></p>
-
   <div class="onglets" role="tablist">
     <button type="button" role="tab" data-tab="meteo" aria-selected="true">Météo</button>
     <button type="button" role="tab" data-tab="carte" aria-selected="false">Carte</button>
     <button type="button" role="tab" data-tab="liste" aria-selected="false">Liste</button>
   </div>
-
   <div id="erreur"></div>
-
   <div id="tab-meteo">
     <div id="meteo"><div class="etat">Localisation en cours…</div></div>
     <section id="poissons-mois"><div class="etat">Chargement des espèces…</div></section>
   </div>
-
   <div id="bloc-filtres" hidden>
     <div class="filtres">
       <label><input type="checkbox" id="f-nom" checked> Masquer les sans nom</label>
@@ -235,13 +224,11 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
       <span id="compte">Chargement des points…</span>
     </div>
   </div>
-
   <div id="tab-carte" hidden><div id="carte"></div></div>
   <div id="tab-liste" hidden>
     <div id="liste-lacs"></div>
     <p class="etat" id="maj-lacs"></p>
   </div>
-
   <footer class="pied">
     <a href="../index.html" style="color:inherit;text-decoration:none;">Bivouac88</a>
     · <img src="../Aventure%20cycliste%20au%20coucher%20du%20soleil.png" alt="Lost but Free" style="height:20px;vertical-align:middle;">
@@ -251,7 +238,6 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
     <br>Made with ♥ by Tito
   </footer>
 </main>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
 <script>
@@ -276,7 +262,6 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
     if (navigator.share) navigator.share({ title: 'Bivouac88', url: window.location.href });
     else navigator.clipboard.writeText(window.location.href);
   });
-
   // ── Codes météo ──
   var CODES = {
     0:'☀️ Dégagé', 1:'🌤️ Peu nuageux', 2:'⛅ Partiellement nuageux', 3:'☁️ Couvert',
@@ -289,7 +274,6 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
   };
   var CODES_NUIT = { 0: '🌙 Dégagé', 1: '🌙 Peu nuageux', 2: '☁️ Partiellement nuageux' };
   function ciel(code, jour) { return (jour === 0 && CODES_NUIT[code]) ? CODES_NUIT[code] : (CODES[code] || ''); }
-
   // ── Utilitaires ──
   function n(v, d) {
     if (v === null || v === undefined) return '–';
@@ -331,7 +315,6 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
     });
     return s + '</div>';
   }
-
   // ── Indicateur pêche (INDICATIF) ──
   var PECHE = {
     seuils: { bon: 2, moyen: 1 },
@@ -353,7 +336,6 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
   var groupePeche = 'carnassiers';
   try { var gs = localStorage.getItem('groupePeche'); if (gs && GROUPES[gs]) groupePeche = gs; } catch (e) {}
   var METEO = null;
-
   function evaluerPeche(g, x) {
     var P = PECHE, s = 0, r = [], t = x.temp;
     if (g === 'carnassiers') {
@@ -414,7 +396,6 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
       nuit: hh.is_day[k] === 0, aubeCrep: Math.abs(now - lev) <= 90 || Math.abs(now - cou) <= 90
     };
   }
-
   // ── Lune ──
   function lune(d) {
     var SYN = 29.530588853, jd = d.getTime() / 86400000 + 2440587.5;
@@ -430,7 +411,6 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
       pleine: dans((SYN / 2 - age + SYN) % SYN), nouvelle: dans((SYN - age) % SYN)
     };
   }
-
   function appliquerFond(code, jour) {
     var f = 'jour';
     if (code >= 95) f = 'orage';
@@ -442,7 +422,6 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
     if (jour === 0 && f === 'nuageux') f = 'nuit-nuageux';
     $('fond-meteo').setAttribute('data-fond', f);
   }
-
   // ── Détails : vent, pluie, UV, pression, lune ──
   function dessinerDetails() {
     var M = METEO, zone = $('details');
@@ -481,7 +460,6 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
       + l('Phase', lu.sens) + l('Âge', n(lu.age, 1) + ' j sur 29,5')
       + l('Pleine lune', lu.pleine) + l('Nouvelle lune', lu.nouvelle) + '</div>';
   }
-
   // ── Pêche : bandeau + détail ──
   function dessinerPeche() {
     var M = METEO, zone = $('peche-contenu'), hero = $('hero-peche');
@@ -508,7 +486,6 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
       + '<span class="score">' + rep.score + '<small>/100</small></span></div>'
       + '<div class="fenetre">' + fen + '</div>'
       + '<div class="sous">Indice maison · ' + FIABILITE[groupePeche] + '</div>';
-
     var html = '<div class="sous">Score heure par heure · ' + GROUPES[groupePeche] + '</div>'
       + barres(vals, et, 100, sc.map(function (r) { return 'n' + r.niveau; }));
     rep.raisons.forEach(function (t) { html += '<div class="l"><span>' + esc(t) + '</span></div>'; });
@@ -520,7 +497,6 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
       el.title = LIBELLES[r.niveau] + ' (' + r.score + '/100)';
     });
   }
-
   // ── Points d'eau (carte / liste) ──
   var POS = null, tous = [], PAGE = 20, affiches = PAGE;
   var carte = null, couche = null, ongletActif = 'meteo', chargeOk = false;
@@ -621,7 +597,6 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
       })
       .catch(function (e) { $('compte').textContent = 'Liste des étangs indisponible (' + e.message + ').'; });
   }
-
   // ── Météo ──
   function chargerMeteo(lat, lng) {
     var app = $('meteo');
@@ -637,7 +612,6 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
         var c = d.current, hh = d.hourly, j = d.daily, i = 0, k;
         for (k = 0; k < hh.time.length; k++) { if (hh.time[k].slice(0, 13) === c.time.slice(0, 13)) { i = k; break; } }
         var html = '';
-
         // 1. Bandeau « Maintenant » (j[1] = aujourd'hui, la requête inclut past_days=1)
         html += '<section><div class="hero">'
           + '<div class="carte-bloc hero-meteo"><div class="panneau" style="border:0;padding:0;background:none"><h3>Maintenant</h3></div>'
@@ -653,7 +627,6 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
           + '</div></div>'
           + '<div class="carte-bloc panneau" id="hero-peche"></div>'
           + '</div></section>';
-
         // 2. Prochaines 24 h
         html += '<section><h2 class="bloc">Prochaines 24 h</h2><div class="heures">';
         for (var a = i; a < Math.min(i + 25, hh.time.length); a++) {
@@ -667,10 +640,8 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
             + '</div>';
         }
         html += '</div></section>';
-
         // 3. Pêche en détail
         html += '<section><h2 class="bloc">Pêche en détail <small>indicatif</small></h2><div class="carte-bloc peche-corps" id="peche-contenu"></div></section>';
-
         // 4. 7 jours
         html += '<section><h2 class="bloc">7 jours</h2><div class="jours">';
         for (var m = 1; m < j.time.length; m++) {
@@ -688,10 +659,8 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
             + '</div>';
         }
         html += '</div></section>';
-
         // 5. Détails
         html += '<section><h2 class="bloc">Détails</h2><div class="details" id="details"></div></section>';
-
         app.innerHTML = html;
         METEO = { c: c, hh: hh, j: j, i: i };
         dessinerDetails();
@@ -708,7 +677,6 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
     try { localStorage.setItem('groupePeche', groupePeche); } catch (er) {}
     dessinerPeche();
   });
-
   function demarrer(lat, lng) {
     POS = { lat: lat, lng: lng };
     var pos = $('pos');
@@ -736,7 +704,6 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
   );
 })();
 </script>
-
 <script>
 // ── À pêcher en [mois] ──
 // Photos : ajoute dans peche/photos/ un fichier nommé comme l'espèce en minuscules sans accents
@@ -748,7 +715,6 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
   var LIEN_REGLES = 'https://environnement.wallonie.be/';
   var sec = document.getElementById('poissons-mois');
   var mois = new Date().getMonth(), moisNow = mois, groupe = 'tous', choisi = null, liste = [];
-
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]; }); }
   function slug(s) { return String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
   function statut(r) { var m = /Statut : ([^.]*)\./.exec(r[5] || ''); return m ? m[1] : ''; }
