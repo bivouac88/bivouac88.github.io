@@ -142,8 +142,7 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
 #poissons-mois .pm-carte { flex: 0 0 160px; scroll-snap-align: start; text-align: left; color: var(--papier); background: var(--carte); border: 1px solid var(--trait); border-radius: 14px; padding: 12px; cursor: pointer; display: flex; flex-direction: column; gap: 2px; }
 #poissons-mois .pm-carte:hover { border-color: var(--accent-trait); background: var(--carte-hover); }
 #poissons-mois .pm-carte[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-fond); }
-#poissons-mois .pm-photo { width: 100%; aspect-ratio: 4/3; border-radius: 8px; object-fit: cover; background: var(--trait-subtil); margin-bottom: 6px; display: flex; align-items: center; justify-content: center; font-size: 28px; }
-#poissons-mois .pm-nom { font: 600 15px var(--serif); line-height: 1.2; }
+#poissons-mois .pm-photo { width: 100%; aspect-ratio: 16/10; border-radius: 8px; background: #f4f2ec; margin-bottom: 6px; display: flex; align-items: center; justify-content: center; font-size: 28px; overflow: hidden; }#poissons-mois .pm-nom { font: 600 15px var(--serif); line-height: 1.2; }
 #poissons-mois .pm-sci { font: italic 400 11px var(--mono); color: var(--discret); }
 #poissons-mois .pm-tag { margin-top: 4px; font: 400 10px var(--mono); color: var(--discret); }
 #poissons-mois .pm-tag.alerte { color: var(--accent); }
@@ -729,7 +728,7 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
   function rang(r) { var s = statut(r).toLowerCase(); return s.indexOf('commune') === 0 ? 0 : (s.indexOf('indigène') === 0 ? 1 : 2); }
   function alerte(r) { return (r[5] || '').indexOf('Vérifier impérativement') >= 0; }
   function photo(r) {
-    return '<span class="pm-photo"><img src="photos/' + slug(r[0]) + '.jpg" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:8px" onerror="this.parentNode.textContent=\'🐟\'"></span>';
+    return '<span class="pm-photo"><img src="photos/' + slug(r[0]) + '.jpg" alt="" loading="lazy" style="width:100%;height:100%;object-fit:contain" onerror="this.parentNode.textContent=\'🐟\'"></span>';
   }
   function especesDuMois() {
     return liste.filter(function (r) { return r[3].charAt(mois) === '1' && (groupe === 'tous' || r[2] === groupe); })
