@@ -92,8 +92,7 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
 .jour .minmax small { font: 400 13px var(--mono); color: var(--discret); }
 .jour .l { font-size: 12px; padding: 5px 0; }
 /* Détails */
-.details { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; align-items: start; }
-.details .barres { height: 64px; }
+.details { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; align-items: stretch; }.details .barres { height: 64px; }
 /* Fond selon le temps */
 #fond-meteo { position: fixed; inset: 0; z-index: 0; pointer-events: none; transition: background 1.2s ease; }
 [data-theme="light"] #fond-meteo { opacity: .7; }
