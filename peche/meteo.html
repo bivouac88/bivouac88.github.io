@@ -421,9 +421,17 @@
     var ill = (1 - Math.cos(2 * Math.PI * age / SYN)) / 2;
     var ph = Math.floor(age / SYN * 8 + 0.5) % 8;
     var noms = ['Nouvelle lune', 'Premier croissant', 'Premier quartier', 'Gibbeuse croissante', 'Pleine lune', 'Gibbeuse décroissante', 'Dernier quartier', 'Dernier croissant'];
-    return { age: age, ill: Math.round(ill * 100), nom: noms[ph], icone: ['🌑', '🌒', '🌓', '🌔', '🌕', '🌖', '🌗', '🌘'][ph] };
+    var croissante = age < SYN / 2;
+    var jPleine = (SYN / 2 - age + SYN) % SYN;
+    var jNouvelle = (SYN - age) % SYN;
+    function dans(j) { var t = new Date(d.getTime() + j * 86400000); return t.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' }) + ' (dans ' + Math.round(j) + ' j)'; }
+    return {
+      age: age, ill: Math.round(ill * 100), nom: noms[ph],
+      icone: ['🌑', '🌒', '🌓', '🌔', '🌕', '🌖', '🌗', '🌘'][ph],
+      sens: croissante ? 'croissante' : 'décroissante',
+      pleine: dans(jPleine), nouvelle: dans(jNouvelle)
+    };
   }
-
   // ── Fond d'écran selon le temps ──────────────────────────────────────────
   function appliquerFond(code, jour) {
     var f = 'jour';
