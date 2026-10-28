@@ -307,12 +307,24 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
     for (var k = 1; k <= 3; k++) s += '<span' + (k > nb ? ' class="off"' : '') + '>🐟</span>';
     return '<span class="poissons">' + s + '</span>';
   }
-  function barres(vals, etiq, max, classes) {
-    var s = '<div class="barres">';
-    vals.forEach(function (v, k) {
-      var p = max ? Math.max(2, Math.round(100 * (v || 0) / max)) : 2;
-      s += '<div class="bc"><div class="bz"><div class="b ' + (classes ? classes[k] : '') + '" style="height:' + p + '%" title="' + n(v, 1) + '"></div></div><span>' + (k % 3 === 0 ? etiq[k] : '') + '</span></div>';
+    function barres(vals, etiq, max) {
+    var W = 300, H = 90, N = vals.length;
+    var pts = vals.map(function (v, k) {
+      return [(k + 0.5) * W / N, H - 4 - (H - 8) * Math.min(1, (v || 0) / (max || 1))];
     });
+    function cl(y) { return Math.max(0, Math.min(H, y)).toFixed(1); }
+    var d = 'M' + pts[0][0].toFixed(1) + ',' + cl(pts[0][1]);
+    for (var k = 0; k < N - 1; k++) {
+      var p0 = pts[k - 1] || pts[k], p1 = pts[k], p2 = pts[k + 1], p3 = pts[k + 2] || p2;
+      d += 'C' + (p1[0] + (p2[0] - p0[0]) / 6).toFixed(1) + ',' + cl(p1[1] + (p2[1] - p0[1]) / 6)
+        + ' ' + (p2[0] - (p3[0] - p1[0]) / 6).toFixed(1) + ',' + cl(p2[1] - (p3[1] - p1[1]) / 6)
+        + ' ' + p2[0].toFixed(1) + ',' + cl(p2[1]);
+    }
+    var aire = d + 'L' + pts[N - 1][0].toFixed(1) + ',' + H + 'L' + pts[0][0].toFixed(1) + ',' + H + 'Z';
+    var s = '<svg class="courbe" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none">'
+      + '<line x1="0" y1="' + H / 2 + '" x2="' + W + '" y2="' + H / 2 + '"/>'
+      + '<path class="z" d="' + aire + '"/><path class="t" d="' + d + '"/></svg><div class="courbe-et">';
+    vals.forEach(function (v, k) { s += '<span>' + (k % 3 === 0 ? etiq[k] : '') + '</span>'; });
     return s + '</div>';
   }
   // ── Indicateur pêche (INDICATIF) ──
