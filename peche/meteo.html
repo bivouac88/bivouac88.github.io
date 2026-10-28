@@ -44,7 +44,8 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
 .alerte { font-weight: 600; }
 /* Bandeau principal */
 .hero { display: grid; grid-template-columns: 1.15fr 1fr; gap: 14px; }
-.hero-meteo .temp { font: 600 64px var(--serif); line-height: 1; letter-spacing: -0.03em; }
+.hero2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; align-items: stretch; }
+@media (max-width: 900px) { .hero2 { grid-template-columns: 1fr; } }.hero-meteo .temp { font: 600 64px var(--serif); line-height: 1; letter-spacing: -0.03em; }
 .hero-meteo .ciel { font: 500 15px var(--mono); margin: 8px 0 14px; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip { font: 400 12px var(--mono); color: var(--discret); background: var(--trait-subtil); border-radius: 8px; padding: 6px 10px; }
@@ -456,15 +457,17 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
       + l('Risque max', n(maxi(risque)) + ' %') + '</div>'
       + '<div class="panneau"><h3>UV · 24 h</h3>' + barres(uv, et, Math.max(8, pic))
       + l('Pic', pic > 0 ? n(pic, 1) + ' à ' + et[hpic] + ' h' : 'nul')
-      + l('Niveau', pic > 0 ? niveauUV : 'nul') + '</div>'
-      + '<div class="panneau"><h3>Pression</h3><div class="gros">' + n(c.pressure_msl) + '<small>hPa</small></div>'
+      + l('Niveau', pic > 0 ? niveauUV : 'nul') + '</div>';
+      var pression = '<div class="panneau"><h3>Pression</h3><div class="gros">' + n(c.pressure_msl) + '<small>hPa</small></div>'
       + '<div class="sous"><span class="' + t3[1] + '">' + t3[0] + '</span></div>'
       + l('Tendance 3 h', signe(d3) + ' hPa', t3[1]) + l('Tendance 6 h', signe(d6) + ' hPa', t6[1])
-      + l('Visibilité', hh.visibility[i] !== null ? n(hh.visibility[i] / 1000, 1) + ' km' : '–') + '</div>'
-      + '<div class="panneau"><h3>Lune</h3><div class="gros">' + lu.icone + ' ' + lu.ill + '<small>% éclairée</small></div>'
+      + l('Visibilité', hh.visibility[i] !== null ? n(hh.visibility[i] / 1000, 1) + ' km' : '–') + '</div>';
+    var luneHtml = '<div class="panneau"><h3>Lune</h3><div class="gros">' + lu.icone + ' ' + lu.ill + '<small>% éclairée</small></div>'
       + '<div class="sous">' + lu.nom + '</div>'
       + l('Phase', lu.sens) + l('Âge', n(lu.age, 1) + ' j sur 29,5')
       + l('Pleine lune', lu.pleine) + l('Nouvelle lune', lu.nouvelle) + '</div>';
+    var haut = $('hero2');
+    if (haut) haut.innerHTML = luneHtml + pression;
   }
   // ── Pêche : bandeau + détail ──
   function dessinerPeche() {
@@ -632,7 +635,7 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
           + '<span class="chip">Soleil <b>' + h(j.sunrise[1]) + ' → ' + h(j.sunset[1]) + '</b></span>'
           + '</div></div>'
           + '<div class="carte-bloc panneau" id="hero-peche"></div>'
-          + '</div></section>';
+          + '</div><div class="hero2" id="hero2"></div></section>';
         // 2. Prochaines 24 h
         html += '<section><h2 class="bloc">Prochaines 24 h</h2><div class="heures">';
         for (var a = i; a < Math.min(i + 25, hh.time.length); a++) {
