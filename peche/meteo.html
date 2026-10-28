@@ -469,8 +469,7 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
   }
   // ── Pêche : bandeau + détail ──
   function dessinerPeche() {
-    var M = METEO, zone = $('peche-contenu'), hero = $('hero-peche');
-    if (!M || !zone || !hero) return;
+    var M = METEO, zone = $('peche-graph'), hero = $('hero-peche');    if (!M || !zone || !hero) return;
     var hh = M.hh, i = M.i, k, sc = [], et = [];
     var rep = evaluerPeche(groupePeche, ctxMaintenant(M));
     for (k = i; k < Math.min(i + 24, hh.time.length); k++) {
@@ -492,13 +491,14 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
       + '<div class="verdict n' + rep.niveau + '">' + poissons(rep.niveau) + '<span>' + LIBELLES[rep.niveau] + '</span>'
       + '<span class="score">' + rep.score + '<small>/100</small></span></div>'
       + '<div class="fenetre">' + fen + '</div>'
-      + '<div class="sous">Indice maison · ' + FIABILITE[groupePeche] + '</div>';
-    var html = '<div class="sous">Score heure par heure · ' + GROUPES[groupePeche] + '</div>'
-      + barres(vals, et, 100, sc.map(function (r) { return 'n' + r.niveau; }));
+      + '<div class="sous">Indice maison</div>';   
+    var graph = '<div class="sous">Score heure par heure · ' + GROUPES[groupePeche] + '</div>'
+    + barres(vals, et, 100, sc.map(function (r) { return 'n' + r.niveau; }));
+    var html = '';
     rep.raisons.forEach(function (t) { html += '<div class="l"><span>' + esc(t) + '</span></div>'; });
     html += '<details><summary>Sources et limites</summary><p>Ce score est un indice que nous calculons nous-mêmes, pas une mesure scientifique. Il part de 50 et ajoute ou retire 15 points par critère retenu : l\'échelle est un choix arbitraire, seuls des écarts nets (par exemple 80 contre 50) ont un sens. Critères : lumière, vent et chaleur pour les carnassiers (étude Shaw et al. 2021, PLOS ONE, doré et maskinongé, un lac du Wisconsin, et article de Carnassiers.com) ; température et nuit pour les carpes (études de laboratoire, captures en compétition) ; température seule pour les blancs et les autres (peu de données). La pression et la lune n\'entrent pas dans le score : aucun effet démontré n\'a été retenu. La température est celle de l\'air (moyenne des dernières 24 h), pas celle de l\'eau. Les 7 jours ne tiennent pas compte de l\'heure.</p></details>';
-    zone.innerHTML = html;
-    Array.prototype.forEach.call(document.querySelectorAll('.pj'), function (el) {
+    zone.innerHTML = graph;
+    hero.insertAdjacentHTML('beforeend', html);    Array.prototype.forEach.call(document.querySelectorAll('.pj'), function (el) {
       var r = evaluerPeche(groupePeche, ctxJour(M.j, Number(el.getAttribute('data-m'))));
       el.innerHTML = poissons(r.niveau);
       el.title = LIBELLES[r.niveau] + ' (' + r.score + '/100)';
@@ -646,7 +646,7 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
             + '<div class="m">' + n(hh.cloud_cover[a]) + '%<div class="d">nuages</div></div>'
             + '</div>';
         }
-        html += '</div></section>';
+        html += '</div><div id="peche-graph"></div></section>';
         // 3. Pêche en détail
         html += '<section><h2 class="bloc">Pêche en détail <small>indicatif</small></h2><div class="carte-bloc peche-corps" id="peche-contenu"></div></section>';
         // 4. 7 jours
