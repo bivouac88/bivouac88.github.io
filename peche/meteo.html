@@ -26,12 +26,10 @@ section { margin-bottom: 32px; }
 .etat { color: var(--discret); font: 400 13px var(--mono); padding: 8px 0; }
 h2.bloc { display: flex; align-items: baseline; gap: 8px; font: 600 18px var(--serif); letter-spacing: -0.01em; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--trait); }
 h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
-
 /* Onglets */
 .onglets { display: flex; gap: 6px; margin: 0 0 18px; position: sticky; top: 0; z-index: 500; padding: 8px 0; background: var(--fond); }
 .onglets button { flex: 1; font: 500 13px var(--mono); color: var(--discret); background: var(--carte); border: 1px solid var(--trait); border-radius: 8px; padding: 9px 6px; cursor: pointer; }
 .onglets button[aria-selected="true"] { color: var(--accent); border-color: var(--accent-trait); background: var(--accent-fond); }
-
 /* Cartes et lignes */
 .carte-bloc, .panneau { background: var(--carte); border: 1px solid var(--trait); border-radius: 14px; padding: 16px 18px; }
 .panneau h3 { font: 500 12px var(--mono); color: var(--discret); margin-bottom: 8px; text-transform: uppercase; letter-spacing: .06em; }
@@ -44,7 +42,6 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
 .hausse { color: var(--succes) !important; }
 .baisse, .alerte { color: var(--accent) !important; }
 .alerte { font-weight: 600; }
-
 /* Bandeau principal */
 .hero { display: grid; grid-template-columns: 1.15fr 1fr; gap: 14px; }
 .hero-meteo .temp { font: 600 64px var(--serif); line-height: 1; letter-spacing: -0.03em; }
@@ -66,7 +63,6 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
 .verdict.n1 { color: var(--discret); }
 .fenetre { font: 500 13px var(--mono); margin: 12px 0 4px; }
 .pj .poissons { font-size: 13px; letter-spacing: 0; }
-
 /* Frise 24 h */
 .heures { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; scroll-snap-type: x proximity; scrollbar-width: none; }
 .heures::-webkit-scrollbar { display: none; }
