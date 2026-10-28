@@ -736,6 +736,23 @@
       transition: opacity 0.15s ease;
     }
     a.fleche-suite:hover { opacity: 1; }
+        .bande-meteo {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 0 0 12px;
+      padding: 10px 16px;
+      background: var(--carte);
+      border: 1px solid var(--trait);
+      border-radius: 12px;
+      color: var(--papier);
+      text-decoration: none;
+      font: 500 13px var(--mono);
+      transition: border-color 0.2s ease, background-color 0.2s ease;
+    }
+    .bande-meteo:hover { border-color: var(--accent-trait); background: var(--carte-hover); }
+    .bande-meteo i { font-style: normal; color: var(--accent); }
   </style>
 </head>
 <body>
@@ -767,6 +784,10 @@
     </div>
   </div>
   </div>
+    <a class="bande-meteo" href="peche/meteo.html">
+    <span>🎣 Météo &amp; pêche</span>
+    <i>→</i>
+  </a>
   <!-- Statistiques principales -->
   <section class="stats-principales">
     <div class="stat-boite">
