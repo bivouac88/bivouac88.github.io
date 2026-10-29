@@ -467,6 +467,7 @@ a.style.top = (menuH + H * 0.08 + (H * 0.35) * (1 - Math.sin(p * Math.PI))) + 'p
   if (!horizonExist) {
     svg.insertAdjacentHTML('beforeend', horizonPath);
   }
+}
   // ── Détails : vent, pluie, UV, pression, lune ──
   function dessinerDetails() {
     var M = METEO, zone = $('details');
