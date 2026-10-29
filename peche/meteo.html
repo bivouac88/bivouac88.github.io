@@ -104,7 +104,7 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
 .jour .l { font-size: 12px; padding: 5px 0; }
 /* Détails */
 .details { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; align-items: stretch; }.details .barres { height: 64px; }
-#astre { position: fixed; width: 80px; height: 80px; border-radius: 50%; z-index: 0; pointer-events: none; transition: left 30s linear, top 30s linear; }
+#astre { position: fixed; width: 80px; height: 80px; border-radius: 50%; z-index: 1; pointer-events: none; transition: left 30s linear, top 30s linear; }
 #astre.soleil { background: radial-gradient(circle at 40% 40%, #fff5c0, #ffd98a 40%, #e58e26); box-shadow: 0 0 80px 30px rgba(229,142,38,.4), 0 0 160px 60px rgba(229,142,38,.15); }
 #astre.lune { background: radial-gradient(circle at 30% 30%, #ffffff, #f4f1e6 40%, #b9b7ad); box-shadow: 0 0 50px 15px rgba(200,210,255,.35), 0 0 100px 40px rgba(200,210,255,.12); }
 #ciel-svg { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
@@ -430,8 +430,8 @@ function placerAstre() {
   var W = window.innerWidth, H = window.innerHeight;
   a.className = jour ? 'soleil' : 'lune';
   a.style.left = (p * (W - 80)) + 'px';
-  a.style.top = (H * 0.28 - Math.sin(p * Math.PI) * H * 0.22) + 'px';
-
+var menuH = 80;
+a.style.top = (menuH + H * 0.08 + (H * 0.35) * (1 - Math.sin(p * Math.PI))) + 'px';
   // Étoiles (nuit + ciel dégagé)
   var nuages = M.c.cloud_cover;
   var etoilesVisible = !jour && nuages < 50;
