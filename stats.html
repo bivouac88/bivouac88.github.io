@@ -445,9 +445,6 @@
       zone.appendChild(col);
     });
   }
-  fetch(API + '?public=1')
-    .then(function (r) { return r.json(); })
-    .then(function (d) {
   // ---- Cache local (partagé avec l'accueil) : affichage immédiat, puis mise à jour ----
   var CLE_CACHE = 'b88-cache-v1';
   function valide(d) { return !!d && typeof d === 'object' && !d.erreur && !!d.totaux && Array.isArray(d.etapes); }
