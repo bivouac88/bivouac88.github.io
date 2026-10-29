@@ -432,6 +432,11 @@ function placerAstre() {
   a.style.left = (p * (W - 80)) + 'px';
 var menuH = 80;
 a.style.top = (menuH + H * 0.08 + (H * 0.35) * (1 - Math.sin(p * Math.PI))) + 'px';
+  // Dimensionner le SVG
+  svg.setAttribute('width', W);
+  svg.setAttribute('height', H);
+  svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+
   // Étoiles (nuit + ciel dégagé)
   var nuages = M.c.cloud_cover;
   var etoilesVisible = !jour && nuages < 50;
@@ -441,29 +446,27 @@ a.style.top = (menuH + H * 0.08 + (H * 0.35) * (1 - Math.sin(p * Math.PI))) + 'p
     var seed = 42;
     for (var k = 0; k < 80; k++) {
       seed = (seed * 1664525 + 1013904223) & 0xffffffff;
-      var x = ((seed >>> 0) % 1000) / 10;
+      var ex = ((seed >>> 0) % W);
       seed = (seed * 1664525 + 1013904223) & 0xffffffff;
-      var y = ((seed >>> 0) % 600) / 10;
+      var ey = ((seed >>> 0) % Math.round(H * 0.75));
       seed = (seed * 1664525 + 1013904223) & 0xffffffff;
-      var r = 0.4 + ((seed >>> 0) % 10) / 16;
-      s += '<circle cx="' + x + '%" cy="' + y + '%" r="' + r + '" fill="white" opacity="' + (0.4 + ((seed>>>0)%6)/10) + '"/>';
+      var er = 0.6 + ((seed >>> 0) % 10) / 12;
+      s += '<circle cx="' + ex + '" cy="' + ey + '" r="' + er + '" fill="white" opacity="' + (0.4 + ((seed>>>0)%6)/10) + '"/>';
     }
     s += '</g>';
     svg.innerHTML = s;
     setTimeout(function() { var g = svg.querySelector('.etoiles'); if (g) g.style.opacity = 1; }, 50);
   } else if (!etoilesVisible && etoiles) {
     etoiles.style.opacity = 0;
-    setTimeout(function() { if (svg.querySelector('.etoiles')) svg.innerHTML = ''; }, 2000);
+    setTimeout(function() { svg.innerHTML = ''; }, 2000);
   }
 
-  // Horizon
-  if (!svg.querySelector('.horizon')) {
-    svg.insertAdjacentHTML('beforeend',
-      '<path class="horizon" d="M0,' + (H*0.92) + ' Q' + (W*0.25) + ',' + (H*0.89) + ' ' + (W*0.5) + ',' + (H*0.91) + ' Q' + (W*0.75) + ',' + (H*0.93) + ' ' + W + ',' + (H*0.90) + ' L' + W + ',' + H + ' L0,' + H + 'Z" fill="rgba(0,0,0,0.18)" style="pointer-events:none"/>'
-    );
+  // Horizon (toujours présent, recalculé si resize)
+  var horizonExist = svg.querySelector('.horizon');
+  var horizonPath = '<path class="horizon" d="M0,' + (H*0.88) + ' Q' + (W*0.3) + ',' + (H*0.85) + ' ' + (W*0.5) + ',' + (H*0.87) + ' Q' + (W*0.7) + ',' + (H*0.89) + ' ' + W + ',' + (H*0.86) + ' L' + W + ',' + H + ' L0,' + H + 'Z" fill="rgba(0,0,0,0.22)" style="pointer-events:none"/>';
+  if (!horizonExist) {
+    svg.insertAdjacentHTML('beforeend', horizonPath);
   }
-}
-
   // ── Détails : vent, pluie, UV, pression, lune ──
   function dessinerDetails() {
     var M = METEO, zone = $('details');
