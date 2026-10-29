@@ -412,6 +412,34 @@
                 5px 0 0 #e8dcc0, 6px 0 0 #cfc3a4, 0 14px 24px -10px rgba(0,0,0,.5);
   }
 }
+    /* ── Étape 2 : le livre qui tourne (grand écran) ── */
+@media (min-width: 1100px) {
+  .carnet.livre-actif .chapitre { display: none; }
+  .livre { grid-column: 1 / -1; position: relative; height: 640px; perspective: 2800px; }
+  .leaf { position: absolute; top: 0; left: 50%; width: 50%; height: 100%; transform-origin: left center; transform-style: preserve-3d; transition: transform .9s cubic-bezier(.45,.05,.25,1); }
+  .leaf.tourne { transform: rotateY(-180deg); }
+  .leaf.leve { transform: rotateY(-9deg); }
+  .leaf.tourne.leve { transform: rotateY(-171deg); }
+  .face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+  .face.verso { transform: rotateY(180deg); }
+  .carnet .livre .face > .feuille { height: 100%; box-sizing: border-box; margin: 0; transform: none; box-shadow: 0 14px 24px -10px rgba(0,0,0,.5); }
+  .carnet .livre .face.d > .feuille {
+    padding-right: 28px; border-radius: 6px 14px 14px 6px;
+    background:
+      linear-gradient(90deg, rgba(0,0,0,.16), transparent 42px),
+      linear-gradient(90deg, transparent var(--x-marge), var(--marge-c) var(--x-marge), var(--marge-c) calc(var(--x-marge) + 2px), transparent calc(var(--x-marge) + 2px)),
+      repeating-linear-gradient(180deg, transparent 0, transparent 31px, var(--ligne-c) 31px, var(--ligne-c) 32px),
+      var(--papier-c);
+  }
+  .carnet .livre .face.d > .feuille::before { left: 14px; right: auto; }
+  .carnet .livre .pile { position: absolute; top: 4px; bottom: -3px; z-index: 0; transition: width .9s; background: repeating-linear-gradient(90deg, #efe4c8 0 1px, #cdbf9d 1px 2px); }
+  .carnet .livre .pile-d { left: 100%; width: min(calc(var(--ep-d, 1) * 4px), 30px); border-radius: 0 6px 6px 0; box-shadow: 0 8px 14px -8px rgba(0,0,0,.5); }
+  .carnet .livre .pile-g { right: 100%; width: min(calc(var(--ep-g, 1) * 4px), 30px); border-radius: 6px 0 0 6px; box-shadow: 0 8px 14px -8px rgba(0,0,0,.5); }
+  .coin { position: absolute; bottom: 0; width: 90px; height: 90px; padding: 0; border: 0; background: none; cursor: pointer; z-index: 1000; }
+  .coin.d { right: 0; }
+  .coin.g { left: 0; }
+  .coin[hidden] { display: none; }
+}
   </style>
 </head>
 <body class="page-journal">
@@ -460,5 +488,84 @@
     </article>
 
   </section></main>
+  <script>
+(function () {
+  var mq = window.matchMedia('(min-width: 1100px)');
+  mq.addEventListener('change', function () { location.reload(); });
+  if (!mq.matches) return;
+  var carnet = document.querySelector('.carnet');
+  if (!carnet) return;
+  var entrees = [], chap = '';
+  Array.prototype.slice.call(carnet.children).forEach(function (el) {
+    if (el.classList.contains('chapitre')) chap = el.textContent.trim();
+    else if (el.classList.contains('feuille')) { el.setAttribute('data-chap', chap); entrees.push(el); }
+  });
+  if (entrees.length < 2) return;
+
+  function vide() { var d = document.createElement('div'); d.className = 'feuille'; return d; }
+  function face(cls, contenu) { var f = document.createElement('div'); f.className = 'face ' + cls; f.appendChild(contenu); return f; }
+  function coin(cls, label) { var b = document.createElement('button'); b.type = 'button'; b.className = 'coin ' + cls; b.setAttribute('aria-label', label); return b; }
+
+  var nb = 1 + Math.ceil((entrees.length - 1) / 2), p = 1, verrou = false;
+  function zFinal(i) { return i < p ? i + 1 : nb - i; }
+
+  var livre = document.createElement('div');
+  livre.className = 'livre';
+  livre.innerHTML = '<div class="pile pile-g"></div><div class="pile pile-d"></div>';
+  var feuillets = [];
+  for (var i = 0; i < nb; i++) {
+    var l = document.createElement('div');
+    l.className = 'leaf' + (i < p ? ' tourne' : '');
+    l.appendChild(face('d', i === 0 ? vide() : entrees[2 * i - 1]));
+    l.appendChild(face('g verso', entrees[2 * i] || vide()));
+    l.style.zIndex = zFinal(i);
+    livre.appendChild(l);
+    feuillets.push(l);
+  }
+  var cg = coin('g', 'Page précédente'), cd = coin('d', 'Page suivante');
+  livre.appendChild(cg);
+  livre.appendChild(cd);
+  carnet.classList.add('livre-actif');
+  carnet.appendChild(livre);
+
+  function etat() {
+    livre.style.setProperty('--ep-g', p);
+    livre.style.setProperty('--ep-d', nb - p);
+    cg.hidden = p <= 1;
+    cd.hidden = p >= nb;
+  }
+  function tourner(sens) {
+    if (verrou) return;
+    var k = sens > 0 ? p : p - 1;
+    if (k < 1 || k >= nb) return;
+    verrou = true;
+    var f = feuillets[k];
+    f.style.zIndex = nb + 10;
+    f.classList.remove('leve');
+    p += sens;
+    f.classList.toggle('tourne', sens > 0);
+    etat();
+    setTimeout(function () { f.style.zIndex = zFinal(k); verrou = false; }, 950);
+  }
+  function lever(sens, on) {
+    if (verrou) return;
+    var k = sens > 0 ? p : p - 1;
+    if (k < 1 || k >= nb) return;
+    feuillets[k].classList.toggle('leve', on);
+  }
+  cd.addEventListener('mouseenter', function () { lever(1, true); });
+  cg.addEventListener('mouseenter', function () { lever(-1, true); });
+  [cd, cg].forEach(function (c) {
+    c.addEventListener('mouseleave', function () { feuillets.forEach(function (x) { x.classList.remove('leve'); }); });
+  });
+  cd.addEventListener('click', function () { tourner(1); });
+  cg.addEventListener('click', function () { tourner(-1); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight') tourner(1);
+    else if (e.key === 'ArrowLeft') tourner(-1);
+  });
+  etat();
+})();
+</script>
 </body>
 </html>
