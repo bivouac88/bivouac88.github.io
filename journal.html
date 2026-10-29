@@ -365,7 +365,27 @@
           var(--papier-c);
       }
     }
-  </style></head>
+    /* Fond : vraie texture de bois (remplace le bois dessiné plus haut) */
+    body.page-journal::before {
+      background-image:
+        radial-gradient(ellipse 85% 60% at 50% 16%, rgba(255, 190, 110, 0.14), transparent 70%),
+        radial-gradient(ellipse 130% 110% at 50% 45%, transparent 50%, rgba(0, 0, 0, var(--vignette)) 100%),
+        url("bois.jpg");
+      background-size: auto, auto, 640px 640px;
+      background-repeat: no-repeat, no-repeat, repeat;
+    }
+    /* Voile qui adoucit le bois (monte le 0.3 pour l'assombrir, baisse-le pour l'éclaircir) */
+    body.page-journal::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background: rgba(36, 24, 16, 0.3);
+    }
+    [data-theme="light"] body.page-journal::after { background: rgba(235, 227, 210, 0.4); }
+  </style>
+</head>
 <body class="page-journal">
   <main>
   <div class="ligne-haut">
