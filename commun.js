@@ -43,9 +43,66 @@
     }
     majIcone();
         b.onclick = function () { appliquer(themeActuel() === 'light' ? 'dark' : 'light', true); };
+    // ---- Menu commun ----
+    if (!document.querySelector('.menu-site')) {
+      var PAGES = [
+        { id: 'index',  nom: 'Accueil',           url: 'index.html' },
+        { id: 'etapes', nom: 'Étapes',            url: 'etapes.html' },
+        { id: 'stats',  nom: 'Stats',             url: 'stats.html' },
+        { id: 'meteo',  nom: 'Météo &amp; pêche', url: 'peche/meteo.html' }
+      ];
+      // Les liens s'adaptent tout seuls à la page dans le dossier peche/
+      var dossier = /\/peche\//.test(location.pathname) ? '../' : '';
+      var segment = location.pathname.split('/').pop().replace(/\.html$/, '') || 'index';
+      var nomCourant = 'Menu';
+      var liensHtml = '';
+      PAGES.forEach(function (p) {
+        var actif = (p.id === segment);
+        if (actif) nomCourant = p.nom;
+        liensHtml += '<li><a href="' + dossier + p.url + '"' + (actif ? ' aria-current="page"' : '') + '>' + p.nom + '</a></li>';
+      });
 
-    // Pied de page commun (ajouté seulement s'il n'y en a pas déjà un dans la page)
-    if (!document.querySelector('.pied')) {
+      var menuNav = document.createElement('nav');
+      menuNav.className = 'menu-site';
+      menuNav.setAttribute('aria-label', 'Navigation principale');
+      menuNav.innerHTML =
+        '<div class="menu-site__barre">' +
+          '<span class="menu-site__page">' + nomCourant + '</span>' +
+          '<ul class="menu-site__liens" id="menu-liens">' + liensHtml + '</ul>' +
+          '<button class="menu-site__burger" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="menu-liens">' +
+            '<span></span><span></span><span></span>' +
+          '</button>' +
+        '</div>';
+      document.body.insertBefore(menuNav, document.body.firstChild);
+
+      var menuVoile = document.createElement('div');
+      menuVoile.className = 'menu-voile';
+      document.body.appendChild(menuVoile);
+
+      var menuBurger = menuNav.querySelector('.menu-site__burger');
+      function menuOuvrir(oui) {
+        menuNav.classList.toggle('ouvert', oui);
+        menuVoile.classList.toggle('visible', oui);
+        menuBurger.setAttribute('aria-expanded', oui ? 'true' : 'false');
+        menuBurger.setAttribute('aria-label', oui ? 'Fermer le menu' : 'Ouvrir le menu');
+      }
+      menuBurger.addEventListener('click', function () {
+        menuOuvrir(!menuNav.classList.contains('ouvert'));
+      });
+      menuVoile.addEventListener('click', function () { menuOuvrir(false); });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') menuOuvrir(false);
+      });
+      window.addEventListener('resize', function () {
+        if (window.innerWidth > 767) menuOuvrir(false);
+      });
+
+      // Petite ombre quand la page défile
+      function menuDefile() { menuNav.classList.toggle('defile', window.scrollY > 8); }
+      window.addEventListener('scroll', menuDefile, { passive: true });
+      menuDefile();
+    }
+    // Pied de page commun (ajouté seulement s'il n'y en a pas déjà un dans la page)    if (!document.querySelector('.pied')) {
       var f = document.createElement('footer');
       f.className = 'pied';
       f.innerHTML =
