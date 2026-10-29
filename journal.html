@@ -319,8 +319,53 @@
       .couverture-titre { font-size: clamp(22px, 6.4vw, 28px); letter-spacing: 0.04em; }
       .couverture-sous { font-size: 10.5px; letter-spacing: 0.1em; }
     }
-  </style>
-</head>
+    /* ============================================================
+       Carnet ouvert : deux pages côte à côte sur grand écran
+       ============================================================ */
+    @media (min-width: 1100px) {
+      .carnet {
+        max-width: 1240px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 34px 0;
+        align-items: stretch;
+      }
+      .couverture { grid-column: 1 / -1; }
+      .chapitre { grid-column: 1 / -1; justify-self: start; }
+
+      /* Des pages de livre : à plat, ombre vers le bas seulement */
+      .carnet .feuille,
+      .carnet .feuille:hover {
+        min-width: 0;
+        transform: none;
+        box-shadow: 0 14px 24px -10px rgba(0, 0, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      /* Page de gauche : la reliure passe à droite, près du dos du carnet */
+      .carnet .feuille:nth-of-type(odd) {
+        grid-column: 1;
+        padding-right: 60px;
+        border-radius: 14px 6px 6px 14px;
+        background:
+          linear-gradient(270deg, rgba(0, 0, 0, 0.2), transparent 46px),
+          linear-gradient(90deg, transparent var(--x-marge), var(--marge-c) var(--x-marge), var(--marge-c) calc(var(--x-marge) + 2px), transparent calc(var(--x-marge) + 2px)),
+          repeating-linear-gradient(180deg, transparent 0, transparent 31px, var(--ligne-c) 31px, var(--ligne-c) 32px),
+          var(--papier-c);
+      }
+      .carnet .feuille:nth-of-type(odd)::before { left: auto; right: 14px; }
+
+      /* Page de droite : la reliure reste à gauche, avec l'ombre du pli */
+      .carnet .feuille:nth-of-type(even) {
+        grid-column: 2;
+        border-radius: 6px 14px 14px 6px;
+        background:
+          linear-gradient(90deg, rgba(0, 0, 0, 0.16), transparent 42px),
+          linear-gradient(90deg, transparent var(--x-marge), var(--marge-c) var(--x-marge), var(--marge-c) calc(var(--x-marge) + 2px), transparent calc(var(--x-marge) + 2px)),
+          repeating-linear-gradient(180deg, transparent 0, transparent 31px, var(--ligne-c) 31px, var(--ligne-c) 32px),
+          var(--papier-c);
+      }
+    }
+  </style></head>
 <body class="page-journal">
   <main>
   <div class="ligne-haut">
