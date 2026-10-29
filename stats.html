@@ -35,7 +35,6 @@
       gap: 12px;
     }
     h2.titre-section small { font: 400 12px var(--mono); color: var(--discret); }
-
     .grille {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -44,7 +43,6 @@
     @media (min-width: 640px) {
       .grille { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
     }
-
     /* Cases de stats */
     .stat-boite, .carte-stat {
       background: var(--carte);
@@ -99,7 +97,6 @@
       outline: 2px solid var(--accent);
       outline-offset: 2px;
     }
-
     /* Progression */
     .piste-avance {
       height: 6px;
@@ -125,7 +122,6 @@
       color: var(--discret);
       font-variant-numeric: tabular-nums;
     }
-
     /* Graphiques en barres */
     .graphique {
       background: var(--carte);
@@ -224,10 +220,10 @@
 </head>
 <body>
 <main>
-  <button id="btn-theme" class="bouton-theme" type="button" aria-label="Thème" title="Thème"></button>
   <div class="ligne-haut">
-    <div class="marque">
-      <a class="logo" href="index.html">
+    <div id="entete-site"></div>
+    <a class="retour" href="index.html">← Retour</a>
+  </div>
         <img src="apple-touch-icon.png" alt="" width="36" height="36">
         <span>Bivouac<em>88</em></span>
       </a>
@@ -238,9 +234,7 @@
 </div>
   <h1 class="titre-page">Toutes les stats</h1>
   <p class="sous-titre-page" id="sous-titre">chargement…</p>
-
   <div id="erreur"></div>
-
   <section class="section">
     <h2 class="titre-section">Progression</h2>
     <div class="grille" id="grille-principales"></div>
@@ -250,12 +244,10 @@
       <span id="avance-resume"></span>
     </div>
   </section>
-
   <section class="section">
     <h2 class="titre-section">Moyennes</h2>
     <div class="grille" id="grille-moyennes"></div>
   </section>
-
   <section class="section">
     <h2 class="titre-section">Records</h2>
     <div class="grille" id="grille-records"></div>
@@ -305,7 +297,6 @@
     });
   };
   var pluriel = function (n, mot) { return n + ' ' + mot + (n > 1 ? 's' : ''); };
-
   function parseMinutes(str) {
     if (!str) return 0;
     var m = String(str).match(/(\d+)\s*(?:h|:)\s*(\d+)?/i);
@@ -352,40 +343,32 @@
   var denDe = function (e) { return Number(e.denivele) || 0; };
   var minDe = function (e) { return parseMinutes(e.temps); };
   var somme = function (liste, f) { return liste.reduce(function (a, e) { return a + f(e); }, 0); };
-
   function afficherStats(t, etapes) {
     var total = t.jours || etapes.length;
     var faits = t.jours_faits || 0;
     var restants = Math.max(0, total - faits);
-
     $('sous-titre').textContent = faits + ' / ' + total + ' étapes · ' + t.avancement + ' % du parcours';
-
     // --- Progression ---
     var gp = $('grille-principales');
     gp.appendChild(carte('Étapes', faits + ' / ' + total, pluriel(restants, 'restante'), 'stat-boite', 'etapes.html'));
     gp.appendChild(carte('Km parcourus', fmt(t.km_faits) + ' km', t.km_total ? 'sur ' + fmt(t.km_total) + ' km' : '', 'stat-boite'));
     gp.appendChild(carte('Km restants', fmt(t.km_restants) + ' km', pluriel(restants, 'étape'), 'stat-boite'));
     gp.appendChild(carte('Dénivelé', '+' + fmt(t.denivele_fait) + ' m', t.denivele_total ? 'sur +' + fmt(t.denivele_total) + ' m' : '', 'stat-boite'));
-
     $('pct').textContent = t.avancement + ' %';
     if (t.km_total) $('avance-resume').textContent = fmt(t.km_faits) + ' / ' + fmt(t.km_total) + ' km';
     setTimeout(function () { $('barre').style.width = t.avancement + '%'; }, 100);
-
     if (!etapes.length) return;
-
     var kmTotal = somme(etapes, kmDe);
     var denTotal = somme(etapes, denDe);
     var minTotal = somme(etapes, minDe);
     var faites = etapes.filter(function (e) { return e.fait; });
     var minFait = somme(faites, minDe);
-
     // --- Moyennes ---
     var gm = $('grille-moyennes');
     gm.appendChild(carte('Km / étape', fmtDec(kmTotal / etapes.length, 1) + ' km', 'sur ' + etapes.length + ' étapes', 'carte-stat'));
     gm.appendChild(carte('Dénivelé / étape', '+' + fmt(Math.round(denTotal / etapes.length)) + ' m', 'sur ' + etapes.length + ' étapes', 'carte-stat'));
     gm.appendChild(carte('Durée / étape', formaterDuree(minTotal / etapes.length), 'temps estimé', 'carte-stat'));
     gm.appendChild(carte('Dénivelé / 100 km', '+' + fmt(kmTotal ? Math.round(denTotal / kmTotal * 100) : 0) + ' m', 'sur tout le parcours', 'carte-stat'));
-
     // --- Records ---
     var gr = $('grille-records');
     var plusLongue = extreme(etapes, kmDe, true);
@@ -396,7 +379,6 @@
     if (plusCourte) gr.appendChild(carte('Plus courte étape', fmtDec(plusCourte.km, 1) + ' km', trajet(plusCourte), 'carte-stat'));
     if (plusGrosD) gr.appendChild(carte('Plus gros dénivelé', '+' + fmt(plusGrosD.denivele) + ' m', trajet(plusGrosD), 'carte-stat'));
     if (plusPetitD) gr.appendChild(carte('Plus petit dénivelé', '+' + fmt(plusPetitD.denivele) + ' m', trajet(plusPetitD), 'carte-stat'));
-
     // --- Temps ---
     var gt = $('grille-temps');
     var plusLongueDuree = extreme(etapes, minDe, true);
@@ -425,7 +407,6 @@
       }).length;
       var plusPluvieux = extreme(avecMeteo, pluieDe, true);
       var plusVenteux = extreme(avecMeteo, rafDe, true);
-
       gme.appendChild(carte('Température moyenne', fmtDec(tMoy, 1) + '°', sur, 'carte-stat'));
       gme.appendChild(carte('Jour le plus chaud', fmtDec(tmax(plusChaud), 0) + '°', trajet(plusChaud), 'carte-stat'));
       gme.appendChild(carte('Jour le plus froid', fmtDec(tmin(plusFroid), 0) + '°', trajet(plusFroid), 'carte-stat'));
@@ -443,13 +424,11 @@
     graphique('graph-km', 'info-km', etapes, kmDe, function (v) { return fmtDec(v, 1) + ' km'; });
     graphique('graph-d', 'info-d', etapes, denDe, function (v) { return '+' + fmt(v) + ' m'; });
   }
-
   function graphique(idBarres, idInfo, etapes, valeurDe, formater) {
     var zone = $(idBarres), info = $(idInfo);
     var max = 0;
     etapes.forEach(function (e) { if (valeurDe(e) > max) max = valeurDe(e); });
     var colActive = null;
-
     function afficherInfo(e, col) {
       if (colActive) colActive.classList.remove('actif');
       colActive = col;
@@ -458,7 +437,6 @@
       info.appendChild(creer('strong', '', trajet(e)));
       info.appendChild(document.createTextNode(' · ' + formater(valeurDe(e)) + (e.fait ? ' · faite' : ' · à venir')));
     }
-
     etapes.forEach(function (e) {
       var col = creer('button', 'barre-col' + (e.fait ? ' fait' : ''));
       col.type = 'button';
@@ -474,7 +452,6 @@
       zone.appendChild(col);
     });
   }
-
   fetch(API + '?public=1')
     .then(function (r) { return r.json(); })
     .then(function (d) {
