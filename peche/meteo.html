@@ -460,8 +460,32 @@ a.style.top = (menuH + H * 0.08 + (H * 0.35) * (1 - Math.sin(p * Math.PI))) + 'p
     etoiles.style.opacity = 0;
     setTimeout(function() { svg.innerHTML = ''; }, 2000);
   }
+  // Nuages
+  var nuagesSvg = svg.querySelector('.nuages');
+  if (nuages > 20) {
+    var opNuages = Math.min(0.7, nuages / 100 * 0.9);
+    var nc = jour ? 'rgba(200,210,220,' : 'rgba(60,70,100,';
+    var nb = Math.round(2 + nuages / 25);
+    var ns = '<g class="nuages">';
+    var nseed = 77;
+    for (var n2 = 0; n2 < nb; n2++) {
+      nseed = (nseed * 1664525 + 1013904223) & 0xffffffff;
+      var nx = ((nseed >>> 0) % (W - 200)) + 100;
+      nseed = (nseed * 1664525 + 1013904223) & 0xffffffff;
+      var ny = ((nseed >>> 0) % Math.round(H * 0.45)) + 40;
+      nseed = (nseed * 1664525 + 1013904223) & 0xffffffff;
+      var nw = 120 + ((nseed >>> 0) % 180);
+      ns += '<ellipse cx="' + nx + '" cy="' + ny + '" rx="' + nw + '" ry="' + Math.round(nw * 0.38) + '" fill="' + nc + opNuages + ')"/>';
+      ns += '<ellipse cx="' + (nx - nw*0.3) + '" cy="' + (ny - nw*0.18) + '" rx="' + Math.round(nw*0.55) + '" ry="' + Math.round(nw*0.32) + '" fill="' + nc + (opNuages*0.85) + ')"/>';
+      ns += '<ellipse cx="' + (nx + nw*0.25) + '" cy="' + (ny - nw*0.12) + '" rx="' + Math.round(nw*0.45) + '" ry="' + Math.round(nw*0.28) + '" fill="' + nc + (opNuages*0.75) + ')"/>';
+    }
+    ns += '</g>';
+    if (!nuagesSvg) { svg.insertAdjacentHTML('afterbegin', ns); }
+  } else if (nuagesSvg) {
+    nuagesSvg.remove();
+  }
 
-  // Horizon (toujours présent, recalculé si resize)
+  // Horizon
   var horizonExist = svg.querySelector('.horizon');
   var horizonPath = '<path class="horizon" d="M0,' + (H*0.88) + ' Q' + (W*0.3) + ',' + (H*0.85) + ' ' + (W*0.5) + ',' + (H*0.87) + ' Q' + (W*0.7) + ',' + (H*0.89) + ' ' + W + ',' + (H*0.86) + ' L' + W + ',' + H + ' L0,' + H + 'Z" fill="rgba(0,0,0,0.22)" style="pointer-events:none"/>';
   if (!horizonExist) {
