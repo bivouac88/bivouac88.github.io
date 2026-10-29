@@ -104,6 +104,9 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
 .jour .l { font-size: 12px; padding: 5px 0; }
 /* Détails */
 .details { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; align-items: stretch; }.details .barres { height: 64px; }
+#astre { position: fixed; width: 56px; height: 56px; border-radius: 50%; z-index: 0; pointer-events: none; transition: left 1s, top 1s; }
+#astre.soleil { background: radial-gradient(circle, #ffd98a, #e58e26); box-shadow: 0 0 60px 20px rgba(229,142,38,.35); }
+#astre.lune { background: radial-gradient(circle at 35% 35%, #f4f1e6, #b9b7ad); box-shadow: 0 0 40px 10px rgba(200,210,255,.25); }
 /* Cases du haut */
 .haut { display: grid; grid-template-columns: 1.5fr 1.3fr 1fr 1fr; gap: 14px; align-items: stretch; }
 .haut .hero, .haut .hero2 { display: contents; }
@@ -180,8 +183,8 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
 </style>
 </head>
 <body>
-<div id="fond-meteo" data-fond="jour"></div>
-<main data-credit="Données : Open-Meteo · OpenStreetMap">
+<div id="fond-meteo" data-fond="jour"></div><div id="astre"></div>
+  <main data-credit="Données : Open-Meteo · OpenStreetMap">
   <div class="ligne-haut">
     <div id="entete-site"></div>
   </div>
@@ -411,6 +414,20 @@ function $(id) { return document.getElementById(id); }
     if (jour === 0 && f === 'nuageux') f = 'nuit-nuageux';
     $('fond-meteo').setAttribute('data-fond', f);
   }
+  function placerAstre() {
+  var M = METEO, a = $('astre'); if (!M || !a) return;
+  var j = M.j, jour = M.c.is_day === 1, deb, fin;
+  function t(s) { return new Date(s).getTime(); }
+  var now = t(M.c.time);
+  if (jour) { deb = t(j.sunrise[1]); fin = t(j.sunset[1]); }
+  else if (now >= t(j.sunset[1])) { deb = t(j.sunset[1]); fin = t(j.sunrise[2]); }
+  else { deb = t(j.sunset[0]); fin = t(j.sunrise[1]); }
+  var p = Math.max(0, Math.min(1, (now - deb) / (fin - deb)));
+  var W = window.innerWidth, H = window.innerHeight;
+  a.className = jour ? 'soleil' : 'lune';
+  a.style.left = (p * (W - 56)) + 'px';
+  a.style.top = (H * 0.3 - Math.sin(p * Math.PI) * H * 0.22) + 'px';
+}
   // ── Détails : vent, pluie, UV, pression, lune ──
   function dessinerDetails() {
     var M = METEO, zone = $('details');
@@ -655,7 +672,7 @@ function $(id) { return document.getElementById(id); }
         var slot = $('slot-poissons'), pm = $('poissons-mois');
         if (slot && pm) slot.appendChild(pm);        METEO = { c: c, hh: hh, j: j, i: i };
         dessinerDetails();
-        appliquerFond(c.weather_code, c.is_day);
+        appliquerFond(c.weather_code, c.is_day); placerAstre(); window.addEventListener('resize', placerAstre);
         dessinerPeche();
       })
       .catch(function (e) { app.innerHTML = ''; erreur('Météo indisponible : ' + e.message); });
