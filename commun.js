@@ -27,8 +27,48 @@
     a.rel = 'noopener noreferrer';
   }
 
-  function themeChoisi() {
-    try { return localStorage.getItem('theme'); } catch (e) { return null; }
+  // ---- Bouton Partager (un seul code pour toutes les pages) ----
+  function partager(btn) {
+    var url = location.href;
+    if (navigator.share) {
+      navigator.share({ title: 'Bivouac88', url: url }).catch(function () {});
+    } else if (navigator.clipboard) {
+      navigator.clipboard.writeText(url).then(function () {
+        btn.textContent = 'Lien copié ✓';
+        setTimeout(function () { btn.textContent = 'Partager'; }, 2000);
+      }).catch(function () {});
+    }
+  }
+
+  // ---- En-tête commun : logo, nom, Soutenir, Partager ----
+  function construireEntete() {
+    var marque = el('div', 'marque');
+    var logo = el('a', 'logo');
+    logo.href = dossier + 'index.html';
+    logo.setAttribute('aria-label', 'Bivouac88 · accueil');
+    var img = document.createElement('img');
+    img.src = dossier + 'apple-touch-icon.png';
+    img.alt = '';
+    img.width = 90;
+    img.height = 90;
+    var nom = el('span', null, 'Bivouac');
+    nom.appendChild(el('em', null, '88'));
+    logo.appendChild(img);
+    logo.appendChild(nom);
+    var don = el('a', 'btn-don', 'Soutenir');
+    don.setAttribute('data-don', '');
+    var part = el('button', 'btn-partage', 'Partager');
+    part.type = 'button';
+    part.title = 'Partager';
+    part.addEventListener('click', function () { partager(part); });
+    marque.appendChild(logo);
+    marque.appendChild(el('small', null, "Tour d'Europe à vélo"));
+    marque.appendChild(don);
+    marque.appendChild(part);
+    return marque;
+  }
+
+  function themeChoisi() {    try { return localStorage.getItem('theme'); } catch (e) { return null; }
   }
   function themeSysteme() {
     return (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'dark';
@@ -65,10 +105,11 @@
     }
     majIcone();
     b.onclick = function () { appliquer(themeActuel() === 'light' ? 'dark' : 'light', true); };
-
-    // ---- Liens de don ----
-    document.querySelectorAll('a[data-don]').forEach(lienDon);
-
+    // ---- En-tête commun (si la page contient <div id="entete-site">) ----
+    var hote = document.getElementById('entete-site');
+    if (hote) hote.replaceWith(construireEntete());
+    // ---- Liens de don ----    
+     document.querySelectorAll('a[data-don]').forEach(lienDon);
     // ---- Menu commun ----
     if (!document.querySelector('.menu-site')) {
       var PAGES = [
@@ -158,6 +199,12 @@
       f.appendChild(logo);
       f.appendChild(document.createTextNode(' Lost but Free · '));
       f.appendChild(don);
+      // Mention propre à une page : <main data-credit="Données : Open-Meteo · OpenStreetMap">
+      var credit = (document.querySelector('main') || document.body).getAttribute('data-credit');
+      if (credit) {
+        f.appendChild(document.createElement('br'));
+        f.appendChild(document.createTextNode(credit));
+      }
       f.appendChild(document.createElement('br'));
       f.appendChild(document.createTextNode('Made with ♥ by Tito'));
       (document.querySelector('main') || document.body).appendChild(f);
