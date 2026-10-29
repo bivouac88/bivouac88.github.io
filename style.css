@@ -29,7 +29,7 @@
 }
 
 [data-theme="light"] {
-  --fond: #ebe3d2;
+  --fond: #d4c9b2;
   --carte: #e1d8c4;
   --carte-hover: #d9cfb9;
   --carte-prochaine: #e5dcc8;
@@ -278,7 +278,7 @@ h1.titre-page {
 /* ============================================================
    Menu commun
    ============================================================ */
-:root { --hauteur-menu: 52px; }
+:root { --hauteur-menu: 60px; }
 html { scroll-padding-top: calc(var(--hauteur-menu) + 8px); }
 
 .menu-site {
@@ -325,9 +325,9 @@ html { scroll-padding-top: calc(var(--hauteur-menu) + 8px); }
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 9px 14px;
+  padding: 11px 16px;
   border-radius: 8px;
-  font: 500 12px var(--mono);
+  font: 500 13px var(--mono);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--discret);
