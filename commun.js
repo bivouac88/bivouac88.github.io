@@ -70,12 +70,11 @@
     document.querySelectorAll('a[data-don]').forEach(lienDon);
 
     // ---- Menu commun ----
-    if (!document.querySelector('.menu-site')) {
       var PAGES = [
         { id: 'index',   nom: 'Accueil',         url: 'index.html' },
+        { id: 'journal', nom: 'Journal de bord', url: 'journal.html' },
         { id: 'etapes',  nom: 'Étapes',          url: 'etapes.html' },
         { id: 'stats',   nom: 'Stats',           url: 'stats.html' },
-        { id: 'journal', nom: 'Journal de bord', url: 'journal.html' },
         { id: 'meteo',   nom: 'Météo & pêche',   url: 'peche/meteo.html' }
       ];
       // Les liens s'adaptent tout seuls à la page dans le dossier peche/
