@@ -207,9 +207,18 @@
       color: rgba(40, 25, 12, 0.75);
       text-shadow: none;
     }
+    /* Voile qui adoucit le bois (monte le 0.55 pour calmer encore, baisse-le pour réveiller) */
+    body.page-journal::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background: rgba(36, 24, 16, 0.55);
+    }
+    [data-theme="light"] body.page-journal::after { background: rgba(169, 130, 96, 0.5); }
 
-    /* Le carnet : plateau de cuir sous les feuilles */
-    .carnet {
+    /* Le carnet : plateau de cuir sous les feuilles */    .carnet {
       position: relative;
       max-width: 900px;
       margin: 34px auto 56px;
