@@ -21,7 +21,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="style.css">
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&display=swap');
+
     :root { --largeur: 1700px; }
+    .titre-page, .sous-titre-page { text-align: center; }
+
     .page-vide {
       background: var(--carte);
       border: 1px solid var(--trait);
@@ -30,6 +34,151 @@
       text-align: center;
       color: var(--discret);
       font: 400 14px var(--mono);
+    }
+
+    /* ---------- Le carnet ---------- */
+    .carnet {
+      --papier-c: #f4ecd8;
+      --encre: #3b2f23;
+      --encre-douce: #7a6a55;
+      --ligne-c: rgba(120, 100, 70, 0.16);
+      --marge-c: rgba(190, 70, 50, 0.38);
+      --tampon: #b4561a;
+      --manuscrit: 'Caveat', 'Segoe Script', cursive;
+      max-width: 860px;
+      margin: 28px auto 0;
+      display: flex;
+      flex-direction: column;
+      gap: 34px;
+    }
+
+    /* Une feuille = une entrée */
+    .feuille {
+      --x-marge: 58px;
+      position: relative;
+      color: var(--encre);
+      background:
+        linear-gradient(90deg, transparent var(--x-marge), var(--marge-c) var(--x-marge), var(--marge-c) calc(var(--x-marge) + 2px), transparent calc(var(--x-marge) + 2px)),
+        repeating-linear-gradient(180deg, transparent 0, transparent 31px, var(--ligne-c) 31px, var(--ligne-c) 32px),
+        var(--papier-c);
+      border-radius: 6px 14px 14px 6px;
+      padding: 32px 28px 32px calc(var(--x-marge) + 26px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.25);
+      transform: rotate(-0.35deg);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
+    }
+    .feuille:nth-of-type(even) { transform: rotate(0.3deg); }
+    .feuille:hover {
+      transform: rotate(0deg) translateY(-3px);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.4), 0 3px 8px rgba(0, 0, 0, 0.25);
+    }
+    [data-theme="light"] .feuille {
+      box-shadow: 0 10px 26px rgba(60, 40, 20, 0.22), 0 2px 5px rgba(60, 40, 20, 0.18);
+    }
+
+    /* Les trous de la reliure */
+    .feuille::before {
+      content: '';
+      position: absolute;
+      left: 14px;
+      top: 18px;
+      bottom: 18px;
+      width: 22px;
+      background: radial-gradient(circle at 11px 11px, var(--fond) 0 6px, rgba(0, 0, 0, 0.28) 6.5px, transparent 9px) 0 0 / 22px 64px repeat-y;
+      pointer-events: none;
+    }
+
+    /* Date façon tampon */
+    .feuille-date {
+      display: block;
+      width: max-content;
+      height: 28px;
+      margin-bottom: 4px;
+      padding: 0 10px;
+      font: 500 12px/24px var(--mono);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--tampon);
+      border: 2px solid var(--tampon);
+      border-radius: 6px;
+      transform: rotate(-3deg);
+      opacity: 0.85;
+      mix-blend-mode: multiply;
+    }
+
+    .feuille h2 {
+      font: 700 clamp(32px, 4.6vw, 42px)/40px var(--manuscrit);
+      color: var(--encre);
+      margin: 0 0 24px;
+    }
+    .feuille p {
+      font: 400 17px/32px var(--serif);
+      margin: 0 0 32px;
+    }
+    .feuille p:last-child { margin-bottom: 0; }
+
+    /* Photo collée au scotch */
+    .photo {
+      position: relative;
+      width: min(100%, 340px);
+      margin: 36px auto 10px;
+      padding: 10px 10px 40px;
+      background: #fffdf7;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28);
+      transform: rotate(1.6deg);
+    }
+    .photo img { display: block; width: 100%; height: auto; }
+    .photo figcaption {
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      bottom: 8px;
+      text-align: center;
+      font: 500 20px/1 var(--manuscrit);
+      color: var(--encre);
+    }
+    .photo::before {
+      content: '';
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      width: 90px;
+      height: 24px;
+      transform: translateX(-50%) rotate(-3deg);
+      background: rgba(235, 210, 140, 0.6);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Mot-clé en bas de feuille */
+    .etiquette {
+      display: inline-block;
+      margin-top: 24px;
+      font: 500 11px var(--mono);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--encre-douce);
+      border-bottom: 1px dashed var(--encre-douce);
+    }
+
+    /* Intercalaire de chapitre (ex. : Avant le départ, En route) */
+    .chapitre {
+      position: relative;
+      z-index: 1;
+      align-self: flex-start;
+      margin: 10px 0 -34px 40px;
+      padding: 10px 24px 8px;
+      font: 700 28px/1 var(--manuscrit);
+      color: #3b2f23;
+      background: #d9b977;
+      border-radius: 10px 10px 0 0;
+      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.25);
+      transform: rotate(-1deg);
+    }
+
+    @media (max-width: 600px) {
+      .feuille { --x-marge: 40px; padding: 28px 16px 28px calc(var(--x-marge) + 18px); }
+      .feuille::before { left: 6px; }
+      .chapitre { margin-left: 16px; font-size: 24px; }
     }
   </style>
 </head>
