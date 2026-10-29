@@ -104,6 +104,14 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
 .jour .l { font-size: 12px; padding: 5px 0; }
 /* Détails */
 .details { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; align-items: stretch; }.details .barres { height: 64px; }
+/* Cases du haut */
+.haut { display: grid; grid-template-columns: 1.5fr 1.3fr 1fr 1fr; gap: 14px; align-items: stretch; }
+.haut .hero, .haut .hero2 { display: contents; }
+.haut .chips { display: grid; grid-template-columns: 1fr 1fr; }
+@media (max-width: 1099px) {
+  .haut { grid-template-columns: 1fr 1fr; }
+  .haut .hero-meteo, .haut #hero-peche { grid-column: 1 / -1; }
+}
 /* Fond selon le temps */
 #fond-meteo { position: fixed; inset: 0; z-index: 0; pointer-events: none; transition: background 1.2s ease; }
 [data-theme="light"] #fond-meteo { opacity: .7; }
@@ -438,7 +446,7 @@ function $(id) { return document.getElementById(id); }
       + l('Visibilité', hh.visibility[i] !== null ? n(hh.visibility[i] / 1000, 1) + ' km' : '–') + '</div>';
     var luneHtml = '<div class="panneau"><h3>Lune</h3><div class="gros">' + lu.icone + ' ' + lu.ill + '<small>% éclairée</small></div>'
       + '<div class="sous">' + lu.nom + '</div>'
-      + l('Phase', lu.sens) + l('Âge', n(lu.age, 1) + ' j sur 29,5')
+      + l('Âge', n(lu.age, 1) + ' j sur 29,5')
       + l('Pleine lune', lu.pleine) + l('Nouvelle lune', lu.nouvelle) + '</div>';
     var haut = $('hero2');
     if (haut) haut.innerHTML = luneHtml + pression;
@@ -596,7 +604,7 @@ function $(id) { return document.getElementById(id); }
         for (k = 0; k < hh.time.length; k++) { if (hh.time[k].slice(0, 13) === c.time.slice(0, 13)) { i = k; break; } }
         var html = '';
     // 1. Bandeau « Maintenant » (j[1] = aujourd'hui, la requête inclut past_days=1)
-        html += '<section><div class="hero">'
+          html += '<section class="haut"><div class="hero">'
           + '<div class="carte-bloc hero-meteo"><div class="panneau" style="border:0;padding:0;background:none"><h3>Maintenant</h3></div>'
           + '<div class="temp">' + n(c.temperature_2m, 1) + '°</div>'
           + '<div class="ciel">' + ciel(c.weather_code, c.is_day) + ' · ressenti ' + n(c.apparent_temperature, 1) + '°</div>'
