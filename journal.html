@@ -384,6 +384,13 @@
       background: rgba(36, 24, 16, 0.3);
     }
     [data-theme="light"] body.page-journal::after { background: rgba(235, 227, 210, 0.4); }
+    /* Le cuir dépasse un peu plus autour des pages */
+    .carnet { padding: 26px 34px 46px; }
+    .carnet::before { inset: 13px; }
+    @media (max-width: 600px) {
+      .carnet { padding: 18px 17px 34px; }
+      .carnet::before { inset: 7px; }
+    }
   </style>
 </head>
 <body class="page-journal">
