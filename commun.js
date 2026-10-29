@@ -49,7 +49,8 @@
         { id: 'index',  nom: 'Accueil',           url: 'index.html' },
         { id: 'etapes', nom: 'Étapes',            url: 'etapes.html' },
         { id: 'stats',  nom: 'Stats',             url: 'stats.html' },
-        { id: 'meteo',  nom: 'Météo &amp; pêche', url: 'peche/meteo.html' }
+        { id: 'journal', nom: 'Journal de bord',  url: 'journal.html' },        
+         { id: 'meteo',  nom: 'Météo &amp; pêche', url: 'peche/meteo.html' }
       ];
       // Les liens s'adaptent tout seuls à la page dans le dossier peche/
       var dossier = /\/peche\//.test(location.pathname) ? '../' : '';
