@@ -33,7 +33,7 @@ section { margin-bottom: 32px; }
 h2.bloc { display: flex; align-items: baseline; gap: 8px; font: 600 18px var(--serif); letter-spacing: -0.01em; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--trait); }
 h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
 /* Onglets */
-.onglets { display: flex; gap: 6px; margin: 0 0 18px; position: sticky; top: 0; z-index: 500; padding: 8px 0; background: var(--fond); }
+.onglets { display: flex; gap: 6px; margin: 0 0 18px; position: sticky; top: calc(var(--hauteur-menu) + env(safe-area-inset-top)); z-index: 500; padding: 8px 0; background: var(--fond); }
 .onglets button { flex: 1; font: 500 13px var(--mono); color: var(--discret); background: var(--carte); border: 1px solid var(--trait); border-radius: 8px; padding: 9px 6px; cursor: pointer; }
 .onglets button[aria-selected="true"] { color: var(--accent); border-color: var(--accent-trait); background: var(--accent-fond); }
 /* Cartes et lignes */
