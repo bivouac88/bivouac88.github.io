@@ -104,9 +104,10 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
 .jour .l { font-size: 12px; padding: 5px 0; }
 /* Détails */
 .details { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; align-items: stretch; }.details .barres { height: 64px; }
-#astre { position: fixed; width: 56px; height: 56px; border-radius: 50%; z-index: 0; pointer-events: none; transition: left 1s, top 1s; }
-#astre.soleil { background: radial-gradient(circle, #ffd98a, #e58e26); box-shadow: 0 0 60px 20px rgba(229,142,38,.35); }
-#astre.lune { background: radial-gradient(circle at 35% 35%, #f4f1e6, #b9b7ad); box-shadow: 0 0 40px 10px rgba(200,210,255,.25); }
+#astre { position: fixed; width: 80px; height: 80px; border-radius: 50%; z-index: 0; pointer-events: none; transition: left 30s linear, top 30s linear; }
+#astre.soleil { background: radial-gradient(circle at 40% 40%, #fff5c0, #ffd98a 40%, #e58e26); box-shadow: 0 0 80px 30px rgba(229,142,38,.4), 0 0 160px 60px rgba(229,142,38,.15); }
+#astre.lune { background: radial-gradient(circle at 30% 30%, #ffffff, #f4f1e6 40%, #b9b7ad); box-shadow: 0 0 50px 15px rgba(200,210,255,.35), 0 0 100px 40px rgba(200,210,255,.12); }
+#ciel-svg { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
 /* Cases du haut */
 .haut { display: grid; grid-template-columns: 1.5fr 1.3fr 1fr 1fr; gap: 14px; align-items: stretch; }
 .haut .hero, .haut .hero2 { display: contents; }
@@ -183,7 +184,9 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
 </style>
 </head>
 <body>
-<div id="fond-meteo" data-fond="jour"></div><div id="astre"></div>
+<div id="fond-meteo" data-fond="jour"></div>
+<svg id="ciel-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+<div id="astre"></div>
   <main data-credit="Données : Open-Meteo · OpenStreetMap">
   <div class="ligne-haut">
     <div id="entete-site"></div>
@@ -414,20 +417,32 @@ function $(id) { return document.getElementById(id); }
     if (jour === 0 && f === 'nuageux') f = 'nuit-nuageux';
     $('fond-meteo').setAttribute('data-fond', f);
   }
-  function placerAstre() {
-  var M = METEO, a = $('astre'); if (!M || !a) return;
+function placerAstre() {
+  var M = METEO, a = $('astre'), svg = $('ciel-svg');
+  if (!M || !a || !svg) return;
   var j = M.j, jour = M.c.is_day === 1, deb, fin;
-  function t(s) { return new Date(s).getTime(); }
-  var now = t(M.c.time);
-  if (jour) { deb = t(j.sunrise[1]); fin = t(j.sunset[1]); }
-  else if (now >= t(j.sunset[1])) { deb = t(j.sunset[1]); fin = t(j.sunrise[2]); }
-  else { deb = t(j.sunset[0]); fin = t(j.sunrise[1]); }
+  function ms(s) { return new Date(s).getTime(); }
+  var now = Date.now();
+  if (jour) { deb = ms(j.sunrise[1]); fin = ms(j.sunset[1]); }
+  else if (now >= ms(j.sunset[1])) { deb = ms(j.sunset[1]); fin = ms(j.sunrise[2]); }
+  else { deb = ms(j.sunset[0]); fin = ms(j.sunrise[1]); }
   var p = Math.max(0, Math.min(1, (now - deb) / (fin - deb)));
   var W = window.innerWidth, H = window.innerHeight;
   a.className = jour ? 'soleil' : 'lune';
-  a.style.left = (p * (W - 56)) + 'px';
-  a.style.top = (H * 0.3 - Math.sin(p * Math.PI) * H * 0.22) + 'px';
-}
+  a.style.left = (p * (W - 80)) + 'px';
+  a.style.top = (H * 0.28 - Math.sin(p * Math.PI) * H * 0.22) + 'px';
+
+  // Étoiles (nuit + ciel dégagé)
+  var nuages = M.c.cloud_cover;
+  var etoilesVisible = !jour && nuages < 50;
+  var etoiles = svg.querySelector('.etoiles');
+  if (etoilesVisible && !etoiles) {
+    var s = '<g class="etoiles" style="opacity:0;transition:opacity 2s">';
+    var seed = 42;
+    for (var k = 0; k < 80; k++) {
+      seed = (seed * 1664525 + 1013904223) & 0xffffffff;
+      var x = ((seed >>> 0) % 1000) / 10;
+      seed = (seed * 1664525 + 1013904223)
   // ── Détails : vent, pluie, UV, pression, lune ──
   function dessinerDetails() {
     var M = METEO, zone = $('details');
@@ -673,6 +688,7 @@ function $(id) { return document.getElementById(id); }
         if (slot && pm) slot.appendChild(pm);        METEO = { c: c, hh: hh, j: j, i: i };
         dessinerDetails();
         appliquerFond(c.weather_code, c.is_day); placerAstre(); window.addEventListener('resize', placerAstre);
+        setInterval(placerAstre, 30000);
         dessinerPeche();
       })
       .catch(function (e) { app.innerHTML = ''; erreur('Météo indisponible : ' + e.message); });
