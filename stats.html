@@ -448,14 +448,42 @@
   fetch(API + '?public=1')
     .then(function (r) { return r.json(); })
     .then(function (d) {
-      if (d.erreur) throw new Error(d.erreur);
-      afficherStats(d.totaux, d.etapes);
+  // ---- Cache local (partagé avec l'accueil) : affichage immédiat, puis mise à jour ----
+  var CLE_CACHE = 'b88-cache-v1';
+  function valide(d) { return !!d && typeof d === 'object' && !d.erreur && !!d.totaux && Array.isArray(d.etapes); }
+  function vider() {
+    ['grille-principales', 'grille-moyennes', 'grille-records', 'grille-temps', 'grille-meteo', 'graph-km', 'graph-d', 'graph-t']
+      .forEach(function (id) { $(id).textContent = ''; });
+  }
+  function message(txt) {
+    var errEl = $('erreur');
+    errEl.textContent = txt || '';
+    errEl.style.display = txt ? 'block' : 'none';
+  }
+
+  var affiche = null;
+  try {
+    var brut = localStorage.getItem(CLE_CACHE);
+    if (brut) {
+      var c = JSON.parse(brut);
+      if (valide(c)) { afficherStats(c.totaux, c.etapes); affiche = brut; }
+    }
+  } catch (e) { affiche = null; }
+
+  fetch(API + '?public=1')
+    .then(function (r) { if (!r.ok) throw new Error('http'); return r.text(); })
+    .then(function (txt) {
+      var d = JSON.parse(txt);
+      if (!valide(d)) throw new Error('format');
+      try { localStorage.setItem(CLE_CACHE, txt); } catch (e) {}
+      if (txt !== affiche) { vider(); afficherStats(d.totaux, d.etapes); }
+      message('');
     })
-    .catch(function (e) {
-      var errEl = $('erreur');
-      errEl.style.display = 'block';
-      errEl.textContent = 'Données indisponibles : ' + e.message;
-      $('sous-titre').textContent = '';
+    .catch(function () {
+      message(affiche
+        ? 'Connexion impossible : affichage de la dernière version enregistrée.'
+        : 'Données indisponibles pour le moment.');
+      if (!affiche) $('sous-titre').textContent = '';
     });
 </script>
 </body>
