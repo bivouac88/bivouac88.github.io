@@ -20,8 +20,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="style.css">
   <style>
-    .bouton-theme svg { width: 17px; height: 17px; display: block; }
-    main {
+  main {
       --largeur: 1400px;
     }
     #journal {
@@ -236,20 +235,10 @@
 </head>
 <body>
 <main>
-  <button id="btn-theme" class="bouton-theme" type="button" aria-label="Thème" title="Thème"></button>
-
   <div class="ligne-haut">
-    <div class="marque">
-      <a class="logo" href="index.html">
-        <img src="apple-touch-icon.png" alt="" width="36" height="36">
-        <span>Bivouac<em>88</em></span>
-      </a>
-      <a class="pastille" href="https://www.leetchi.com/fr/c/bivouac88-4670104" target="_blank" rel="noopener">Soutenir</a>
-      <button class="pastille" type="button" title="Partager" onclick="if(navigator.share){navigator.share({title:'Bivouac88',url:window.location.href})}else{navigator.clipboard.writeText(window.location.href)}">Partager</button>
-</div>
+    <div id="entete-site"></div>
     <a class="retour" href="index.html">← Retour</a>
   </div>
-
   <h1 class="titre-page">Toutes les étapes</h1>
   <p class="sous-titre-page" id="compteur-page">chargement…</p>
 
@@ -267,6 +256,7 @@
     return Number(n || 0).toLocaleString('fr-FR', { minimumFractionDigits: d !== undefined ? d : 1, maximumFractionDigits: d !== undefined ? d : 1 });
   };
   var fmt = function (n) { return Number(n || 0).toLocaleString('fr-FR'); };
+  var esc = B88.esc;
   var toutesEtapes = [];
   var SMILEYS = { '1': '😞', '2': '🙁', '3': '😐', '4': '🙂', '5': '😍' };
   function smileyPour(avis) {
@@ -292,22 +282,22 @@
 
       var html =
         '<div class="etape-entete">' +
-          '<span class="jour">Étape ' + e.jour + '</span>' +
-          '<span class="badge">' + badgeText + '</span>' +
+        '<span class="jour">Étape ' + esc(e.jour) + '</span>' +
+        '<span class="badge">' + badgeText + '</span>' +
         '</div>' +
-        '<div class="trajet"><span>' + e.depart + '</span><i>→</i><span>' + e.arrivee + '</span></div>' +
+        '<div class="trajet"><span>' + esc(e.depart) + '</span><i>→</i><span>' + esc(e.arrivee) + '</span></div>' +
         '<div class="meta">' +
           '<span>' + fmtDec(e.km, 1) + ' km</span>' +
           '<span class="sep">·</span>' +
           '<span>+' + fmt(e.denivele) + ' m</span>' +
           '<span class="sep">·</span>' +
-          '<span>' + (e.temps || '–') + '</span>' +
+          '<span>' + esc(e.temps || '–') + '</span>' +
         '</div>';
 
         if (e.fait && e.meteo) {
         var m = e.meteo;
         html += '<div class="meteo-bloc">' +
-          '<div class="meteo-conditions">' + m.conditions.join(' · ') + '</div>' +
+          '<div class="meteo-conditions">' + esc((m.conditions || []).join(' · ')) + '</div>' +
           '<div class="meta">' +
           '<span>' + fmtDec(m.tmin, 0) + '° / ' + fmtDec(m.tmax, 0) + '°</span>' +
           '<span class="sep">·</span>' +
@@ -321,7 +311,7 @@
       if (e.fait && e.note && (e.note.avis || e.note.commentaire || e.note.photo)) {
         html += '<div class="avis-bloc">';
         if (e.note.avis) {
-        html += '<div class="avis-smiley">' + smileyPour(e.note.avis) + '</div>';
+        html += '<div class="avis-smiley">' + esc(smileyPour(e.note.avis)) + '</div>';
         }
         html += '<div class="avis-texte">';
         if (e.note.commentaire) {
@@ -329,15 +319,15 @@
 if (commentaire.length > 100) {
   commentaire = commentaire.substring(0, 100).trimEnd() + '...';
 }
-html += '<div class="avis-commentaire">' + commentaire + '</div>';
-        }
+    html += '<div class="avis-commentaire">' + esc(commentaire) + '</div>';
+}
         var photos = [e.note.photo, e.note.photo2, e.note.photo3, e.note.photo4].filter(Boolean);
 if (photos.length) {
   html += '<div class="galerie-photos">';
   photos.forEach(function (url, i) {
+  if (!/^https:\/\//.test(url)) return;
   var miniature = url.split('=')[0] + '=w200';
-  html += '<img class="avis-photo" src="' + miniature + '" alt="Photo ' + (i + 1) + '" loading="lazy" style="cursor:pointer" onclick="ouvrirLightbox(this.dataset.original)" data-original="' + url + '">';
-});
+  html += '<img class="avis-photo" src="' + esc(miniature) + '" alt="Photo ' + (i + 1) + '" loading="lazy" style="cursor:pointer" onclick="ouvrirLightbox(this.dataset.original)" data-original="' + esc(url) + '">';});
   html += '</div>';
 }
                 if (e.fait) {
@@ -354,7 +344,7 @@ html += '<span id="like-count-' + e.jour + '" style="color:var(--discret)">–</
 html += '</div>';
 html += '<div class="comment-form">';
 html += '<input type="text" placeholder="Nom" id="nom-' + e.jour + '" maxlength="30">';
-html += '<input type="text" placeholder="Commentaire" id="comment-' + e.jour + '">';
+html += '<input type="text" placeholder="Commentaire" id="comment-' + e.jour + '" maxlength="200">';
 html += '<button onclick="postComment(' + e.jour + ')">Envoyer</button>';
 html += '</div></div>';
 }
@@ -391,6 +381,7 @@ html += '<div class="comments-bloc">';
       $('compteur-page').textContent = '';
     });
 function ouvrirLightbox(url) {
+  if (!/^https:\/\//.test(url)) return;
   var img = document.getElementById('lightbox-img');
   img.src = url.split('=')[0] + '=s1600';
   document.getElementById('lightbox').classList.add('active');
@@ -429,9 +420,9 @@ function postComment(jour) {
   var texte = String(c.commentaire || '');
   if (texte.length > 50) {
     texte = texte.substring(0, 50).trimEnd() + '...';
-  }
-  return '<div class="comment"><strong>' + c.nom + '</strong> ' + texte + '</div>';
-}).join('');
+}
+return '<div class="comment"><strong>' + esc(c.nom) + '</strong> ' + esc(texte) + '</div>';
+    }).join('');
     });
 }
 function toutAfficher() {
