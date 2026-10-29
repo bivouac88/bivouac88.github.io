@@ -396,7 +396,22 @@
   color: rgba(40, 25, 12, 0.85);
   border-color: rgba(40, 25, 12, 0.35);
 }
-  
+/* ── Pages de taille fixe + épaisseur du tas (grand écran) ── */
+@media (min-width: 1100px) {
+  .carnet .feuille { height: 640px; overflow: hidden; }
+  .carnet .feuille::after {
+    content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 70px;
+    background: linear-gradient(transparent, var(--papier-c)); pointer-events: none;
+  }
+  .carnet .feuille:nth-of-type(odd) {
+    box-shadow: -1px 0 0 #e8dcc0, -2px 0 0 #cfc3a4, -3px 0 0 #e8dcc0, -4px 0 0 #cfc3a4,
+                -5px 0 0 #e8dcc0, -6px 0 0 #cfc3a4, 0 14px 24px -10px rgba(0,0,0,.5);
+  }
+  .carnet .feuille:nth-of-type(even) {
+    box-shadow: 1px 0 0 #e8dcc0, 2px 0 0 #cfc3a4, 3px 0 0 #e8dcc0, 4px 0 0 #cfc3a4,
+                5px 0 0 #e8dcc0, 6px 0 0 #cfc3a4, 0 14px 24px -10px rgba(0,0,0,.5);
+  }
+}
   </style>
 </head>
 <body class="page-journal">
