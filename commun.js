@@ -102,8 +102,8 @@
       window.addEventListener('scroll', menuDefile, { passive: true });
       menuDefile();
     }
-    // Pied de page commun (ajouté seulement s'il n'y en a pas déjà un dans la page)    if (!document.querySelector('.pied')) {
-      var f = document.createElement('footer');
+    // Pied de page commun (ajouté seulement s'il n'y en a pas déjà un dans la page)
+    if (!document.querySelector('.pied')) {      var f = document.createElement('footer');
       f.className = 'pied';
       f.innerHTML =
         '<a href="index.html">Bivouac88</a>' +
