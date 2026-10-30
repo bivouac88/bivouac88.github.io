@@ -416,7 +416,7 @@
 @media (min-width: 1100px) {
   .carnet.livre-actif .chapitre { display: none; }
   .livre { grid-column: 1 / -1; position: relative; height: 640px; perspective: 2800px; }
-  .leaf { position: absolute; top: 0; left: 50%; width: 50%; height: 100%; transform-origin: left center; transform-style: preserve-3d; transition: transform .9s cubic-bezier(.45,.05,.25,1); }
+  .leaf { position: absolute; top: 0; left: 50%; width: 50%; height: 100%; transform-origin: left center; transform-style: preserve-3d; transition: transform 1.4s cubic-bezier(.42,0,.2,1); }
   .leaf.tourne { transform: rotateY(-180deg); }
   .leaf.leve { transform: rotateY(-9deg); }
   .leaf.tourne.leve { transform: rotateY(-171deg); }
@@ -432,13 +432,35 @@
       var(--papier-c);
   }
   .carnet .livre .face.d > .feuille::before { left: 14px; right: auto; }
-  .carnet .livre .pile { position: absolute; top: 4px; bottom: -3px; z-index: 0; transition: width .9s; background: repeating-linear-gradient(90deg, #efe4c8 0 1px, #cdbf9d 1px 2px); }
+  .carnet .livre .pile { position: absolute; top: 4px; bottom: -3px; z-index: 0; transition: width 1.4s; background: repeating-linear-gradient(90deg, #efe4c8 0 1px, #cdbf9d 1px 2px); }
   .carnet .livre .pile-d { left: 100%; width: min(calc(var(--ep-d, 1) * 4px), 30px); border-radius: 0 6px 6px 0; box-shadow: 0 8px 14px -8px rgba(0,0,0,.5); }
   .carnet .livre .pile-g { right: 100%; width: min(calc(var(--ep-g, 1) * 4px), 30px); border-radius: 6px 0 0 6px; box-shadow: 0 8px 14px -8px rgba(0,0,0,.5); }
   .coin { position: absolute; bottom: 0; width: 90px; height: 90px; padding: 0; border: 0; background: none; cursor: pointer; z-index: 1000; }
   .coin.d { right: 0; }
   .coin.g { left: 0; }
   .coin[hidden] { display: none; }
+}
+    /* ── Étape 2b : coin visible + tour plus naturel ── */
+@media (min-width: 1100px) {
+  .face::after { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0; }
+  .face.d::after { background: linear-gradient(90deg, rgba(0,0,0,.3), transparent 75%); border-radius: 6px 14px 14px 6px; }
+  .face.g::after { background: linear-gradient(270deg, rgba(0,0,0,.3), transparent 75%); border-radius: 14px 6px 6px 14px; }
+  .leaf.en-vol { animation: souleve 1.4s ease-in-out; }
+  .leaf.en-vol .face::after { animation: ombre 1.4s ease-in-out; }
+  .leaf.en-vol .face > .feuille { animation: ombrePortee 1.4s ease-in-out; }
+  @keyframes souleve { 0%, 100% { translate: 0 0 0; } 50% { translate: 0 -6px 70px; } }
+  @keyframes ombre { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
+  @keyframes ombrePortee { 0%, 100% { box-shadow: 0 14px 24px -10px rgba(0,0,0,.5); } 50% { box-shadow: 0 26px 46px -8px rgba(0,0,0,.65); } }
+
+  .coin { --c: 38px; }
+  .coin:hover { --c: 58px; }
+  .coin::before, .coin::after { content: ''; position: absolute; bottom: 0; width: var(--c); height: var(--c); transition: width .25s, height .25s; pointer-events: none; }
+  .coin.d::before, .coin.d::after { right: 0; }
+  .coin.g::before, .coin.g::after { left: 0; transform: scaleX(-1); }
+  .coin::before { clip-path: polygon(100% 0, 100% 100%, 0 100%); background: linear-gradient(315deg, #cfc2a0, #e0d4b5); }
+  .coin::after { clip-path: polygon(0 0, 100% 0, 0 100%); background: linear-gradient(135deg, #fffaf0 0%, #eadfc2 55%, #a99c7c 100%); }
+  .coin.appel::before, .coin.appel::after { animation: coinAppel 1.4s ease-in-out 2; }
+  @keyframes coinAppel { 0%, 100% { width: 38px; height: 38px; } 50% { width: 54px; height: 54px; } }
 }
   </style>
 </head>
@@ -542,10 +564,13 @@
     var f = feuillets[k];
     f.style.zIndex = nb + 10;
     f.classList.remove('leve');
+    f.classList.add('en-vol');
+    aTourne = true;
+    clearTimeout(appelT);
     p += sens;
     f.classList.toggle('tourne', sens > 0);
     etat();
-    setTimeout(function () { f.style.zIndex = zFinal(k); verrou = false; }, 950);
+    setTimeout(function () { f.style.zIndex = zFinal(k); f.classList.remove('en-vol'); verrou = false; }, 1450);
   }
   function lever(sens, on) {
     if (verrou) return;
@@ -565,6 +590,16 @@
     else if (e.key === 'ArrowLeft') tourner(-1);
   });
   etat();
+    var appelT = null, aTourne = false;
+  function appel() {
+    if (aTourne) return;
+    [cd, cg].forEach(function (c) {
+      if (c.hidden) return;
+      c.classList.remove('appel'); void c.offsetWidth; c.classList.add('appel');
+    });
+    appelT = setTimeout(appel, 9000);
+  }
+  appelT = setTimeout(appel, 2500);
 })();
 </script>
 </body>
