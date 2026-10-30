@@ -534,6 +534,10 @@
   }
   .carnet .chapitre { scroll-margin-top: 130px; }
 }
+    /* Onglet "Avant le départ" : plus près du cadre du titre (mobile) */
+@media (max-width: 1099px) {
+  .carnet .couverture + .chapitre { margin-top: -44px; }
+}
     /* Grand écran : cahier et onglets plus près du cadre du titre */
 @media (min-width: 1100px) {
   .onglets-livre { margin-top: -56px; }
