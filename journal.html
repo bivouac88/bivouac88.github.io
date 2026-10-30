@@ -505,6 +505,32 @@
   .carnet .livre .face.d .feuille-date { left: 96px; transform: rotate(-6deg); }
   .carnet .livre .face.g .feuille-date { left: auto; right: 78px; transform: rotate(5deg); }
 }
+    /* ── Mobile étape 1 : onglets de chapitre ── */
+@media (max-width: 1099px) {
+  .onglets-mobile {
+    position: sticky;
+    top: calc(var(--hauteur-menu) + env(safe-area-inset-top));
+    z-index: 50;
+    display: flex;
+    gap: 8px;
+    padding: 8px 4px;
+    overflow-x: auto;
+    background: color-mix(in srgb, var(--fond) 85%, transparent);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+  }
+  .onglets-mobile button {
+    flex: 0 0 auto;
+    font: 700 20px/1 'Caveat', cursive;
+    color: #3b2f23;
+    background: #d9b977;
+    border: 0;
+    border-radius: 10px;
+    padding: 8px 16px;
+    cursor: pointer;
+  }
+  .carnet .chapitre { scroll-margin-top: 130px; }
+}
   </style>
 </head>
 <body class="page-journal">
@@ -695,6 +721,28 @@
   elast.className = 'elastique';
 livre.appendChild(elast);
   etat();
+})();
+</script>
+  <script>
+(function () {
+  if (window.matchMedia('(min-width: 1100px)').matches) return;
+  var carnet = document.querySelector('.carnet');
+  if (!carnet) return;
+  var chaps = carnet.querySelectorAll('.chapitre');
+  if (!chaps.length) return;
+  var barre = document.createElement('nav');
+  barre.className = 'onglets-mobile';
+  barre.setAttribute('aria-label', 'Chapitres');
+  chaps.forEach(function (c) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = c.textContent.trim();
+    b.addEventListener('click', function () {
+      c.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    barre.appendChild(b);
+  });
+  carnet.parentNode.insertBefore(barre, carnet);
 })();
 </script>
 </body>
