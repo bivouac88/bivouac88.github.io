@@ -582,7 +582,7 @@
   .leaf.leve { transform: none; }
   .leaf.tourne.leve { transform: rotateY(-180deg); }
 }
-    /* ── Étape B : épaisseur du tas (grand écran) ── */
+/* ── Étape B : épaisseur du tas (grand écran) ── */
 @media (min-width: 1100px) {
   .carnet {
     --epais-max: clamp(30px, 3.4vw, 50px);
@@ -591,10 +591,14 @@
     padding-right: var(--padh);
     max-width: calc(1172px + 2 * var(--padh));
   }
-  .carnet .livre .pile-g { width: calc(16px + min(3px + var(--ep-g, 1) * 0.5px, var(--epais-max))); }
-  .carnet .livre .pile-d { width: calc(16px + min(3px + var(--ep-d, 1) * 0.5px, var(--epais-max))); }
-  .carnet .livre .plat-g { left: calc(-1 * (min(3px + var(--ep-g, 1) * 0.5px, var(--epais-max)) + 6px)); transition: left 1.4s; }
-  .carnet .livre .plat-d { right: calc(-1 * (min(3px + var(--ep-d, 1) * 0.5px, var(--epais-max)) + 6px)); transition: right 1.4s; }
+  .livre {
+    --t-g: calc(min(var(--ep-g, 1) * 100px, 3px) + min(var(--ep-g, 1) * 0.5px, var(--epais-max) - 3px));
+    --t-d: calc(min(var(--ep-d, 1) * 100px, 3px) + min(var(--ep-d, 1) * 0.5px, var(--epais-max) - 3px));
+  }
+  .carnet .livre .pile-g { width: calc(min(var(--ep-g, 1) * 100px, 16px) + var(--t-g)); }
+  .carnet .livre .pile-d { width: calc(min(var(--ep-d, 1) * 100px, 16px) + var(--t-d)); }
+  .carnet .livre .plat-g { left: calc(-1 * (var(--t-g) + 6px)); transition: left 1.4s; }
+  .carnet .livre .plat-d { right: calc(-1 * (var(--t-d) + 6px)); transition: right 1.4s; }
   .livre.rapide .plat { transition-duration: .45s; }
 }
   </style>
