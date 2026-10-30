@@ -38,6 +38,10 @@
   --or: #e2ac58;
   --grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='c' x='0' y='0' width='100%25' height='100%25'><feTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' seed='3'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1.4 -0.45'/></filter><rect width='100%25' height='100%25' filter='url(%23c)' opacity='0.6'/></svg>");
   --garde: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='m' x='0' y='0' width='100%25' height='100%25'><feTurbulence type='turbulence' baseFrequency='0.006 0.02' numOctaves='4' seed='11'/><feColorMatrix values='0.9 0 0 0 0.12 0 0.25 0 0 0.02 0 0 0.2 0 0.04 0 0 0 0 1'/></filter><rect width='100%25' height='100%25' filter='url(%23m)'/></svg>");
+  --garde:
+    repeating-linear-gradient(45deg, transparent 0 20px, rgba(226, 172, 88, 0.16) 20px 21.5px),
+    repeating-linear-gradient(-45deg, transparent 0 20px, rgba(226, 172, 88, 0.16) 20px 21.5px),
+    radial-gradient(ellipse at 50% 40%, #7a2630, #5a1a22 70%, #43121a);
 }
 [hidden] { display: none !important; }
 .ligne-haut { margin-bottom: 8px; }
@@ -300,7 +304,19 @@ body.page-journal .pied {
 
 /* ---------- 3. Grand écran : le livre ---------- */
 @media (min-width: 1100px) {
-  .carnet { display: block; max-width: 1300px; margin: 10px auto 70px; padding: 34px 90px 54px; }
+  .carnet { display: block; max-width: 1300px; margin: 10px auto 70px; padding: 40px 96px 74px; }
+  /* Tapis de bureau en cuir sous le livre */
+  .carnet.livre-actif {
+    border-radius: 18px;
+    background-color: #34211a;
+    background-image: var(--grain), linear-gradient(135deg, rgba(255, 220, 180, 0.1), transparent 38%, rgba(0, 0, 0, 0.3));
+    box-shadow: inset 0 1px 0 rgba(255, 220, 180, 0.12), inset 0 0 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 0, 0, 0.55), 0 10px 18px rgba(0, 0, 0, 0.45), 0 34px 70px rgba(0, 0, 0, 0.55);
+  }
+  /* Couture */
+  .carnet.livre-actif::before {
+    content: ''; position: absolute; inset: 14px;
+    border: 2px dashed rgba(240, 200, 140, 0.3); border-radius: 10px; pointer-events: none;
+  }
   .carnet.livre-actif .couverture,
   .carnet.livre-actif .chapitre { display: none; }
 
