@@ -188,8 +188,8 @@
       var home = el('a', null, 'Bivouac88');
       home.href = dossier + 'index.html';
       var logo = document.createElement('img');
-      logo.src = dossier + 'Aventure cycliste au coucher du soleil.png';
-      logo.alt = 'Lost but Free';
+      logo.src = dossier + 'lost-but-free.jpg';
+      logo.alt = 'Lost-but-Free';
       logo.height = 20;
       logo.loading = 'lazy';
       logo.decoding = 'async';
