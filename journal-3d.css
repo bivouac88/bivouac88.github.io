@@ -1,0 +1,38 @@
+/* journal-3d.css · couche réalisme du journal (grand écran seulement)
+   À charger APRÈS le <style> de journal.html. Supprimer ce fichier = retour à l'état précédent. */
+
+/* Lampe : halo chaud qui suit la souris + vignette */
+.lampe, .poussiere { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.lampe {
+  z-index: 3;
+  background:
+    radial-gradient(circle 700px at var(--mx, 50%) var(--my, 18%), rgba(255, 196, 120, 0.2), rgba(255, 170, 90, 0.07) 45%, transparent 72%),
+    radial-gradient(ellipse 120% 100% at var(--mx, 50%) var(--my, 18%), transparent 35%, rgba(8, 4, 0, 0.38) 100%);
+}
+[data-theme="light"] .lampe { opacity: 0.45; }
+.poussiere { z-index: 4; }
+
+@media (min-width: 1100px) {
+  /* Courbure : ombre dans le creux, reflet sur le dos de la page qui se soulève (intensité = --lum, pilotée par le script du livre) */
+  .livre .face.d::after {
+    background: linear-gradient(90deg, rgba(20, 10, 0, 0.6) 0%, rgba(20, 10, 0, 0.12) 28%, rgba(255, 246, 225, 0.38) 54%, transparent 80%);
+  }
+  .livre .face.g::after {
+    background: linear-gradient(270deg, rgba(20, 10, 0, 0.6) 0%, rgba(20, 10, 0, 0.12) 28%, rgba(255, 246, 225, 0.38) 54%, transparent 80%);
+  }
+
+  /* Ombre du livre : s'éloigne de la lampe (--ox / --oy posés par le script) */
+  .carnet.livre-actif {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 220, 180, 0.12), inset 0 0 60px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(0, 0, 0, 0.55), 0 10px 18px rgba(0, 0, 0, 0.45),
+      calc(var(--ox, 0) * 1px) calc(34px + var(--oy, 0) * 1px) 70px rgba(0, 0, 0, 0.55);
+  }
+
+  /* Fondu du bas : garde le grain du papier au lieu d'un aplat */
+  .livre .fondu {
+    background: var(--fibre), var(--papier-c);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 88%);
+    mask-image: linear-gradient(to bottom, transparent, #000 88%);
+  }
+}
