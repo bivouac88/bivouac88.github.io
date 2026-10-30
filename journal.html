@@ -582,6 +582,21 @@
   .leaf.leve { transform: none; }
   .leaf.tourne.leve { transform: rotateY(-180deg); }
 }
+    /* ── Étape B : épaisseur du tas (grand écran) ── */
+@media (min-width: 1100px) {
+  .carnet {
+    --epais-max: clamp(30px, 3.4vw, 50px);
+    --padh: calc(var(--epais-max) + 22px);
+    padding-left: var(--padh);
+    padding-right: var(--padh);
+    max-width: calc(1172px + 2 * var(--padh));
+  }
+  .carnet .livre .pile-g { width: calc(16px + min(3px + var(--ep-g, 1) * 0.5px, var(--epais-max))); }
+  .carnet .livre .pile-d { width: calc(16px + min(3px + var(--ep-d, 1) * 0.5px, var(--epais-max))); }
+  .carnet .livre .plat-g { left: calc(-1 * (min(3px + var(--ep-g, 1) * 0.5px, var(--epais-max)) + 6px)); transition: left 1.4s; }
+  .carnet .livre .plat-d { right: calc(-1 * (min(3px + var(--ep-d, 1) * 0.5px, var(--epais-max)) + 6px)); transition: right 1.4s; }
+  .livre.rapide .plat { transition-duration: .45s; }
+}
   </style>
 </head>
 <body class="page-journal">
