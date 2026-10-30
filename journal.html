@@ -36,6 +36,7 @@
 :root {
   --largeur: 1700px;
   --or: #e2ac58;
+    --fibre: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='p' x='0' y='0' width='100%25' height='100%25'><feTurbulence type='fractalNoise' baseFrequency='0.9 0.6' numOctaves='3' seed='7'/><feColorMatrix values='0 0 0 0 0.35 0 0 0 0 0.26 0 0 0 0 0.15 0 0 0 0.9 -0.3'/></filter><rect width='100%25' height='100%25' filter='url(%23p)' opacity='0.35'/></svg>");
   --grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='c' x='0' y='0' width='100%25' height='100%25'><feTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' seed='3'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1.4 -0.45'/></filter><rect width='100%25' height='100%25' filter='url(%23c)' opacity='0.6'/></svg>");
   --garde: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='m' x='0' y='0' width='100%25' height='100%25'><feTurbulence type='turbulence' baseFrequency='0.006 0.02' numOctaves='4' seed='11'/><feColorMatrix values='0.9 0 0 0 0.12 0 0.25 0 0 0.02 0 0 0.2 0 0.04 0 0 0 0 1'/></filter><rect width='100%25' height='100%25' filter='url(%23m)'/></svg>");
   --garde:
@@ -118,9 +119,10 @@ body.page-journal .pied {
   position: relative;
   color: var(--encre);
   background:
-    linear-gradient(90deg, transparent var(--x-marge), var(--marge-c) var(--x-marge), var(--marge-c) calc(var(--x-marge) + 2px), transparent calc(var(--x-marge) + 2px)),
-    repeating-linear-gradient(180deg, transparent 0, transparent 31px, var(--ligne-c) 31px, var(--ligne-c) 32px),
-    var(--papier-c);
+  linear-gradient(90deg, transparent var(--x-marge), var(--marge-c) var(--x-marge), var(--marge-c) calc(var(--x-marge) + 2px), transparent calc(var(--x-marge) + 2px)),
+  repeating-linear-gradient(180deg, transparent 0, transparent 31px, var(--ligne-c) 31px, var(--ligne-c) 32px),
+  var(--fibre),
+  var(--papier-c);
   border-radius: 6px 14px 14px 6px;
   padding: 32px 28px 96px calc(var(--x-marge) + 26px);
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.25);
@@ -416,8 +418,9 @@ body.page-journal .pied {
     transform: none; transition: none;
     border-radius: 6px 14px 14px 6px;
     box-shadow: 0 14px 24px -10px rgba(0, 0, 0, 0.5);
-    background:
+        background:
       linear-gradient(90deg, transparent var(--x-marge), var(--marge-c) var(--x-marge), var(--marge-c) calc(var(--x-marge) + 2px), transparent calc(var(--x-marge) + 2px)),
+      var(--fibre),
       var(--papier-c);
   }
   .livre .face.g > .feuille { border-radius: 14px 6px 6px 14px; }
