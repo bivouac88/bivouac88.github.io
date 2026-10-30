@@ -490,6 +490,21 @@
   .carnet .livre .pile-d { width: calc(min(var(--ep-d, 1) * 100px, 16px) + min(calc(var(--ep-d, 1) * 4px), 16px)); }
   .carnet .livre .pile-g { width: calc(min(var(--ep-g, 1) * 100px, 16px) + min(calc(var(--ep-g, 1) * 4px), 16px)); }
 }
+    /* ── Date en tampon rouge, en bas de page ── */
+.feuille { padding-bottom: 96px; }
+.feuille .feuille-date {
+  position: absolute; left: 50%; bottom: 26px; z-index: 2;
+  width: max-content; height: auto; margin: 0; padding: 6px 16px;
+  font: 700 21px/1 var(--mono); letter-spacing: .18em; text-transform: uppercase;
+  color: #b3261e; border: 6px double #b3261e; border-radius: 8px;
+  transform: translateX(-50%) rotate(-6deg); opacity: .8; mix-blend-mode: multiply;
+  -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -9 7.4'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -9 7.4'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+@media (min-width: 1100px) {
+  .carnet .livre .face.d .feuille-date { left: 96px; transform: rotate(-6deg); }
+  .carnet .livre .face.g .feuille-date { left: auto; right: 78px; transform: rotate(5deg); }
+}
   </style>
 </head>
 <body class="page-journal">
