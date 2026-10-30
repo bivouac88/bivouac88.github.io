@@ -1,0 +1,104 @@
+/* journal-mobile.css · carnet 3D mobile (< 1100px). À charger après le <style> de journal.html */
+@media (max-width: 1099px) {
+  .carnet.m-actif { display: flex; flex-direction: column; align-items: center; gap: 18px; max-width: none; margin: 62px auto 36px; padding: 0; }
+  .carnet.m-actif > .chapitre, .carnet.m-actif > .couverture { display: none; }
+
+  .m-livre {
+    --ep: 12px; --elas: linear-gradient(90deg, #a35a0f, #e58e26 45%, #f2a54a 55%, #b8680f);
+    position: relative; width: min(92vw, 440px);
+    height: clamp(440px, calc(100vh - 330px), 700px); height: clamp(440px, calc(100svh - 330px), 700px);
+    perspective: 1800px; touch-action: pan-y;
+  }
+
+  /* Cuir : plat arrière et couverture */
+  .m-plat, .m-couv { position: absolute; inset: -12px -14px -12px -10px; border-radius: 6px 16px 16px 6px; }
+  .m-plat, .m-av {
+    background-color: #4f2f1c;
+    background-image: var(--grain), linear-gradient(135deg, rgba(255, 220, 180, 0.14), transparent 40%, rgba(0, 0, 0, 0.3));
+  }
+  .m-plat { z-index: 0; box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.5), 0 26px 50px rgba(0, 0, 0, 0.55), 0 4px 10px rgba(0, 0, 0, 0.5); }
+  .m-plat::before, .m-av::after { content: ''; position: absolute; top: 0; bottom: 0; right: 26px; width: 13px; border-radius: 2px; background: var(--elas); box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35), 3px 0 6px rgba(0, 0, 0, 0.4); }
+  .m-plat::after, .m-av::before { content: ''; position: absolute; inset: 6px; border: 2px dashed rgba(240, 200, 140, 0.3); border-radius: 4px 12px 12px 4px; pointer-events: none; }
+
+  /* Couverture : deux faces qui tournent autour du dos */
+  .m-couv { z-index: 4000; transform-origin: left center; transform-style: preserve-3d; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .m-couv:focus-visible { outline: 3px solid var(--or); outline-offset: 4px; }
+  .m-face { position: absolute; inset: 0; border-radius: inherit; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+  .m-av { box-shadow: inset 28px 0 24px -18px rgba(0, 0, 0, 0.6), inset 0 0 40px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(0, 0, 0, 0.55); }
+  .m-av .couverture-cadre { position: absolute; inset: 40px 42px 40px 46px; box-sizing: border-box; padding: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .m-av .couverture-titre { font-size: clamp(30px, 9vw, 40px); }
+  .m-av .couverture-sous { font-size: 11px; }
+  .m-ar {
+    transform: rotateY(180deg); border-radius: 16px 6px 6px 16px; display: flex; align-items: center; justify-content: center;
+    background-color: #6b1f26; background-image: var(--garde); box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.5);
+  }
+  .m-ex { text-align: center; transform: rotate(-1.2deg); background: #f2e8cf; color: #3b2f23; padding: 18px 26px; outline: 3px double rgba(60, 40, 20, 0.35); outline-offset: -9px; border: 1px solid rgba(60, 40, 20, 0.5); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45); }
+  .m-ex span { display: block; font: 500 11px/1.4 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: #7a6a55; }
+  .m-ex strong { display: block; margin-top: 6px; font: 700 34px/1 var(--manuscrit); }
+
+  /* Tranche des pages (épaisseur selon l'avancement) */
+  .m-pile { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+  .m-pile::before, .m-pile::after { content: ''; position: absolute; }
+  .m-pile::before { top: 3px; bottom: -4px; right: calc(-1 * var(--ep)); width: var(--ep); border-radius: 0 6px 6px 0; background: repeating-linear-gradient(90deg, #efe4c8 0 1px, #cdbf9d 1px 2px, #e6d9ba 2px 3px, #d7caa8 3px 4px); }
+  .m-pile::after { left: 2px; right: 0; top: 100%; height: calc(var(--ep) * 0.7); background: repeating-linear-gradient(180deg, #efe4c8 0 1px, #cdbf9d 1px 2px, #e6d9ba 2px 3px, #d7caa8 3px 4px); }
+
+  /* Onglets de chapitre : posés sur le bord haut des pages */
+  .m-onglets { position: absolute; z-index: 1; left: 14px; right: 6px; top: -46px; height: 46px; display: flex; align-items: flex-end; gap: 6px; overflow: hidden; overflow-x: auto; scrollbar-width: none; transition: opacity 0.5s; }
+  .m-onglets::-webkit-scrollbar { display: none; }
+  .m-onglets button {
+    flex: 0 0 auto; padding: 8px 18px 14px; border: 0; border-radius: 12px 12px 0 0; cursor: pointer;
+    font: 700 20px/1 var(--manuscrit); color: #3b2f23; transform: translateY(8px); transition: transform 0.3s;
+    background: linear-gradient(180deg, #e9cf94, #cfa95f); box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(60, 40, 20, 0.25);
+  }
+  .m-onglets button.actif { transform: none; background: linear-gradient(180deg, #f8e2aa, #ecca86); }
+
+  /* Spirale : passe dans les trous de reliure, au-dessus des pages */
+  .m-spirale {
+    position: absolute; z-index: 3500; left: -7px; top: 18px; bottom: 18px; width: 50px; pointer-events: none; transition: opacity 0.5s;
+    background: linear-gradient(90deg, #5b5852, #f1eee7 35%, #a9a49a 62%, #4d4a45);
+    -webkit-mask-image: linear-gradient(180deg, transparent 0 8px, #000 8px 15px, transparent 15px 64px); mask-image: linear-gradient(180deg, transparent 0 8px, #000 8px 15px, transparent 15px 64px);
+    -webkit-mask-size: 100% 64px; mask-size: 100% 64px; -webkit-mask-repeat: repeat-y; mask-repeat: repeat-y;
+  }
+  .m-livre.ferme .m-spirale, .m-livre.ferme .m-onglets { opacity: 0; pointer-events: none; }
+
+  /* Feuillets */
+  .m-leaf { position: absolute; inset: 0; transform-origin: left center; transform-style: preserve-3d; will-change: transform; }
+  .m-recto, .m-verso { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+  .m-verso {
+    transform: rotateY(180deg); border-radius: 14px 6px 6px 14px;
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.16), transparent 30%, transparent 70%, rgba(0, 0, 0, 0.16)), var(--fibre), #eadfc4;
+  }
+  .m-recto::after { content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none; border-radius: 6px 14px 14px 6px; background: linear-gradient(90deg, rgba(0, 0, 0, 0.2), transparent 36px); }
+  .m-lum, .m-sous { position: absolute; inset: 0; z-index: 2; pointer-events: none; border-radius: 6px 14px 14px 6px; }
+  .m-lum { opacity: var(--lum, 0); background: linear-gradient(90deg, rgba(20, 10, 0, 0.6), rgba(20, 10, 0, 0.1) 28%, rgba(255, 246, 225, 0.38) 54%, transparent 82%); }
+  .m-sous { opacity: var(--sous, 0); background: linear-gradient(90deg, rgba(10, 5, 0, 0.7), transparent 70%); }
+
+  .carnet .m-livre .m-recto > .feuille {
+    --x-marge: 44px; position: absolute; inset: 0; margin: 0; padding: 0; overflow: hidden; transform: none;
+    border-radius: 6px 14px 14px 6px; box-shadow: 0 10px 18px -8px rgba(0, 0, 0, 0.5);
+    background: linear-gradient(90deg, transparent var(--x-marge), var(--marge-c) var(--x-marge), var(--marge-c) calc(var(--x-marge) + 2px), transparent calc(var(--x-marge) + 2px)), var(--fibre), var(--papier-c);
+  }
+  .carnet .m-livre .feuille::before { left: 12px; }
+  .m-livre .feuille-int {
+    position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; scrollbar-width: none;
+    padding: 28px 18px 110px calc(var(--x-marge) + 20px);
+    background-image: repeating-linear-gradient(180deg, transparent 0, transparent 31px, var(--ligne-c) 31px, var(--ligne-c) 32px); background-attachment: local;
+  }
+  .m-livre .feuille-int::-webkit-scrollbar { display: none; }
+  .m-livre .feuille.garde .feuille-int { background-image: none; display: flex; flex-direction: column; justify-content: center; }
+  .m-livre .fondu {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 110px; pointer-events: none; transition: opacity 0.25s;
+    background: var(--fibre), var(--papier-c); -webkit-mask-image: linear-gradient(to bottom, transparent, #000 85%); mask-image: linear-gradient(to bottom, transparent, #000 85%);
+  }
+  .m-livre .feuille.fin .fondu { opacity: 0; }
+  .m-livre .feuille .feuille-date { font-size: 18px; bottom: 20px; border-width: 5px; }
+
+  /* Navigation */
+  .m-nav { display: flex; align-items: center; gap: 16px; margin-top: 14px; transition: opacity 0.5s; }
+  .m-livre.ferme + .m-nav { opacity: 0; pointer-events: none; }
+  .m-nav button { width: 54px; height: 46px; border: 0; border-radius: 10px; cursor: pointer; font: 700 28px/1 var(--manuscrit); color: #3b2f23; background: linear-gradient(180deg, #e9cf94, #cfa95f); box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(60, 40, 20, 0.25); }
+  .m-nav button:active { transform: scale(0.96); }
+  .m-nav button:disabled { opacity: 0.35; cursor: default; }
+  .m-cpt { min-width: 64px; text-align: center; font: 500 13px var(--mono); letter-spacing: 0.1em; color: rgba(245, 230, 205, 0.85); text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6); }
+  [data-theme="light"] .m-cpt { color: rgba(40, 25, 12, 0.85); text-shadow: none; }
+}
