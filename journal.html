@@ -472,27 +472,32 @@ body.page-journal .pied {
   }
   .livre .o-av .lib { right: 0; }
   .livre .o-ar .lib { left: 0; }
-
-  /* Coins de page : on clique ou on glisse */
+  /* Coins de page : zones cliquables invisibles (le pli est dessiné sur la page) */
   .livre .coin {
     position: absolute; bottom: 0; width: 90px; height: 90px; padding: 0; border: 0; background: none;
-    cursor: grab; z-index: 2000; touch-action: none; --c: 38px;
+    cursor: grab; z-index: 2000; touch-action: none;
   }
   .livre .coin:active { cursor: grabbing; }
   .livre .coin:focus-visible { outline: 3px solid var(--or); outline-offset: -3px; }
   .livre .coin.d { right: 0; }
   .livre .coin.g { left: 0; }
-  .livre .coin:hover { --c: 58px; }
-  .livre .coin::before, .livre .coin::after { content: ''; position: absolute; bottom: 0; width: var(--c); height: var(--c); transition: width 0.25s, height 0.25s; pointer-events: none; }
-  .livre .coin.d::before, .livre .coin.d::after { right: 0; }
-  .livre .coin.g::before, .livre .coin.g::after { left: 0; transform: scaleX(-1); }
-  .livre .coin::before { clip-path: polygon(100% 0, 100% 100%, 0 100%); background: linear-gradient(315deg, #cfc2a0, #e0d4b5); }
-  .livre .coin::after { clip-path: polygon(0 0, 100% 0, 0 100%); background: linear-gradient(135deg, #fffaf0 0%, #eadfc2 55%, #a99c7c 100%); }
-  .livre .coin.appel::before, .livre .coin.appel::after { animation: coinAppel 1.4s ease-in-out 2; }
-  @keyframes coinAppel { 0%, 100% { width: 38px; height: 38px; } 50% { width: 54px; height: 54px; } }
-}
-@media (min-width: 1100px) and (prefers-reduced-motion: reduce) {
-  .livre .coin.appel::before, .livre .coin.appel::after { animation: none; }
+
+  /* Pli de coin : fait partie de la page, il tourne avec elle */
+  .livre .pli {
+    position: absolute; bottom: 0; z-index: 3; pointer-events: none;
+    width: var(--c, 36px); height: var(--c, 36px); transition: width 0.25s, height 0.25s;
+  }
+  .livre .face.d .pli { right: 0; }
+  .livre .face.g .pli { left: 0; transform: scaleX(-1); }
+  .livre .pli::before, .livre .pli::after { content: ''; position: absolute; inset: 0; }
+  .livre .pli::before { clip-path: polygon(100% 0, 100% 100%, 0 100%); background: linear-gradient(315deg, #cfc2a0, #e0d4b5); }
+  .livre .pli::after { clip-path: polygon(0 0, 100% 0, 0 100%); background: linear-gradient(135deg, #fffaf0 0%, #eadfc2 55%, #a99c7c 100%); }
+  .livre:has(.coin.d:hover) .face.d .pli,
+  .livre:has(.coin.g:hover) .face.g .pli { --c: 54px; }
+  .livre:has(.coin.d.appel) .face.d .pli { animation: coinAppel 1.4s ease-in-out 2; }
+  @keyframes coinAppel { 0%, 100% { width: 36px; height: 36px; } 50% { width: 52px; height: 52px; } }
+  @media (min-width: 1100px) and (prefers-reduced-motion: reduce) {
+  .livre .pli { animation: none !important; }
   .couverture-invite { animation: none; opacity: 0.8; }
 }
 
@@ -702,6 +707,7 @@ body.page-journal .pied {
       maj();
     }
     feuilles.forEach(preparer);
+    feuilles.forEach(function (f, j) { if (!(j === n - 1 && n % 2)) f.appendChild(div('pli')); });
     if (document.fonts && document.fonts.ready) {
       document.fonts.ready.then(function () { feuilles.forEach(function (f) { if (f._maj) f._maj(); }); });
     }
@@ -793,7 +799,7 @@ body.page-journal .pied {
         var vol = a > 0 && a < 180;
         var s = Math.sin(a * Math.PI / 180);
         var z = vol ? 1000 + k : (a >= 90 ? (k === 0 ? 1 : k + 2) : L - k + 3);
-        var vis = vol || (k >= q - 2 && k <= q + 1);
+        var vis = vol || k === 0 || (k >= q - 2 && k <= q + 1);
         var tr;
         if (vol && !reduit) {
           var t = tilt[k] !== null ? tilt[k] : s * 1.4;
