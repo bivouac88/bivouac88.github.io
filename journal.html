@@ -432,9 +432,9 @@
       var(--papier-c);
   }
   .carnet .livre .face.d > .feuille::before { left: 14px; right: auto; }
-  .carnet .livre .pile { position: absolute; top: 4px; bottom: -3px; z-index: 0; transition: width 1.4s; background: repeating-linear-gradient(90deg, #efe4c8 0 1px, #cdbf9d 1px 2px); }
-  .carnet .livre .pile-d { left: 100%; width: min(calc(var(--ep-d, 1) * 4px), 30px); border-radius: 0 6px 6px 0; box-shadow: 0 8px 14px -8px rgba(0,0,0,.5); }
-  .carnet .livre .pile-g { right: 100%; width: min(calc(var(--ep-g, 1) * 4px), 30px); border-radius: 6px 0 0 6px; box-shadow: 0 8px 14px -8px rgba(0,0,0,.5); }
+    .carnet .livre .pile { position: absolute; top: 0; bottom: 0; z-index: 0; transition: width 1.4s; background: repeating-linear-gradient(90deg, #efe4c8 0 1px, #cdbf9d 1px 2px); box-shadow: 0 8px 14px -8px rgba(0,0,0,.5); }
+  .carnet .livre .pile-d { left: calc(100% - 16px); width: calc(min(var(--ep-d, 1) * 100px, 16px) + min(calc(var(--ep-d, 1) * 4px), 30px)); border-radius: 0 14px 14px 0; }
+  .carnet .livre .pile-g { right: calc(100% - 16px); width: calc(min(var(--ep-g, 1) * 100px, 16px) + min(calc(var(--ep-g, 1) * 4px), 30px)); border-radius: 14px 0 0 14px; }
   .coin { position: absolute; bottom: 0; width: 90px; height: 90px; padding: 0; border: 0; background: none; cursor: pointer; z-index: 1000; }
   .coin.d { right: 0; }
   .coin.g { left: 0; }
@@ -470,6 +470,11 @@
   .onglet.actif { background: #f0d391; padding: 12px 22px 8px; margin-top: 0; }
   .livre.rapide .leaf, .livre.rapide .pile { transition-duration: .45s; }
   .livre.rapide .leaf.en-vol, .livre.rapide .leaf.en-vol .face::after, .livre.rapide .leaf.en-vol .face > .feuille { animation-duration: .45s; }
+}
+    /* ── Élastique sur toute la hauteur ── */
+@media (min-width: 1100px) {
+  .carnet.livre-actif .couverture::after { display: none; }
+  .elastique { position: absolute; top: -8px; bottom: -2px; right: 68px; width: 14px; border-radius: 2px 2px 7px 7px; pointer-events: none; background: linear-gradient(90deg, #a35a0f, #e58e26 45%, #f2a54a 55%, #b8680f); box-shadow: 0 0 0 1px rgba(0,0,0,.35), 3px 0 6px rgba(0,0,0,.4), -3px 0 6px rgba(0,0,0,.25); }
 }
   </style>
 </head>
@@ -657,6 +662,9 @@
     onglets.appendChild(b);
   });
   carnet.insertBefore(onglets, livre);
+    var elast = document.createElement('div');
+  elast.className = 'elastique';
+  carnet.insertBefore(elast, onglets);
   etat();
 })();
 </script>
