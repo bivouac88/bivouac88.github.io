@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <!-- Politique de sécurité (CSP) : seules les ressources de ce site, Google Fonts et les images https sont autorisées -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Journal de bord · Bivouac88</title>
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <meta name="theme-color" content="#e58e26">
+  <meta name="description" content="Le journal de bord du Tour d'Europe à vélo de Bivouac88 : préparatifs, route et coulisses.">
+  <meta property="og:title" content="Journal de bord · Bivouac88">
+  <meta property="og:description" content="Préparatifs, route et coulisses du Tour d'Europe à vélo.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://bivouac88.github.io/journal.html">
+  <meta property="og:image" content="https://bivouac88.github.io/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <script src="commun.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Cinzel:wght@600;700&display=swap">
+  <style>
+/* =====================================================================
+   JOURNAL DE BORD · Bivouac88
+   1. Variables et bureau en bois
+   2. Éléments communs (feuilles, couverture)
+   3. Grand écran : le livre (>= 1100px)
+   4. Mobile : couverture puis une feuille à la fois (< 1100px)
+   ===================================================================== */
+
+/* ---------- 1. Variables et bureau en bois ---------- */
+:root {
+  --largeur: 1700px;
+  --or: #e2ac58;
+  --grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='c' x='0' y='0' width='100%25' height='100%25'><feTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' seed='3'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1.4 -0.45'/></filter><rect width='100%25' height='100%25' filter='url(%23c)' opacity='0.6'/></svg>");
+  --garde: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='m' x='0' y='0' width='100%25' height='100%25'><feTurbulence type='turbulence' baseFrequency='0.006 0.02' numOctaves='4' seed='11'/><feColorMatrix values='0.9 0 0 0 0.12 0 0.25 0 0 0.02 0 0 0.2 0 0.04 0 0 0 0 1'/></filter><rect width='100%25' height='100%25' filter='url(%23m)'/></svg>");
+}
+[hidden] { display: none !important; }
+.ligne-haut { margin-bottom: 8px; }
+
+body.page-journal { --bois: #3a281b; --vignette: 0.6; }
+[data-theme="light"] body.page-journal { --bois: #a98260; --vignette: 0.28; }
+body.page-journal::before {
+  opacity: 1;
+  background-color: var(--bois);
+  background-image:
+    radial-gradient(ellipse 85% 60% at 50% 16%, rgba(255, 190, 110, 0.14), transparent 70%),
+    radial-gradient(ellipse 130% 110% at 50% 45%, transparent 50%, rgba(0, 0, 0, var(--vignette)) 100%),
+    url("bois.jpg");
+  background-size: auto, auto, 640px 640px;
+  background-repeat: no-repeat, no-repeat, repeat;
+}
+/* Voile qui adoucit le bois (monte le 0.3 pour l'assombrir, baisse-le pour l'éclaircir) */
+body.page-journal::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: rgba(36, 24, 16, 0.3);
+}
+[data-theme="light"] body.page-journal::after { background: rgba(235, 227, 210, 0.4); }
+body.page-journal .pied {
+  color: rgba(245, 230, 205, 0.55);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+[data-theme="light"] body.page-journal .pied {
+  color: rgba(40, 25, 12, 0.75);
+  text-shadow: none;
+}
+[data-theme="light"] body.page-journal .marque small,
+[data-theme="light"] body.page-journal .btn-partage {
+  color: rgba(40, 25, 12, 0.85);
+  border-color: rgba(40, 25, 12, 0.35);
+}
+
+/* ---------- 2. Éléments communs ---------- */
+.carnet {
+  --papier-c: #f4ecd8;
+  --encre: #3b2f23;
+  --encre-douce: #7a6a55;
+  --ligne-c: rgba(120, 100, 70, 0.16);
+  --marge-c: rgba(190, 70, 50, 0.38);
+  --tampon: #b4561a;
+  --manuscrit: 'Caveat', 'Segoe Script', cursive;
+  position: relative;
+  z-index: 1;
+  max-width: 860px;
+  margin: 10px auto 56px;
+  display: flex;
+  flex-direction: column;
+  gap: 34px;
+}
+
+/* Le cuir (couverture, dos, plateau mobile) */
+.couverture,
+.livre .couv-av,
+.livre .couv-int,
+.livre .plat-d,
+.carnet.mobile-actif {
+  background-color: #4f2f1c;
+  background-image:
+    var(--grain),
+    linear-gradient(135deg, rgba(255, 220, 180, 0.14), transparent 40%, rgba(0, 0, 0, 0.3));
+}
+
+/* Une feuille = une entrée (version empilée : mobile ou sans JavaScript) */
+.feuille {
+  --x-marge: 58px;
+  position: relative;
+  color: var(--encre);
+  background:
+    linear-gradient(90deg, transparent var(--x-marge), var(--marge-c) var(--x-marge), var(--marge-c) calc(var(--x-marge) + 2px), transparent calc(var(--x-marge) + 2px)),
+    repeating-linear-gradient(180deg, transparent 0, transparent 31px, var(--ligne-c) 31px, var(--ligne-c) 32px),
+    var(--papier-c);
+  border-radius: 6px 14px 14px 6px;
+  padding: 32px 28px 96px calc(var(--x-marge) + 26px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+/* Les trous de la reliure */
+.feuille::before {
+  content: '';
+  position: absolute;
+  left: 14px;
+  top: 18px;
+  bottom: 18px;
+  width: 22px;
+  background: radial-gradient(circle at 11px 11px, #2a1b11 0 5px, rgba(0, 0, 0, 0.3) 6px, transparent 9px) 0 0 / 22px 64px repeat-y;
+  pointer-events: none;
+}
+.feuille h2 {
+  font: 700 clamp(32px, 4.6vw, 42px)/40px var(--manuscrit);
+  color: var(--encre);
+  margin: 0 0 24px;
+}
+.feuille p {
+  font: 400 17px/32px var(--serif);
+  margin: 0 0 32px;
+}
+.feuille p:last-child { margin-bottom: 0; }
+
+/* Date en tampon rouge, en bas de page */
+.feuille .feuille-date {
+  position: absolute;
+  left: 50%;
+  bottom: 26px;
+  z-index: 2;
+  width: max-content;
+  height: auto;
+  margin: 0;
+  padding: 6px 16px;
+  font: 700 21px/1 var(--mono);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #b3261e;
+  border: 6px double #b3261e;
+  border-radius: 8px;
+  transform: translateX(-50%) rotate(-6deg);
+  opacity: 0.8;
+  mix-blend-mode: multiply;
+  -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -9 7.4'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -9 7.4'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+/* Photo collée au scotch */
+.photo {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 340px);
+  margin: 36px auto 10px;
+  padding: 10px 10px 40px;
+  background: #fffdf7;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28);
+  transform: rotate(1.6deg);
+}
+.photo img { display: block; width: 100%; height: auto; }
+.photo figcaption {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 8px;
+  text-align: center;
+  font: 500 20px/1 var(--manuscrit);
+  color: var(--encre);
+}
+.photo::before {
+  content: '';
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  width: 90px;
+  height: 24px;
+  transform: translateX(-50%) rotate(-3deg);
+  background: rgba(235, 210, 140, 0.6);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+/* Mot-clé en bas d'entrée */
+.etiquette {
+  display: inline-block;
+  margin-top: 24px;
+  font: 500 11px var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--encre-douce);
+  border-bottom: 1px dashed var(--encre-douce);
+}
+
+/* Page de garde */
+.feuille.garde { text-align: center; }
+.feuille.garde h2 { margin-bottom: 18px; }
+.feuille.garde .mot { font: 500 26px/34px var(--manuscrit); color: var(--encre-douce); }
+
+/* Intercalaire de chapitre (lu par le script, jamais affiché dans le livre) */
+.chapitre {
+  align-self: flex-start;
+  margin: 10px 0 -34px 40px;
+  padding: 10px 24px 8px;
+  font: 700 28px/1 var(--manuscrit);
+  color: #3b2f23;
+  background: #d9b977;
+  border-radius: 10px 10px 0 0;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.25);
+  position: relative;
+  z-index: 1;
+}
+
+/* La couverture : cuir, cadre doré, emblème */
+.couverture {
+  position: relative;
+  padding: 22px 16px;
+  border-radius: 10px 18px 18px 10px;
+  box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.5), 0 10px 18px rgba(0, 0, 0, 0.45);
+  text-align: center;
+}
+.couverture-cadre {
+  position: relative;
+  padding: 22px 26px 20px;
+  border: 1px solid rgba(240, 200, 140, 0.38);
+  border-radius: 4px;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+.couverture-cadre::before {
+  content: '';
+  position: absolute;
+  inset: -9px;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--or), var(--or)) left top / 26px 3px no-repeat,
+    linear-gradient(var(--or), var(--or)) left top / 3px 26px no-repeat,
+    linear-gradient(var(--or), var(--or)) right top / 26px 3px no-repeat,
+    linear-gradient(var(--or), var(--or)) right top / 3px 26px no-repeat,
+    linear-gradient(var(--or), var(--or)) left bottom / 26px 3px no-repeat,
+    linear-gradient(var(--or), var(--or)) left bottom / 3px 26px no-repeat,
+    linear-gradient(var(--or), var(--or)) right bottom / 26px 3px no-repeat,
+    linear-gradient(var(--or), var(--or)) right bottom / 3px 26px no-repeat;
+  filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.6));
+}
+.couverture-emblem {
+  display: block;
+  width: clamp(54px, 6vw, 84px);
+  height: auto;
+  margin: 0 auto 14px;
+  color: var(--or);
+  filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.7));
+}
+.couverture-titre {
+  font: 700 clamp(28px, 3.4vw, 46px)/1.12 'Cinzel', Georgia, serif;
+  letter-spacing: 0.06em;
+  text-wrap: balance;
+  margin: 0;
+  background: linear-gradient(180deg, #ffd998 0%, #f0a43c 48%, #b8680f 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.7)) drop-shadow(0 -1px 0 rgba(255, 220, 170, 0.15));
+}
+.couverture-ornement { display: inline; margin: 0 0.4em; color: rgba(240, 200, 140, 0.6); }
+.couverture-sous {
+  margin: 10px 0 0;
+  font: 400 12px/1.6 var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(240, 210, 160, 0.62);
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.6);
+}
+.couverture-invite {
+  margin: 22px 0 0;
+  font: 500 20px/1 var(--manuscrit);
+  color: rgba(240, 210, 160, 0.78);
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.6);
+  animation: invite 2.8s ease-in-out infinite;
+}
+@keyframes invite { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }
+
+/* ---------- 3. Grand écran : le livre ---------- */
+@media (min-width: 1100px) {
+  .carnet { display: block; max-width: 1300px; margin: 10px auto 70px; padding: 34px 90px 54px; }
+  .carnet.livre-actif .couverture,
+  .carnet.livre-actif .chapitre { display: none; }
+
+  .livre { position: relative; width: 100%; height: 640px; perspective: 2600px; transform: translateX(-25%); }
+
+  /* Un feuillet : deux faces (recto à droite, verso à gauche) qui tournent autour du dos */
+  .livre .leaf { position: absolute; top: 0; left: 50%; width: 50%; height: 100%; transform-origin: left center; transform-style: preserve-3d; }
+  .livre .face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+  .livre .face.verso { transform: rotateY(180deg); }
+  /* Lumière sur la page qui se soulève (l'intensité vient du script) */
+  .livre .face::after { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: var(--lum, 0); }
+  .livre .face.d::after { background: linear-gradient(90deg, rgba(0, 0, 0, 0.4), transparent 78%); border-radius: 6px 14px 14px 6px; }
+  .livre .face.g::after { background: linear-gradient(270deg, rgba(0, 0, 0, 0.4), transparent 78%); border-radius: 14px 6px 6px 14px; }
+
+  /* Dos du livre (plat arrière), tranches et signet */
+  .livre .plat-d {
+    position: absolute; top: -10px; bottom: -10px; left: 50%;
+    right: calc(-1 * (var(--t-d, 0px) + 14px));
+    z-index: -1; border-radius: 2px 14px 14px 2px;
+    box-shadow: 0 18px 36px rgba(0, 0, 0, 0.55), 0 4px 8px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(0, 0, 0, 0.4);
+  }
+  .livre .plat-d::before {
+    content: ''; position: absolute; inset: 10px calc(var(--t-d, 0px) + 14px) 10px 0;
+    background-color: #6b1f26; background-image: var(--garde); box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.5);
+  }
+  .livre .elastique {
+    position: absolute; top: 0; bottom: 0; right: 6px; width: 12px; border-radius: 2px;
+    background: linear-gradient(90deg, #a35a0f, #e58e26 45%, #f2a54a 55%, #b8680f);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35), 2px 0 5px rgba(0, 0, 0, 0.4);
+  }
+  .livre .pile {
+    position: absolute; top: 0; bottom: 0; z-index: 2; pointer-events: none;
+    background:
+      linear-gradient(180deg, rgba(0, 0, 0, 0.2), transparent 7%, transparent 93%, rgba(0, 0, 0, 0.25)),
+      repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.09) 0 1px, transparent 1px 5px),
+      repeating-linear-gradient(90deg, #efe4c8 0 1px, #cdbf9d 1px 2px, #e6d9ba 2px 3px, #d7caa8 3px 4px, #efe4c8 4px 6px, #c9bb97 6px 7px);
+  }
+  .livre .pile-d { left: 100%; width: var(--t-d, 0px); border-radius: 0 8px 8px 0; }
+  .livre .pile-g { right: 100%; width: var(--t-g, 0px); border-radius: 8px 0 0 8px; }
+  .livre .signet {
+    position: absolute; left: 68%; bottom: -54px; width: 16px; height: 64px; z-index: 0;
+    background: linear-gradient(90deg, #8e2420, #b3352e 50%, #8e2420);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 82%, 0 100%);
+  }
+  /* Ombres portées sur les pages pendant un tour (intensité pilotée par le script) */
+  .livre .ombre { position: absolute; top: 0; bottom: 0; width: 50%; z-index: 900; pointer-events: none; }
+  .livre .ombre.d { left: 50%; background: linear-gradient(90deg, rgba(10, 5, 0, 0.55), transparent 62%); opacity: var(--os-d, 0); }
+  .livre .ombre.g { left: 0; background: linear-gradient(270deg, rgba(10, 5, 0, 0.55), transparent 62%); opacity: var(--os-g, 0); }
+
+  /* Couverture (face avant) */
+  .livre .face.couv-av {
+    inset: -10px calc(-1 * (var(--t-d, 0px) + 14px)) -10px 0;
+    border-radius: 4px 14px 14px 4px; cursor: pointer;
+    box-shadow: 0 22px 44px rgba(0, 0, 0, 0.55), 0 4px 10px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 220, 180, 0.14), inset 0 0 60px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(0, 0, 0, 0.55);
+  }
+  .livre .couv-av:focus-visible { outline: 3px solid var(--or); outline-offset: 4px; }
+  .livre .couv-av::before { content: ''; position: absolute; inset: 12px; border: 2px dashed rgba(240, 200, 140, 0.26); border-radius: 3px 10px 10px 3px; pointer-events: none; }
+  .livre .charniere {
+    position: absolute; left: 0; top: 0; bottom: 0; width: 30px; pointer-events: none;
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.5), rgba(255, 220, 170, 0.07) 38%, rgba(0, 0, 0, 0.32) 72%, transparent);
+  }
+  .livre .charniere::after { content: ''; position: absolute; top: 14px; bottom: 14px; left: 34px; border-left: 2px dashed rgba(240, 200, 140, 0.22); }
+  .livre .elast-couv {
+    position: absolute; top: 0; bottom: 0; right: calc(var(--t-d, 0px) + 44px); width: 14px; border-radius: 2px; pointer-events: none;
+    background: linear-gradient(90deg, #a35a0f, #e58e26 45%, #f2a54a 55%, #b8680f);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35), 3px 0 6px rgba(0, 0, 0, 0.4), -3px 0 6px rgba(0, 0, 0, 0.25);
+  }
+  .livre .couv-pos { position: absolute; top: 46px; bottom: 46px; left: 60px; right: calc(var(--t-d, 0px) + 76px); }
+  .livre .couv-pos .couverture-cadre { height: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+  /* Couverture (face intérieure) : papier de garde marbré */
+  .livre .face.couv-int {
+    inset: -10px calc(-1 * (var(--t-g, 0px) + 14px)) -10px 0;
+    border-radius: 14px 4px 4px 14px;
+    box-shadow: 0 18px 36px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 0, 0, 0.55);
+  }
+  .livre .endpaper {
+    position: absolute; inset: 10px 0 10px calc(var(--t-g, 0px) + 14px);
+    background-color: #6b1f26; background-image: var(--garde);
+    box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.5);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .livre .endpaper::after { content: ''; position: absolute; inset: 0; background: linear-gradient(270deg, rgba(0, 0, 0, 0.4), transparent 60px); pointer-events: none; }
+  .livre .ex-libris {
+    position: relative; z-index: 1; text-align: center; transform: rotate(-1.2deg);
+    background: #f2e8cf; color: #3b2f23; padding: 20px 30px;
+    outline: 3px double rgba(60, 40, 20, 0.35); outline-offset: -9px;
+    border: 1px solid rgba(60, 40, 20, 0.5); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+  }
+  .livre .ex-libris span { display: block; font: 500 11px/1.4 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: #7a6a55; }
+  .livre .ex-libris strong { display: block; margin-top: 6px; font: 700 34px/1 var(--manuscrit); }
+
+  /* Les pages */
+  .livre .face > .feuille {
+    --x-marge: 54px;
+    height: 100%; margin: 0; padding: 0; box-sizing: border-box; overflow: hidden;
+    transform: none; transition: none;
+    border-radius: 6px 14px 14px 6px;
+    box-shadow: 0 14px 24px -10px rgba(0, 0, 0, 0.5);
+    background:
+      linear-gradient(90deg, transparent var(--x-marge), var(--marge-c) var(--x-marge), var(--marge-c) calc(var(--x-marge) + 2px), transparent calc(var(--x-marge) + 2px)),
+      var(--papier-c);
+  }
+  .livre .face.g > .feuille { border-radius: 14px 6px 6px 14px; }
+  .livre .face > .feuille::after { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; border-radius: inherit; }
+  .livre .face.d > .feuille::after { background: linear-gradient(90deg, rgba(0, 0, 0, 0.2), transparent 46px); }
+  .livre .face.g > .feuille::after { background: linear-gradient(270deg, rgba(0, 0, 0, 0.2), transparent 46px); }
+  .livre .face.g > .feuille::before { left: auto; right: 14px; }
+
+  /* Le contenu défile dans la page ; les lignes du papier défilent avec le texte */
+  .livre .feuille-int {
+    position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden;
+    padding: 32px 30px 120px calc(var(--x-marge) + 24px);
+    background-image: repeating-linear-gradient(180deg, transparent 0, transparent 31px, var(--ligne-c) 31px, var(--ligne-c) 32px);
+    background-attachment: local;
+    scrollbar-width: thin; scrollbar-color: rgba(120, 100, 70, 0.4) transparent;
+  }
+  .livre .feuille-int::-webkit-scrollbar { width: 6px; }
+  .livre .feuille-int::-webkit-scrollbar-thumb { background: rgba(120, 100, 70, 0.4); border-radius: 3px; }
+  .livre .face.g .feuille-int { padding-right: 64px; }
+  .livre .feuille.garde .feuille-int { background-image: none; display: flex; flex-direction: column; justify-content: center; }
+  /* Fondu en bas : il disparaît quand on est arrivé au bout */
+  .livre .fondu {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 150px; pointer-events: none; transition: opacity 0.25s;
+    background: linear-gradient(to bottom, rgba(244, 236, 216, 0), var(--papier-c) 88%);
+  }
+  .livre .feuille.fin .fondu { opacity: 0; }
+  .livre .face.d .feuille-date { left: 96px; transform: rotate(-6deg); }
+  .livre .face.g .feuille-date { left: auto; right: 78px; transform: rotate(5deg); }
+
+  /* Onglets de chapitre : collés au feuillet, ils changent de côté avec lui */
+  .livre .onglet {
+    position: absolute; z-index: 1; cursor: pointer; transform-style: preserve-3d; transition: opacity 0.3s;
+    right: calc(-1 * (var(--tt, 14px) + 30px)); width: calc(var(--tt, 14px) + 30px);
+  }
+  .livre .onglet:focus-visible { outline: 3px solid var(--or); outline-offset: 2px; }
+  .livre.ferme .onglet { opacity: 0; pointer-events: none; }
+  .livre .o-av, .livre .o-ar {
+    position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    background: linear-gradient(180deg, #e3c585, #d1ad68); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(60, 40, 20, 0.25);
+    transition: background 0.25s;
+  }
+  .livre .o-av { border-radius: 0 10px 10px 0; }
+  .livre .o-ar { transform: rotateY(180deg); border-radius: 10px 0 0 10px; }
+  .livre .onglet:hover .o-av, .livre .onglet:hover .o-ar { background: linear-gradient(180deg, #edd197, #dcb875); }
+  .livre .onglet.actif .o-av, .livre .onglet.actif .o-ar { background: linear-gradient(180deg, #f6dea4, #e8c985); }
+  .livre .onglet .lib {
+    position: absolute; top: 0; bottom: 0; width: 30px; display: flex; align-items: center; justify-content: center;
+    writing-mode: vertical-rl; font: 700 21px/1 var(--manuscrit); color: #3b2f23; white-space: nowrap;
+  }
+  .livre .o-av .lib { right: 0; }
+  .livre .o-ar .lib { left: 0; }
+
+  /* Coins de page : on clique ou on glisse */
+  .livre .coin {
+    position: absolute; bottom: 0; width: 90px; height: 90px; padding: 0; border: 0; background: none;
+    cursor: grab; z-index: 2000; touch-action: none; --c: 38px;
+  }
+  .livre .coin:active { cursor: grabbing; }
+  .livre .coin:focus-visible { outline: 3px solid var(--or); outline-offset: -3px; }
+  .livre .coin.d { right: 0; }
+  .livre .coin.g { left: 0; }
+  .livre .coin:hover { --c: 58px; }
+  .livre .coin::before, .livre .coin::after { content: ''; position: absolute; bottom: 0; width: var(--c); height: var(--c); transition: width 0.25s, height 0.25s; pointer-events: none; }
+  .livre .coin.d::before, .livre .coin.d::after { right: 0; }
+  .livre .coin.g::before, .livre .coin.g::after { left: 0; transform: scaleX(-1); }
+  .livre .coin::before { clip-path: polygon(100% 0, 100% 100%, 0 100%); background: linear-gradient(315deg, #cfc2a0, #e0d4b5); }
+  .livre .coin::after { clip-path: polygon(0 0, 100% 0, 0 100%); background: linear-gradient(135deg, #fffaf0 0%, #eadfc2 55%, #a99c7c 100%); }
+  .livre .coin.appel::before, .livre .coin.appel::after { animation: coinAppel 1.4s ease-in-out 2; }
+  @keyframes coinAppel { 0%, 100% { width: 38px; height: 38px; } 50% { width: 54px; height: 54px; } }
+}
+@media (min-width: 1100px) and (prefers-reduced-motion: reduce) {
+  .livre .coin.appel::before, .livre .coin.appel::after { animation: none; }
+  .couverture-invite { animation: none; opacity: 0.8; }
+}
+
+/* ---------- 4. Mobile : couverture, puis une feuille à la fois ---------- */
+@media (max-width: 1099px) {
+  .carnet .feuille:nth-of-type(odd) { transform: rotate(-0.25deg); }
+  .carnet .feuille:nth-of-type(even) { transform: rotate(0.25deg); }
+  .feuille { --x-marge: 40px; padding: 28px 16px 96px calc(var(--x-marge) + 18px); }
+  .feuille::before { left: 6px; }
+  .chapitre { margin-left: 16px; font-size: 24px; }
+  .couverture-titre { font-size: clamp(24px, 7vw, 32px); }
+  .couverture-sous { font-size: 10.5px; letter-spacing: 0.1em; }
+
+  /* Livre fermé */
+  .carnet.mobile-ferme .chapitre,
+  .carnet.mobile-ferme .feuille,
+  .carnet.mobile-ferme .nav-pages { display: none; }
+  .carnet.mobile-ferme .couverture {
+    width: min(100%, 340px); min-height: 440px; margin: 18px auto 0; box-sizing: border-box;
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+    box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.5), 0 22px 44px rgba(0, 0, 0, 0.55), 0 4px 10px rgba(0, 0, 0, 0.5);
+  }
+  .carnet.mobile-ferme .couverture::after {
+    content: ''; position: absolute; top: -8px; bottom: -8px; right: 30px; width: 12px; border-radius: 2px; pointer-events: none;
+    background: linear-gradient(90deg, #a35a0f, #e58e26 45%, #f2a54a 55%, #b8680f);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35), 3px 0 6px rgba(0, 0, 0, 0.4);
+  }
+  .carnet.mobile-ferme .couverture:focus-visible { outline: 3px solid var(--or); outline-offset: 4px; }
+  .couverture.part { animation: couvPart 0.45s ease-in forwards; transform-origin: left center; }
+  @keyframes couvPart { to { transform: perspective(900px) rotateY(-95deg); opacity: 0; } }
+
+  /* Livre ouvert : un plateau de cuir, une feuille à la fois */
+  .carnet.mobile-actif { padding: 14px 17px 30px; border-radius: 10px 18px 18px 10px; gap: 22px; box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.5), 0 10px 18px rgba(0, 0, 0, 0.45), 0 30px 60px rgba(0, 0, 0, 0.5); }
+  .carnet.mobile-actif::before { content: ''; position: absolute; inset: 7px; border: 2px dashed rgba(240, 200, 140, 0.3); border-radius: 6px 14px 14px 6px; pointer-events: none; }
+  .carnet.mobile-actif .couverture,
+  .carnet.mobile-actif .chapitre,
+  .carnet.mobile-actif .feuille { display: none; }
+  .carnet.mobile-actif .feuille.courante {
+    display: block; transform: none;
+    box-shadow: 0 5px 0 -1px #e8dcc0, 0 10px 0 -2px #cfc3a4, 0 15px 0 -3px #e8dcc0, 0 22px 30px -6px rgba(0, 0, 0, 0.4);
+  }
+  .onglets-mobile {
+    position: sticky; top: calc(var(--hauteur-menu, 0px) + env(safe-area-inset-top)); z-index: 50;
+    display: flex; gap: 8px; padding: 8px 4px; overflow-x: auto;
+    background: color-mix(in srgb, var(--fond) 85%, transparent);
+    -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  }
+  .onglets-mobile button {
+    flex: 0 0 auto; font: 700 20px/1 'Caveat', cursive; color: #3b2f23; background: #d9b977;
+    border: 0; border-radius: 10px; padding: 8px 16px; cursor: pointer;
+  }
+  .onglets-mobile button.actif { background: #f0d391; }
+  .nav-pages { display: flex; align-items: center; justify-content: center; gap: 18px; }
+  .nav-pages button {
+    width: 48px; height: 44px; font: 700 26px/1 'Caveat', cursive; color: #3b2f23; background: #d9b977;
+    border: 0; border-radius: 10px; cursor: pointer;
+  }
+  .nav-pages button:disabled { opacity: 0.35; cursor: default; }
+  .nav-pages .compteur { font: 500 13px var(--mono); letter-spacing: 0.1em; color: rgba(240, 210, 160, 0.8); }
+}
+@keyframes apparait { from { opacity: 0; translate: 0 10px; } to { opacity: 1; translate: 0 0; } }
+@media (max-width: 1099px) and (prefers-reduced-motion: no-preference) {
+  .carnet.mobile-actif .feuille.courante { animation: apparait 0.35s ease-out; }
+}
+@media (max-width: 1099px) and (prefers-reduced-motion: reduce) {
+  .couverture-invite { animation: none; opacity: 0.8; }
+  .couverture.part { animation: none; opacity: 0; }
+}
+  </style>
+</head>
+<body class="page-journal">
+  <main>
+  <div class="ligne-haut">
+    <div id="entete-site"></div>
+  </div>
+  <div id="erreur"></div>
+
+  <!-- ============================================================
+       LE CARNET
+       Pour ajouter une entrée : copie un bloc <article class="feuille">
+       et colle-le à la suite, dans l'ordre voulu (la plus ancienne en haut).
+       Pour un nouveau chapitre : ajoute <div class="chapitre">Nom</div>
+       juste avant sa première entrée.
+       ============================================================ -->
+  <section class="carnet">
+
+    <!-- Couverture (titre, image et texte à personnaliser plus tard) -->
+    <header class="couverture">
+      <div class="couverture-cadre">
+        <svg class="couverture-emblem" viewBox="0 0 100 100" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="50" cy="50" r="44"/>
+          <circle cx="50" cy="50" r="38" stroke-width="1"/>
+          <circle cx="50" cy="50" r="6"/>
+          <path d="M50 44V12M50 56V88M44 50H12M56 50H88M54.2 45.8L76.9 23.1M45.8 45.8L23.1 23.1M54.2 54.2L76.9 76.9M45.8 54.2L23.1 76.9"/>
+        </svg>
+        <h1 class="couverture-titre">Journal de bord</h1>
+        <p class="couverture-sous">Préparatifs, route, coulisses <span class="couverture-ornement" aria-hidden="true">✦</span> tout le voyage, au fil des jours</p>
+        <p class="couverture-invite">Ouvrir le carnet</p>
+      </div>
+    </header>
+
+    <!-- Page de garde -->
+    <article class="feuille garde">
+      <h2>Journal de bord</h2>
+      <p class="mot">Ici viendra le petit mot d'ouverture du carnet.</p>
+    </article>
+
+    <div class="chapitre">Avant le départ</div>
+
+    <article class="feuille">
+      <span class="feuille-date">J-100</span>
+      <h2>Titre de la première page</h2>
+      <p>Ici, le texte de l'entrée. Chaque ligne d'écriture se pose sur une ligne du papier, et les paragraphes s'enchaînent avec un saut de ligne entre eux.</p>
+      <p>Un deuxième paragraphe, pour voir le rythme de lecture sur grand écran comme sur téléphone.</p>
+      <span class="etiquette">Préparatifs</span>
+    </article>
+
+    <article class="feuille">
+      <span class="feuille-date">J-60</span>
+      <h2>Une entrée avec photo</h2>
+      <p>Cette feuille montre comment une photo se colle sur la page, avec un morceau de scotch et une légende écrite à la main.</p>
+      <figure class="photo">
+        <img src="apple-touch-icon.png" alt="Photo d'exemple" loading="lazy" decoding="async">
+        <figcaption>Légende de la photo</figcaption>
+      </figure>
+      <p>Le texte reprend après la photo.</p>
+      <span class="etiquette">Matériel</span>
+    </article>
+
+    <div class="chapitre">En route</div>
+
+    <article class="feuille">
+      <span class="feuille-date">Étape 1</span>
+      <h2>La première page de la route</h2>
+      <p>Les entrées du voyage s'ajouteront à la suite, dans le même carnet.</p>
+      <span class="etiquette">Journal du jour</span>
+    </article>
+
+  </section>
+  </main>
+
+  <script>
+(function () {
+  'use strict';
+
+  /* Textes de l'intérieur de couverture (papier de garde) */
+  var TEXTES = { exlibris: 'Ce journal appartient à', proprio: 'Bivouac88' };
+
+  var carnet = document.querySelector('.carnet');
+  if (!carnet) return;
+  var mq = window.matchMedia('(min-width: 1100px)');
+  mq.addEventListener('change', function () { location.reload(); });
+  var reduit = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* Lecture du contenu : chaque feuille retient son chapitre */
+  var feuilles = [], chap = '';
+  Array.prototype.slice.call(carnet.children).forEach(function (el) {
+    if (el.classList.contains('chapitre')) chap = el.textContent.trim();
+    else if (el.classList.contains('feuille')) {
+      el.setAttribute('data-chap', el.classList.contains('garde') ? '' : chap);
+      feuilles.push(el);
+    }
+  });
+  var couv = carnet.querySelector('.couverture');
+  if (!feuilles.length || !couv) return;
+
+  function div(cls) { var d = document.createElement('div'); d.className = cls; return d; }
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+  function ease(u) { return u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2; }
+  function activer(el, fn) {
+    el.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn(); }
+    });
+  }
+
+  if (mq.matches) bureau(); else mobile();
+
+  /* =================================================================
+     GRAND ÉCRAN : le livre
+     ================================================================= */
+  function bureau() {
+    var n = feuilles.length;
+    var L = 1 + Math.ceil(n / 2);            /* nombre de feuillets, couverture comprise */
+    var maxQ = (n % 2) ? L - 1 : L;          /* dernier état atteignable */
+    var DUR = reduit ? 350 : 1250;           /* durée d'un tour de page (ms) */
+    var ang = [], tilt = [], jeton = [], cache = [], aOnglet = [];
+    for (var i = 0; i < L; i++) { ang.push(0); tilt.push(null); jeton.push(0); cache.push(''); aOnglet.push(false); }
+    var actifs = 0, verrou = false, drag = null;
+    var appelT = null, aTourne = false;
+
+    /* Chaque feuille : zone qui défile + fondu du bas */
+    function preparer(f) {
+      var date = f.querySelector(':scope > .feuille-date');
+      var int = div('feuille-int'), corps = div('feuille-corps');
+      Array.prototype.slice.call(f.childNodes).forEach(function (nd) { if (nd !== date) corps.appendChild(nd); });
+      int.appendChild(corps);
+      f.appendChild(int);
+      f.appendChild(div('fondu'));
+      if (date) f.appendChild(date);
+      function maj() {
+        var s = int.scrollHeight - int.clientHeight;
+        f.classList.toggle('fin', s < 8 || int.scrollTop >= s - 8);
+      }
+      int.addEventListener('scroll', maj, { passive: true });
+      if (window.ResizeObserver) new ResizeObserver(maj).observe(corps);
+      f._maj = maj;
+      maj();
+    }
+    feuilles.forEach(preparer);
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(function () { feuilles.forEach(function (f) { if (f._maj) f._maj(); }); });
+    }
+
+    /* Construction du livre */
+    var livre = div('livre ferme');
+    livre.innerHTML = '<div class="plat-d"><div class="elastique"></div></div>' +
+      '<div class="pile pile-g"></div><div class="pile pile-d"></div>' +
+      '<div class="ombre g"></div><div class="ombre d"></div><div class="signet"></div>';
+
+    var cadre = couv.querySelector('.couverture-cadre');
+    var cf = div('face d couv-av');
+    cf.setAttribute('role', 'button');
+    cf.tabIndex = 0;
+    cf.setAttribute('aria-label', 'Ouvrir le journal');
+    cf.innerHTML = '<div class="charniere"></div><div class="elast-couv"></div><div class="couv-pos"></div>';
+    cf.querySelector('.couv-pos').appendChild(cadre);
+    var cb = div('face g verso couv-int');
+    cb.innerHTML = '<div class="endpaper"><div class="ex-libris"><span></span><strong></strong></div></div>';
+    cb.querySelector('span').textContent = TEXTES.exlibris;
+    cb.querySelector('strong').textContent = TEXTES.proprio;
+
+    function vide() { return div('feuille vide'); }
+    function face(cls, contenu) { var f = div('face ' + cls); f.appendChild(contenu); return f; }
+
+    var leaves = [];
+    for (var k = 0; k < L; k++) {
+      var lf = div('leaf');
+      if (k === 0) { lf.appendChild(cf); lf.appendChild(cb); }
+      else {
+        lf.appendChild(face('d', feuilles[2 * k - 2] || vide()));
+        lf.appendChild(face('g verso', feuilles[2 * k - 1] || vide()));
+      }
+      livre.appendChild(lf);
+      leaves.push(lf);
+    }
+
+    /* Onglets de chapitre, collés au feuillet de la première entrée du chapitre */
+    var chaps = [];
+    feuilles.forEach(function (f, j) {
+      var nom = f.getAttribute('data-chap');
+      if (nom && !chaps.some(function (c) { return c.nom === nom; })) chaps.push({ nom: nom, j: j });
+    });
+    var hOng = Math.max(70, Math.min(160, Math.floor(560 / Math.max(1, chaps.length)) - 10));
+    chaps.forEach(function (c, idx) {
+      var kf = Math.floor(c.j / 2) + 1;
+      c.q = Math.min(maxQ, kf + (c.j % 2));
+      var o = div('onglet');
+      o.setAttribute('role', 'button');
+      o.tabIndex = 0;
+      o.setAttribute('aria-label', 'Aller au chapitre : ' + c.nom);
+      o.style.top = (46 + idx * (hOng + 10)) + 'px';
+      o.style.height = hOng + 'px';
+      o.innerHTML = '<div class="o-av"><span class="lib"></span></div><div class="o-ar"><span class="lib"></span></div>';
+      Array.prototype.forEach.call(o.querySelectorAll('.lib'), function (s) { s.textContent = c.nom; });
+      o.addEventListener('click', function () { aller(c.q); });
+      activer(o, function () { aller(c.q); });
+      leaves[kf].appendChild(o);
+      aOnglet[kf] = true;
+      c.el = o;
+    });
+
+    function coin(cls, label) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'coin ' + cls;
+      b.setAttribute('aria-label', label);
+      return b;
+    }
+    var cg = coin('g', 'Page précédente'), cd = coin('d', 'Page suivante');
+    livre.appendChild(cg);
+    livre.appendChild(cd);
+    carnet.classList.add('livre-actif');
+    carnet.appendChild(livre);
+
+    /* Nombre de feuillets tournés (côté gauche) */
+    function cur() { var c = 0; for (var i = 0; i < L; i++) if (ang[i] >= 90) c++; return c; }
+
+    /* Dessin : appelé à chaque image de l'animation */
+    function render() {
+      var ng = 0, nd = 0, q = cur(), osd = 0, osg = 0;
+      for (var k = 0; k < L; k++) { if (k > 0) { ng += ang[k] / 180; nd += 1 - ang[k] / 180; } }
+      var tg = Math.min(ng * 1.7, 38), td = Math.min(nd * 1.7, 38);
+      livre.style.setProperty('--t-g', tg.toFixed(1) + 'px');
+      livre.style.setProperty('--t-d', td.toFixed(1) + 'px');
+      for (k = 0; k < L; k++) {
+        var a = ang[k];
+        if (a < 0.4) a = 0; else if (a > 179.6) a = 180;
+        var vol = a > 0 && a < 180;
+        var s = Math.sin(a * Math.PI / 180);
+        var z = vol ? 1000 + k : (a >= 90 ? (k === 0 ? 1 : k + 2) : L - k + 3);
+        var vis = vol || (k >= q - 2 && k <= q + 1);
+        var tr;
+        if (vol && !reduit) {
+          var t = tilt[k] !== null ? tilt[k] : s * 1.4;
+          tr = 'translateZ(' + (s * 16).toFixed(1) + 'px) rotateX(' + t.toFixed(2) + 'deg) rotateY(' + (-a).toFixed(2) + 'deg)';
+        } else {
+          tr = 'rotateY(' + (-a).toFixed(2) + 'deg)';
+        }
+        var lum = vol ? (s * 0.55).toFixed(2) : '0';
+        var tt = (a < 90 ? td : tg) + 14;
+        var cle = tr + '|' + z + '|' + vis + '|' + lum + '|' + (aOnglet[k] ? tt.toFixed(1) : '');
+        if (cache[k] !== cle) {
+          cache[k] = cle;
+          var lf = leaves[k];
+          lf.style.transform = tr;
+          lf.style.zIndex = z;
+          lf.style.visibility = vis ? '' : 'hidden';
+          lf.style.setProperty('--lum', lum);
+          if (aOnglet[k]) lf.style.setProperty('--tt', tt.toFixed(1) + 'px');
+        }
+        if (vol) {
+          osd = Math.max(osd, s * (1 - a / 180) * 0.9);
+          osg = Math.max(osg, s * (a / 180) * 0.9);
+        }
+      }
+      livre.style.setProperty('--os-d', osd.toFixed(2));
+      livre.style.setProperty('--os-g', osg.toFixed(2));
+      livre.style.transform = 'translateX(' + (-25 * (1 - ang[0] / 180)).toFixed(3) + '%)';
+      livre.classList.toggle('ferme', ang[0] < 90);
+    }
+
+    /* État de l'interface : coins visibles, onglet actif */
+    function etat() {
+      var q = cur();
+      cg.hidden = q <= 0;
+      cd.hidden = q <= 0 || q >= maxQ;
+      var e = (2 * q - 2 < n) ? 2 * q - 2 : 2 * q - 3;
+      var nomActif = (q >= 1 && e > 0 && feuilles[e]) ? feuilles[e].getAttribute('data-chap') : '';
+      chaps.forEach(function (c) { c.el.classList.toggle('actif', c.nom === nomActif); });
+    }
+
+    /* Animation d'un feuillet vers un angle cible */
+    function anim(k, cible, dur, opt) {
+      opt = opt || {};
+      var de = ang[k], id = ++jeton[k], t0 = null;
+      if (!opt.doux) actifs++;
+      function fin() { if (!opt.doux) actifs--; }
+      if (de === cible) { fin(); if (opt.fini) opt.fini(); return; }
+      tilt[k] = null;
+      function pas(t) {
+        if (jeton[k] !== id) { fin(); return; }
+        if (t0 === null) t0 = t;
+        var u = Math.min(1, (t - t0) / dur);
+        ang[k] = de + (cible - de) * ease(u);
+        render();
+        if (u < 1) requestAnimationFrame(pas);
+        else { fin(); etat(); if (opt.fini) opt.fini(); }
+      }
+      requestAnimationFrame(pas);
+    }
+    function dureePour(k, cible) { return Math.max(300, DUR * Math.abs(cible - ang[k]) / 180); }
+    function premier() {
+      if (cur() >= 1) { aTourne = true; clearTimeout(appelT); }
+    }
+
+    /* Un tour de page (sens +1 : vers l'avant, -1 : vers l'arrière) */
+    function tourner(sens) {
+      if (actifs || verrou || drag) return;
+      var q = cur();
+      if (sens > 0 && q >= maxQ) return;
+      var k = sens > 0 ? q : q - 1;
+      if (k < 0) return;
+      premier();
+      var cible = sens > 0 ? 180 : 0;
+      anim(k, cible, dureePour(k, cible));
+    }
+
+    /* Avance rapide vers un état (clic sur un onglet) */
+    function aller(cibleQ) {
+      if (actifs || verrou || drag) return;
+      cibleQ = clamp(cibleQ, 1, maxQ);
+      var q = cur();
+      if (cibleQ === q) return;
+      premier();
+      var sens = cibleQ > q ? 1 : -1, nb = Math.abs(cibleQ - q), vite = reduit ? 250 : 520;
+      verrou = true;
+      for (var s = 0; s < nb; s++) {
+        (function (s) {
+          var k = sens > 0 ? q + s : q - s - 1;
+          setTimeout(function () {
+            anim(k, sens > 0 ? 180 : 0, vite, { fini: function () { if (s === nb - 1) { verrou = false; etat(); } } });
+          }, s * 110);
+        })(s);
+      }
+    }
+
+    /* Le coin se soulève quand la souris passe dessus */
+    function souleve(sens, on) {
+      if (actifs || verrou || drag) return;
+      var q = cur();
+      var k = sens > 0 ? q : q - 1;
+      if (k < 0 || k >= L) return;
+      if (sens > 0 && q >= maxQ) return;
+      var cible = sens > 0 ? (on ? 8 : 0) : (on ? 172 : 180);
+      anim(k, cible, 220, { doux: true });
+    }
+    cd.addEventListener('mouseenter', function () { souleve(1, true); });
+    cg.addEventListener('mouseenter', function () { souleve(-1, true); });
+    cd.addEventListener('mouseleave', function () { souleve(1, false); });
+    cg.addEventListener('mouseleave', function () { souleve(-1, false); });
+
+    /* Glisser un coin : la page suit le doigt ou la souris */
+    function debut(e, sens) {
+      if (e.button !== undefined && e.button !== 0) return;
+      if (actifs || verrou) return;
+      var q = cur();
+      var k = sens > 0 ? q : q - 1;
+      if (k < 0 || (sens > 0 && q >= maxQ)) return;
+      drag = { k: k, sens: sens, x0: e.clientX, y0: e.clientY, moved: false, pts: [{ x: e.clientX, t: performance.now() }] };
+      try { e.currentTarget.setPointerCapture(e.pointerId); } catch (x) {}
+      e.preventDefault();
+    }
+    function bouge(e) {
+      if (!drag) return;
+      if (!drag.moved && Math.abs(e.clientX - drag.x0) + Math.abs(e.clientY - drag.y0) < 8) return;
+      if (drag.k === 0) return; /* la couverture s'ouvre au clic seulement */
+      if (!drag.moved) { drag.moved = true; jeton[drag.k]++; }
+      var r = livre.getBoundingClientRect();
+      var W = r.width / 2;
+      var c = clamp((e.clientX - (r.left + W)) / W, -1, 1);
+      var a = Math.acos(c) * 180 / Math.PI;
+      ang[drag.k] = a;
+      tilt[drag.k] = clamp((e.clientY - (r.top + r.height / 2)) / r.height * 9, -5, 5) * Math.sin(a * Math.PI / 180);
+      drag.pts.push({ x: e.clientX, t: performance.now() });
+      if (drag.pts.length > 8) drag.pts.shift();
+      render();
+    }
+    function fini(e) {
+      if (!drag) return;
+      var d = drag;
+      drag = null;
+      if (!d.moved) { tourner(d.sens); return; }
+      var a = ang[d.k], p = d.pts, v = 0;
+      if (p.length > 1) {
+        var p0 = p[0], p1 = p[p.length - 1];
+        if (p1.t > p0.t) v = (p1.x - p0.x) / (p1.t - p0.t);
+      }
+      var cible;
+      if (d.sens > 0) cible = (v < -0.5) ? 180 : (v > 0.5 ? 0 : (a > 90 ? 180 : 0));
+      else cible = (v > 0.5) ? 0 : (v < -0.5 ? 180 : (a < 90 ? 0 : 180));
+      premier();
+      tilt[d.k] = null;
+      anim(d.k, cible, 160 + Math.abs(cible - a) / 180 * 500);
+    }
+    [[cd, 1], [cg, -1]].forEach(function (paire) {
+      var c = paire[0], sens = paire[1];
+      c.addEventListener('pointerdown', function (e) { debut(e, sens); });
+      c.addEventListener('pointermove', bouge);
+      c.addEventListener('pointerup', fini);
+      c.addEventListener('pointercancel', fini);
+    });
+
+    /* La couverture : un clic l'ouvre */
+    cf.addEventListener('click', function () { if (cur() === 0) tourner(1); });
+    activer(cf, function () { if (cur() === 0) tourner(1); });
+    cf.addEventListener('mouseenter', function () { if (cur() === 0 && !actifs && !verrou) anim(0, reduit ? 0 : 6, 240, { doux: true }); });
+    cf.addEventListener('mouseleave', function () { if (cur() === 0 && !actifs && !verrou) anim(0, 0, 240, { doux: true }); });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+      if (e.key === 'ArrowRight') tourner(1);
+      else if (e.key === 'ArrowLeft') tourner(-1);
+    });
+
+    /* Petit rappel du coin, après l'ouverture, tant qu'aucune page n'a été tournée */
+    function appel() {
+      if (aTourne) return;
+      if (!cd.hidden) { cd.classList.remove('appel'); void cd.offsetWidth; cd.classList.add('appel'); }
+      appelT = setTimeout(appel, 9000);
+    }
+    appelT = setTimeout(appel, 3000);
+
+    render();
+    etat();
+  }
+
+  /* =================================================================
+     MOBILE : couverture, puis une feuille à la fois
+     ================================================================= */
+  function mobile() {
+    var cur = 0, ouvert = false;
+    var chaps = [], idx = 0;
+    Array.prototype.slice.call(carnet.children).forEach(function (el) {
+      if (el.classList.contains('chapitre')) chaps.push({ nom: el.textContent.trim(), i: idx });
+      else if (el.classList.contains('feuille')) idx++;
+    });
+
+    var barre = document.createElement('nav');
+    barre.className = 'onglets-mobile';
+    barre.setAttribute('aria-label', 'Chapitres');
+    barre.hidden = true;
+    chaps.forEach(function (c) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = c.nom;
+      b.addEventListener('click', function () { aller(c.i, true); });
+      c.btn = b;
+      barre.appendChild(b);
+    });
+    carnet.parentNode.insertBefore(barre, carnet);
+
+    var nav = div('nav-pages');
+    var prev = document.createElement('button');
+    prev.type = 'button'; prev.textContent = '‹'; prev.setAttribute('aria-label', 'Page précédente');
+    var next = document.createElement('button');
+    next.type = 'button'; next.textContent = '›'; next.setAttribute('aria-label', 'Page suivante');
+    var compteur = document.createElement('span');
+    compteur.className = 'compteur';
+    compteur.setAttribute('aria-live', 'polite');
+    nav.appendChild(prev); nav.appendChild(compteur); nav.appendChild(next);
+    carnet.appendChild(nav);
+
+    function aller(i, defiler) {
+      if (i < 0 || i >= feuilles.length) return;
+      cur = i;
+      feuilles.forEach(function (f, k) { f.classList.toggle('courante', k === cur); });
+      compteur.textContent = (cur + 1) + ' / ' + feuilles.length;
+      prev.disabled = cur === 0;
+      next.disabled = cur === feuilles.length - 1;
+      chaps.forEach(function (c, j) {
+        var suiv = chaps[j + 1];
+        c.btn.classList.toggle('actif', cur >= c.i && (!suiv || cur < suiv.i));
+      });
+      if (defiler) {
+        var haut = carnet.getBoundingClientRect().top + window.pageYOffset - 130;
+        window.scrollTo(0, Math.max(0, haut));
+      }
+    }
+    prev.addEventListener('click', function () { aller(cur - 1, true); });
+    next.addEventListener('click', function () { aller(cur + 1, true); });
+
+    document.addEventListener('keydown', function (e) {
+      if (!ouvert) return;
+      if (e.key === 'ArrowRight') aller(cur + 1, true);
+      else if (e.key === 'ArrowLeft') aller(cur - 1, true);
+    });
+
+    var x0 = null, y0 = null;
+    carnet.addEventListener('touchstart', function (e) {
+      if (!ouvert || e.touches.length !== 1) { x0 = null; return; }
+      x0 = e.touches[0].clientX;
+      y0 = e.touches[0].clientY;
+    }, { passive: true });
+    carnet.addEventListener('touchend', function (e) {
+      if (x0 === null) return;
+      var dx = e.changedTouches[0].clientX - x0;
+      var dy = e.changedTouches[0].clientY - y0;
+      x0 = null;
+      if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+      aller(cur + (dx < 0 ? 1 : -1), true);
+    }, { passive: true });
+
+    /* Livre fermé : un toucher l'ouvre */
+    function ouvrir() {
+      if (ouvert) return;
+      ouvert = true;
+      couv.classList.add('part');
+      setTimeout(function () {
+        carnet.classList.remove('mobile-ferme');
+        carnet.classList.add('mobile-actif');
+        barre.hidden = false;
+        aller(0, false);
+        window.scrollTo(0, Math.max(0, carnet.getBoundingClientRect().top + window.pageYOffset - 130));
+      }, reduit ? 0 : 450);
+    }
+    couv.setAttribute('role', 'button');
+    couv.tabIndex = 0;
+    couv.setAttribute('aria-label', 'Ouvrir le journal');
+    couv.addEventListener('click', ouvrir);
+    activer(couv, ouvrir);
+    carnet.classList.add('mobile-ferme');
+  }
+})();
+  </script>
+</body>
+</html>
