@@ -499,5 +499,27 @@ function loadLikes(jour) {
     }).catch(function() {});
 }
 </script>
+  <script>
+(function () {
+  if (window.matchMedia('(min-width: 1100px)').matches) return;
+  var carnet = document.querySelector('.carnet');
+  if (!carnet) return;
+  var chaps = carnet.querySelectorAll('.chapitre');
+  if (!chaps.length) return;
+  var barre = document.createElement('nav');
+  barre.className = 'onglets-mobile';
+  barre.setAttribute('aria-label', 'Chapitres');
+  chaps.forEach(function (c) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = c.textContent.trim();
+    b.addEventListener('click', function () {
+      c.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    barre.appendChild(b);
+  });
+  carnet.parentNode.insertBefore(barre, carnet);
+})();
+</script>
 </body>
 </html>
