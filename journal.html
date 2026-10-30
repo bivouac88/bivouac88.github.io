@@ -462,6 +462,15 @@
   .coin.appel::before, .coin.appel::after { animation: coinAppel 1.4s ease-in-out 2; }
   @keyframes coinAppel { 0%, 100% { width: 38px; height: 38px; } 50% { width: 54px; height: 54px; } }
 }
+    /* ── Étape 3 : onglets de chapitre ── */
+@media (min-width: 1100px) {
+  .onglets-livre { grid-column: 1 / -1; position: relative; z-index: 2; display: flex; align-items: flex-end; gap: 6px; flex-wrap: wrap; margin: 10px 0 -34px 40px; }
+  .onglet { font: 700 24px/1 var(--manuscrit); color: #3b2f23; background: #d9b977; border: 0; border-radius: 10px 10px 0 0; padding: 8px 22px 6px; margin-top: 6px; cursor: pointer; box-shadow: 0 -2px 8px rgba(0,0,0,.25); transition: background .25s, padding .25s, margin .25s; }
+  .onglet:hover { background: #e6c88a; }
+  .onglet.actif { background: #f0d391; padding: 12px 22px 8px; margin-top: 0; }
+  .livre.rapide .leaf, .livre.rapide .pile { transition-duration: .45s; }
+  .livre.rapide .leaf.en-vol, .livre.rapide .leaf.en-vol .face::after, .livre.rapide .leaf.en-vol .face > .feuille { animation-duration: .45s; }
+}
   </style>
 </head>
 <body class="page-journal">
@@ -555,6 +564,13 @@
     livre.style.setProperty('--ep-d', nb - p);
     cg.hidden = p <= 1;
     cd.hidden = p >= nb;
+    if (chaps) {
+      var e = 2 * p - 1 < entrees.length ? 2 * p - 1 : 2 * p - 2;
+      chaps.forEach(function (c, j) {
+        var suiv = chaps[j + 1];
+        c.btn.classList.toggle('actif', e >= c.e && (!suiv || e < suiv.e));
+      });
+    }
   }
   function tourner(sens) {
     if (verrou) return;
@@ -600,6 +616,48 @@
     appelT = setTimeout(appel, 9000);
   }
   appelT = setTimeout(appel, 2500);
+    var chaps = [];
+  entrees.forEach(function (el, e) {
+    var nom = el.getAttribute('data-chap');
+    if (nom && !chaps.some(function (c) { return c.nom === nom; })) chaps.push({ nom: nom, e: e });
+  });
+  function aller(cible) {
+    if (verrou || cible === p || cible < 1 || cible > nb) return;
+    verrou = true;
+    aTourne = true;
+    clearTimeout(appelT);
+    livre.classList.add('rapide');
+    var sens = cible > p ? 1 : -1, n = Math.abs(cible - p), debut = p;
+    for (var s = 0; s < n; s++) {
+      (function (s) {
+        setTimeout(function () {
+          var k = sens > 0 ? debut + s : debut - s - 1;
+          var f = feuillets[k];
+          f.style.zIndex = nb + 10 + s;
+          f.classList.remove('leve');
+          f.classList.add('en-vol');
+          p += sens;
+          f.classList.toggle('tourne', sens > 0);
+          etat();
+          setTimeout(function () { f.style.zIndex = zFinal(k); f.classList.remove('en-vol'); }, 480);
+        }, s * 110);
+      })(s);
+    }
+    setTimeout(function () { livre.classList.remove('rapide'); verrou = false; }, (n - 1) * 110 + 520);
+  }
+  var onglets = document.createElement('div');
+  onglets.className = 'onglets-livre';
+  chaps.forEach(function (c) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'onglet';
+    b.textContent = c.nom;
+    b.addEventListener('click', function () { aller(Math.floor(c.e / 2) + 1); });
+    c.btn = b;
+    onglets.appendChild(b);
+  });
+  carnet.insertBefore(onglets, livre);
+  etat();
 })();
 </script>
 </body>
