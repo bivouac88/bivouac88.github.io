@@ -49,7 +49,7 @@
   var N = feuilles.length, cur = 0, ouvert = false, busy = false, cp = 0, g = null;
   var prog = [], tilt = [], jeton = [];
   var livre = d('m-livre ferme');
-  livre.innerHTML = '<div class="m-plat"></div><div class="m-pile"></div><div class="m-spirale"></div>';
+  livre.innerHTML = '<div class="m-plat"></div><div class="m-pile"></div><div class="m-pile-g"></div><div class="m-spirale"></div>';
   var onglets = d('m-onglets');
   livre.appendChild(onglets);
 
@@ -92,23 +92,27 @@
   carnet.appendChild(nav);
 
   /* Dessin : appelé à chaque image de l'animation */
+  /* Une page tournée se pose et s'aplatit contre le dos */
+  function serre(a) {
+    if (a < 0.5) return 1;
+    var u = (a - 0.5) * 2;
+    return 1 - 0.98 * u * u * (3 - 2 * u);
+  }
   function rendre() {
     var f1 = 0;
     while (f1 < N && prog[f1] >= 1) f1++;
     leaves.forEach(function (lf, i) {
-      var a = prog[i], vol = a > 0 && a < 1;
-      var vis = a < 1 && (vol || i <= f1 + 3);
+      var a = prog[i], vol = a > 0 && a < 1, tourne = a >= 1;
+      var vis = tourne ? i >= f1 - 2 : (vol || i <= f1 + 3);
       lf.style.visibility = vis ? '' : 'hidden';
       if (!vis) return;
-      lf.style.zIndex = vol ? 3000 - i : N - i + 10;
-      lf.style.transform = 'rotateY(' + (-a * 165).toFixed(2) + 'deg)' + (tilt[i] ? ' rotateX(' + (tilt[i] * Math.sin(a * Math.PI)).toFixed(2) + 'deg)' : '');
+      lf.style.zIndex = vol ? 3000 - i : (tourne ? i + 10 : N - i + 10);
+      lf.style.transform = 'scaleX(' + serre(a).toFixed(3) + ') rotateY(' + (-a * 180).toFixed(2) + 'deg)' + (tilt[i] ? ' rotateX(' + (tilt[i] * Math.sin(a * Math.PI)).toFixed(2) + 'deg)' : '');
       lf.style.setProperty('--lum', (Math.sin(a * Math.PI) * 0.55).toFixed(2));
       lf.style.setProperty('--sous', i ? (Math.sin(prog[i - 1] * Math.PI) * 0.5).toFixed(2) : '0');
     });
-    cv.style.transform = 'rotateY(' + (-cp * 165).toFixed(2) + 'deg)';
-    cv.style.visibility = cp >= 1 ? 'hidden' : '';
+    cv.style.transform = 'scaleX(' + serre(cp).toFixed(3) + ') rotateY(' + (-cp * 180).toFixed(2) + 'deg)';
   }
-
   function etat() {
     cpt.textContent = (cur + 1) + ' / ' + N;
     pv.disabled = cur === 0;
@@ -117,6 +121,7 @@
     chaps.forEach(function (c, j) { if (c.i <= cur) act = j; });
     chaps.forEach(function (c, j) { c.btn.classList.toggle('actif', j === act); });
     livre.style.setProperty('--ep', (3 + 9 * (N - 1 - cur) / Math.max(1, N - 1)).toFixed(1) + 'px');
+    livre.style.setProperty('--eg', (cur ? 3 + 8 * cur / Math.max(1, N - 1) : 0).toFixed(1) + 'px');
     rendre();
   }
 
