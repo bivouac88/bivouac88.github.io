@@ -568,7 +568,8 @@ body.page-journal .pied {
 }
 </style>
 <link rel="stylesheet" href="journal-3d.css">
-<script src="journal-3d.js" defer></script>
+<link rel="stylesheet" href="journal-mobile.css">
+<script src="journal-mobile.js" defer></script>
 </head>
 <body class="page-journal">
   <main>
@@ -674,9 +675,7 @@ body.page-journal .pied {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn(); }
     });
   }
-
-  if (mq.matches) bureau(); else mobile();
-
+  if (mq.matches) bureau();
   /* =================================================================
      GRAND ÉCRAN : le livre
      ================================================================= */
