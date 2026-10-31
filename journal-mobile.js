@@ -1,6 +1,14 @@
 /* journal-mobile.js · carnet 3D mobile (< 1100px). Remplace l'ancienne fonction mobile(). */
 (function () {
   'use strict';
+  var lance = false;
+  window.demarrerMobile = function () {
+    if (lance) return;
+    lance = true;
+    lancer();
+  };
+  if (window.carnetPret) window.demarrerMobile();
+  function lancer() {
   if (!window.matchMedia('(max-width: 1099px)').matches) return;
   var TEXTES = { exlibris: 'Ce journal appartient à', proprio: 'Bivouac88' };
   var carnet = document.querySelector('.carnet');
@@ -201,6 +209,6 @@
     if (e.key === 'ArrowRight') aller(cur + 1);
     else if (e.key === 'ArrowLeft') aller(cur - 1);
   });
-
   etat();
+  }
 })();
