@@ -434,6 +434,23 @@ function couleursCiel(el) {
   f.style.setProperty('--ciel-haut', mix(P[i][1], P[i + 1][1]));
   f.style.setProperty('--ciel-bas', mix(P[i][2], P[i + 1][2]));
 }
+function ombreLune(a, jour) {
+  var s = a.querySelector('svg.phase');
+  if (jour) { if (s) s.remove(); return; }
+  var L = lune(new Date()), SYN = 29.530588853;
+  var c = Math.cos(2 * Math.PI * L.age / SYN);
+  var rx = Math.max(0.01, 100 * Math.abs(c)), sw = c > 0 ? 1 : 0;
+  var d = 'M100,0 A100,100 0 0 1 100,200 A' + rx.toFixed(2) + ',100 0 0 ' + sw + ' 100,0 Z';
+  var flip = L.age < SYN / 2 ? ' transform="translate(200,0) scale(-1,1)"' : '';
+  var cle = d + flip;
+  if (s && a.getAttribute('data-ph') === cle) return;
+  a.setAttribute('data-ph', cle);
+  if (s) s.remove();
+  a.insertAdjacentHTML('beforeend',
+    '<svg class="phase" viewBox="0 0 200 200" style="position:absolute;inset:0;width:100%;height:100%;clip-path:circle(50%);pointer-events:none">'
+    + '<defs><filter id="flou-phase"><feGaussianBlur stdDeviation="3"/></filter></defs>'
+    + '<g filter="url(#flou-phase)"><path d="' + d + '" fill="rgba(5,8,24,.9)"' + flip + '/></g></svg>');
+}
 function placerAstre() {
   var M = METEO, a = $('astre'), svg = $('ciel-svg');
   if (!M || !a || !svg) return;
