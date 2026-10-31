@@ -332,7 +332,6 @@ function $(id) { return document.getElementById(id); }
     autres: { mini: 8, maxi: 28 }
   };
   var GROUPES = { carnassiers: 'Carnassiers', carpes: 'Carpes', blancs: 'Blancs', autres: 'Autres' };
-  var FIABILITE = {
   var LIBELLES = ['', 'Faible', 'Moyenne', 'Bonne'];
   var groupePeche = 'carnassiers';
   try { var gs = localStorage.getItem('groupePeche'); if (gs && GROUPES[gs]) groupePeche = gs; } catch (e) {}
@@ -884,7 +883,6 @@ function $(id) { return document.getElementById(id); }
         html += '</div></section>';
         // 5. Détails
         html += '<section><h2 class="bloc">Détails</h2><div class="details" id="details"></div></section>';
-        app.innerHTML = html;
         // « À pêcher en [mois] » est rangée dans #meteo : on la remet dehors avant de reconstruire
         var pm = $('poissons-mois'), defil = [];
         if (pm && app.contains(pm)) $('tab-meteo').appendChild(pm);
