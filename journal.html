@@ -286,8 +286,8 @@ body.page-journal .pied {
   color: transparent;
   filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.7)) drop-shadow(0 -1px 0 rgba(255, 220, 170, 0.15));
 }
-.couverture-ornement { display: inline; margin: 0 0.4em; color: rgba(240, 200, 140, 0.6); }
-.couverture-sous {
+.couverture-ornement { display: block; margin: 12px 0 0; font-size: 18px; color: rgba(240, 200, 140, 0.6); }
+  .couverture-sous {
   margin: 10px 0 0;
   font: 400 12px/1.6 var(--mono);
   letter-spacing: 0.12em;
@@ -296,7 +296,7 @@ body.page-journal .pied {
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.6);
 }
 .couverture-invite {
-  margin: 22px 0 0;
+  margin: 12px 0 0;
   font: 500 20px/1 var(--manuscrit);
   color: rgba(240, 210, 160, 0.78);
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.6);
@@ -387,8 +387,7 @@ body.page-journal .pied {
     box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35), 3px 0 6px rgba(0, 0, 0, 0.4), -3px 0 6px rgba(0, 0, 0, 0.25);
   }
   .livre .couv-pos { position: absolute; top: 46px; bottom: 46px; left: 60px; right: calc(var(--t-d, 0px) + 76px); }
-  .livre .couv-pos .couverture-cadre { height: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-
+.livre .couv-pos .couverture-cadre { height: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
   /* Couverture (face intérieure) : papier de garde marbré */
   .livre .face.couv-int {
     inset: -10px calc(-1 * (var(--t-g, 0px) + 14px)) -10px 0;
@@ -598,8 +597,9 @@ body.page-journal .pied {
           <path d="M50 44V12M50 56V88M44 50H12M56 50H88M54.2 45.8L76.9 23.1M45.8 45.8L23.1 23.1M54.2 54.2L76.9 76.9M45.8 54.2L23.1 76.9"/>
         </svg>
         <h1 class="couverture-titre">Journal de bord</h1>
-        <p class="couverture-sous">Préparatifs, route, coulisses <span class="couverture-ornement" aria-hidden="true">✦</span> tout le voyage, au fil des jours</p>
-        <p class="couverture-invite">Ouvrir le carnet</p>
+        <p class="couverture-sous">Préparatifs, route, coulisses</p>
+<span class="couverture-ornement" aria-hidden="true">✦</span>
+<p class="couverture-invite">Ouvrir le carnet</p>
       </div>
     </header>
 
