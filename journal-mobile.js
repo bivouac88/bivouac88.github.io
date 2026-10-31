@@ -1,15 +1,6 @@
-/* journal-mobile.js · carnet 3D mobile (< 1100px). */
+/* journal-mobile.js · carnet 3D mobile (< 1100px). Remplace l'ancienne fonction mobile(). */
 (function () {
   'use strict';
-  var lance = false;
-  window.demarrerMobile = function () {
-    if (lance) return;
-    lance = true;
-    lancer();
-  };
-  if (window.carnetPret) window.demarrerMobile();
-
-  function lancer() {
   if (!window.matchMedia('(max-width: 1099px)').matches) return;
   var TEXTES = { exlibris: 'Ce journal appartient à', proprio: 'Bivouac88' };
   var carnet = document.querySelector('.carnet');
@@ -42,6 +33,7 @@
     });
   }
 
+  /* Chaque feuille : zone qui défile + fondu du bas (comme sur PC) */
   function preparer(f) {
     var date = f.querySelector(':scope > .feuille-date');
     var int = d('feuille-int'), corps = d('feuille-corps');
@@ -71,6 +63,7 @@
     return lf;
   });
 
+  /* Couverture : face avant (cadre doré) + face intérieure (papier de garde) */
   var cv = d('m-couv');
   var av = d('m-face m-av'), ar = d('m-face m-ar');
   av.appendChild(cadre);
@@ -98,6 +91,8 @@
   carnet.appendChild(livre);
   carnet.appendChild(nav);
 
+  /* Dessin : appelé à chaque image de l'animation */
+  /* Une page tournée se pose et s'aplatit contre le dos */
   function serre(a) {
     if (a < 0.5) return 1;
     var u = (a - 0.5) * 2;
@@ -132,3 +127,80 @@
 
   function vers(i, cible, dur, fin) {
     var de = prog[i], id = ++jeton[i];
+    tween(dur, function (e) { if (jeton[i] === id) { prog[i] = de + (cible - de) * e; rendre(); } },
+      function () { if (jeton[i] === id && fin) fin(); });
+  }
+
+  /* Aller à une page : les feuilles se tournent l'une après l'autre */
+  function aller(k) {
+    if (!ouvert || busy || g || k < 0 || k >= N || k === cur) return;
+    busy = true;
+    var c0 = cur, sens = k > c0 ? 1 : -1, nb = Math.abs(k - c0), dur = reduit ? 200 : (nb > 1 ? 420 : 700);
+    for (var s = 0; s < nb; s++) {
+      (function (s) {
+        setTimeout(function () {
+          vers(sens > 0 ? c0 + s : c0 - s - 1, sens > 0 ? 1 : 0, dur,
+            s === nb - 1 ? function () { cur = k; busy = false; etat(); } : null);
+        }, s * 110);
+      })(s);
+    }
+  }
+
+  /* Ouverture de la couverture */
+  function ouvrir() {
+    if (ouvert || busy) return;
+    busy = true;
+    livre.classList.remove('ferme');
+    tween(reduit ? 250 : 1100, function (e) { cp = e; rendre(); }, function () { ouvert = true; busy = false; etat(); });
+    window.scrollTo({ top: Math.max(0, livre.getBoundingClientRect().top + window.pageYOffset - 120), behavior: reduit ? 'auto' : 'smooth' });
+  }
+  cv.addEventListener('click', ouvrir);
+  cv.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); ouvrir(); } });
+
+  /* Glisser : la page suit le doigt */
+  livre.addEventListener('pointerdown', function (e) {
+    if (!ouvert || busy || e.target.closest('.m-onglets')) return;
+    g = { x: e.clientX, y: e.clientY, on: false, pts: [{ x: e.clientX, t: performance.now() }] };
+  });
+  livre.addEventListener('pointermove', function (e) {
+    if (!g) return;
+    var dx = e.clientX - g.x, dy = e.clientY - g.y;
+    if (!g.on) {
+      if (Math.abs(dx) < 10 || Math.abs(dx) < Math.abs(dy) * 1.3) return;
+      g.sens = dx < 0 ? 1 : -1;
+      g.i = g.sens > 0 ? cur : cur - 1;
+      if (g.i < 0 || (g.sens > 0 && cur >= N - 1)) { g = null; return; }
+      g.on = true; jeton[g.i]++;
+      try { livre.setPointerCapture(e.pointerId); } catch (x) {}
+    }
+    var r = livre.getBoundingClientRect();
+    var p = g.sens > 0 ? -dx / r.width : 1 - dx / r.width;
+    prog[g.i] = clamp(p * 1.3, 0, 1);
+    tilt[g.i] = reduit ? 0 : clamp((e.clientY - r.top - r.height / 2) / r.height * 8, -4, 4);
+    g.pts.push({ x: e.clientX, t: performance.now() });
+    if (g.pts.length > 8) g.pts.shift();
+    rendre();
+  });
+  function relacher() {
+    if (!g) return;
+    var o = g; g = null;
+    if (!o.on) return;
+    var p = o.pts, v = 0;
+    if (p.length > 1 && p[p.length - 1].t > p[0].t) v = (p[p.length - 1].x - p[0].x) / (p[p.length - 1].t - p[0].t);
+    var avant = o.sens > 0, a = prog[o.i];
+    var tourne = avant ? (v < -0.4 || (v <= 0.4 && a > 0.35)) : !(v > 0.4 || (v >= -0.4 && a < 0.65));
+    var nouveau = tourne ? (avant ? cur + 1 : cur) : (avant ? cur : cur - 1);
+    busy = true; tilt[o.i] = 0;
+    vers(o.i, tourne ? 1 : 0, reduit ? 150 : 300 + 250 * Math.abs((tourne ? 1 : 0) - a), function () { cur = nouveau; busy = false; etat(); });
+  }
+  livre.addEventListener('pointerup', relacher);
+  livre.addEventListener('pointercancel', relacher);
+
+  document.addEventListener('keydown', function (e) {
+    if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+    if (e.key === 'ArrowRight') aller(cur + 1);
+    else if (e.key === 'ArrowLeft') aller(cur - 1);
+  });
+
+  etat();
+})();
