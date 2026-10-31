@@ -118,8 +118,8 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
   .haut .hero-meteo, .haut #hero-peche { grid-column: 1 / -1; }
 }
 /* Fond selon le temps */
-#fond-meteo { position: fixed; inset: 0; z-index: 0; pointer-events: none; transition: background 1.2s ease; }
-[data-theme="light"] #fond-meteo { opacity: .7; }
+#fond-meteo { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: linear-gradient(180deg, var(--ciel-haut, #1a2a55) 0%, var(--ciel-bas, #2a3a66) 100%); transition: background 1.2s ease; }
+  [data-theme="light"] #fond-meteo { opacity: .7; }
 #fond-meteo[data-fond="jour"] { background: radial-gradient(ellipse 90% 60% at 50% -10%, rgba(229,142,38,.28), transparent 70%); }
 #fond-meteo[data-fond="nuit"] { background: linear-gradient(180deg, rgba(25,40,95,.45), transparent 65%); }
 #fond-meteo[data-fond="nuit-nuageux"] { background: linear-gradient(180deg, rgba(40,48,70,.5), transparent 65%); }
@@ -418,6 +418,29 @@ function $(id) { return document.getElementById(id); }
     if (jour === 0 && f === 'nuageux') f = 'nuit-nuageux';
     $('fond-meteo').setAttribute('data-fond', f);
   }
+  
+function couleursCiel(el) {
+  // el = hauteur du soleil en degrés (négatif = sous l'horizon)
+  // chaque étape : [hauteur, couleur du haut, couleur de l'horizon]
+  var P = [
+    [-18, [8, 12, 32],    [14, 22, 50]],
+    [-8,  [18, 28, 66],   [58, 52, 100]],
+    [-3,  [44, 58, 110],  [214, 112, 96]],
+    [0,   [74, 98, 152],  [244, 150, 84]],
+    [6,   [88, 138, 200], [250, 196, 140]],
+    [20,  [70, 130, 208], [160, 200, 236]],
+    [45,  [46, 110, 200], [130, 184, 232]]
+  ];
+  var e = Math.max(P[0][0], Math.min(P[P.length - 1][0], el)), i = 0;
+  while (i < P.length - 2 && e > P[i + 1][0]) i++;
+  var t = (e - P[i][0]) / (P[i + 1][0] - P[i][0]);
+  function mix(a, b) {
+    return 'rgb(' + [0, 1, 2].map(function (q) { return Math.round(a[q] + (b[q] - a[q]) * t); }).join(',') + ')';
+  }
+  var f = $('fond-meteo');
+  f.style.setProperty('--ciel-haut', mix(P[i][1], P[i + 1][1]));
+  f.style.setProperty('--ciel-bas', mix(P[i][2], P[i + 1][2]));
+}
 function placerAstre() {
   var M = METEO, a = $('astre'), svg = $('ciel-svg');
   if (!M || !a || !svg) return;
