@@ -453,6 +453,13 @@ function placerAstre() {
   var p = Math.max(0, Math.min(1, (now - deb) / (fin - deb)));
   var W = window.innerWidth, H = window.innerHeight;
   a.className = jour ? 'soleil' : 'lune';
+  var rad = Math.PI / 180, lat = POS ? POS.lat : 50.5;
+  var doy = Math.floor((now - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+  var dec = 23.44 * Math.sin(2 * Math.PI * (doy - 81) / 365) * rad;
+  var midi = (ms(j.sunrise[1]) + ms(j.sunset[1])) / 2;
+  var ha = ((now - midi) / 86400000) * 2 * Math.PI;
+  var elev = Math.asin(Math.sin(lat * rad) * Math.sin(dec) + Math.cos(lat * rad) * Math.cos(dec) * Math.cos(ha)) / rad;
+  couleursCiel(elev);
   a.style.left = (p * (W - 80)) + 'px';
 var menuH = 80;
 a.style.top = (menuH + H * 0.08 + (H * 0.35) * (1 - Math.sin(p * Math.PI))) + 'px';
