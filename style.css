@@ -133,6 +133,7 @@ main {
   gap: 12px;
   margin-bottom: 18px;
   padding-right: 52px;
+  max-width: 900px;
 }
 
 .marque {
