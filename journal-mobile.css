@@ -62,7 +62,7 @@
   .m-livre.ferme .m-spirale, .m-livre.ferme .m-onglets { opacity: 0; pointer-events: none; }
 
   /* Feuillets */
-  .m-leaf { position: absolute; inset: 0; transform-origin: left center; transform-style: preserve-3d; will-change: transform; }
+  .m-leaf { position: absolute; inset: 0; transform-origin: left center; transform-style: preserve-3d; }
   .m-recto, .m-verso { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
   .m-verso {
     transform: rotateY(180deg); border-radius: 14px 6px 6px 14px;
