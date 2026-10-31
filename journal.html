@@ -158,20 +158,41 @@ body.page-journal .pied {
   width: max-content;
   height: auto;
   margin: 0;
-  padding: 6px 16px;
-  font: 700 21px/1 var(--mono);
-  letter-spacing: 0.18em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 20px 40px 18px;
+  font: 700 30px/1 var(--mono);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
+  white-space: nowrap;
   color: #b3261e;
-  border: 6px double #b3261e;
-  border-radius: 8px;
-  transform: translateX(-50%) rotate(-6deg);
+  border: 5px double #b3261e;
+  border-radius: 50%;
+  transform: translateX(-50%) rotate(-8deg);
   opacity: 0.8;
   mix-blend-mode: multiply;
   -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -9 7.4'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
   mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -9 7.4'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
 }
-
+.feuille .feuille-date::before {
+  content: 'BIVOUAC88';
+  font: 700 10px/1 var(--mono);
+  letter-spacing: 0.3em;
+  padding-bottom: 5px;
+  border-bottom: 2px solid #b3261e;
+}
+.feuille .feuille-date::after {
+  content: '✦ ✦ ✦';
+  font: 400 11px/1 var(--mono);
+  letter-spacing: 0.4em;
+  padding-top: 5px;
+  border-top: 2px solid #b3261e;
+}
+@media (max-width: 1099px) {
+  .feuille .feuille-date { font-size: 22px; padding: 16px 28px 14px; }
+}
 /* Photo collée au scotch */
 .photo {
   position: relative;
