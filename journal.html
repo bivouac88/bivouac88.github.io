@@ -431,6 +431,7 @@ body.page-journal .pied {
   /* Le contenu défile dans la page ; les lignes du papier défilent avec le texte */
   .livre .feuille-int {
     position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden;
+    overscroll-behavior: contain;
     padding: 32px 30px 120px calc(var(--x-marge) + 24px);
     background-image: repeating-linear-gradient(180deg, transparent 0, transparent 31px, var(--ligne-c) 31px, var(--ligne-c) 32px);
     background-attachment: local;
