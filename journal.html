@@ -1139,10 +1139,15 @@ function demarrerCarnet() {
         return d;
       });
   }
+  function pret() {
+    window.carnetPret = true;
+    demarrerCarnet();
+    if (window.demarrerMobile) window.demarrerMobile();
+  }
 
   if (cacheOk) {
     construire(enCache.pages);
-    demarrerCarnet();
+    pret();
     charger().then(function (d) {
       if (!d._change) return;
       var ferme = document.querySelector('.livre.ferme, .carnet.mobile-ferme');
@@ -1154,8 +1159,7 @@ function demarrerCarnet() {
         var er = document.getElementById('erreur');
         if (er) { er.textContent = 'Le carnet est indisponible pour le moment.'; er.style.display = 'block'; }
       })
-      .then(demarrerCarnet);
-  }
+      .then(pret);  }
 })();
   </script>
 </body>
