@@ -470,6 +470,7 @@ function placerAstre() {
   var ha = ((now - midi) / 86400000) * 2 * Math.PI;
   var elev = Math.asin(Math.sin(lat * rad) * Math.sin(dec) + Math.cos(lat * rad) * Math.cos(dec) * Math.cos(ha)) / rad;
   couleursCiel(elev);
+  ombreLune(a, jour);
   a.style.left = (p * (W - 80)) + 'px';
 var menuH = 80;
 a.style.top = (menuH + H * 0.08 + (H * 0.35) * (1 - Math.sin(p * Math.PI))) + 'px';
