@@ -1104,7 +1104,10 @@ function demarrerCarnet() {
       .then(function (txt) {
         var d = JSON.parse(txt);
         if (!d || !Array.isArray(d.pages)) throw new Error('format');
+        var ancien = null;
+        try { ancien = localStorage.getItem(CLE); } catch (e) {}
         try { localStorage.setItem(CLE, txt); } catch (e) {}
+        d._change = (ancien !== null && ancien !== txt);
         return d;
       });
   }
@@ -1112,8 +1115,11 @@ function demarrerCarnet() {
   if (cacheOk) {
     construire(enCache.pages);
     demarrerCarnet();
-    charger().catch(function () {});
-  } else {
+    charger().then(function (d) {
+      if (!d._change) return;
+      var ferme = document.querySelector('.livre.ferme, .carnet.mobile-ferme');
+      if (ferme) location.reload();
+    }).catch(function () {});  } else {
     charger()
       .then(function (d) { construire(d.pages); })
       .catch(function () {
