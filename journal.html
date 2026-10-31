@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <!-- Politique de sécurité (CSP) : seules les ressources de ce site, Google Fonts et les images https sont autorisées -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Journal de bord · Bivouac88</title>
   <link rel="icon" href="favicon.ico" sizes="any">
@@ -603,48 +603,10 @@ body.page-journal .pied {
       </div>
     </header>
 
-    <!-- Page de garde -->
-    <article class="feuille garde">
-      <h2>Journal de bord</h2>
-      <p class="mot">Ici viendra le petit mot d'ouverture du carnet.</p>
-    </article>
-
-    <div class="chapitre">Avant le départ</div>
-
-    <article class="feuille">
-      <span class="feuille-date">J-100</span>
-      <h2>Titre de la première page</h2>
-      <p>Ici, le texte de l'entrée. Chaque ligne d'écriture se pose sur une ligne du papier, et les paragraphes s'enchaînent avec un saut de ligne entre eux.</p>
-      <p>Un deuxième paragraphe, pour voir le rythme de lecture sur grand écran comme sur téléphone.</p>
-      <span class="etiquette">Préparatifs</span>
-    </article>
-
-    <article class="feuille">
-      <span class="feuille-date">J-60</span>
-      <h2>Une entrée avec photo</h2>
-      <p>Cette feuille montre comment une photo se colle sur la page, avec un morceau de scotch et une légende écrite à la main.</p>
-      <figure class="photo">
-        <img src="apple-touch-icon.png" alt="Photo d'exemple" loading="lazy" decoding="async">
-        <figcaption>Légende de la photo</figcaption>
-      </figure>
-      <p>Le texte reprend après la photo.</p>
-      <span class="etiquette">Matériel</span>
-    </article>
-
-    <div class="chapitre">En route</div>
-
-    <article class="feuille">
-      <span class="feuille-date">Étape 1</span>
-      <h2>La première page de la route</h2>
-      <p>Les entrées du voyage s'ajouteront à la suite, dans le même carnet.</p>
-      <span class="etiquette">Journal du jour</span>
-    </article>
-
-  </section>
   </main>
 
   <script>
-(function () {
+function demarrerCarnet() {
   'use strict';
 
   /* Textes de l'intérieur de couverture (papier de garde) */
@@ -1083,6 +1045,66 @@ body.page-journal .pied {
     activer(couv, ouvrir);
     carnet.classList.add('mobile-ferme');
   }
+}
+
+/* ---------- Chargement des pages depuis le Sheet ---------- */
+(function () {
+  var API = 'https://script.google.com/macros/s/AKfycbyptX2-OXsxh8yXqk9Hi_ygvcxP1_4vD0AT-KzZPcTFzR9AfEKHbQnBvgi3Pvw5a-LL/exec';
+  var carnet = document.querySelector('.carnet');
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function paragraphes(texte) {
+    return String(texte).split(/\n\s*\n/).map(function (p) {
+      p = p.trim();
+      return p ? '<p>' + esc(p).replace(/\n/g, '<br>') + '</p>' : '';
+    }).join('');
+  }
+
+  function construire(pages) {
+    var chap = null;
+    pages.forEach(function (p) {
+      if (p.chapitre && p.chapitre !== chap) {
+        chap = p.chapitre;
+        var c = document.createElement('div');
+        c.className = 'chapitre';
+        c.textContent = chap;
+        carnet.appendChild(c);
+      }
+      var html = '<span class="feuille-date">' + esc(p.tampon) + '</span>' +
+                 '<h2>' + esc(p.titre) + '</h2>';
+      (p.blocs || []).forEach(function (b) {
+        if (b.texte) html += paragraphes(b.texte);
+        if (b.photo && /^https:\/\//.test(b.photo)) {
+          html += '<figure class="photo"><img src="' + esc(b.photo) + '=w800" alt="' +
+                  esc(b.legende || 'Photo') + '" loading="lazy" decoding="async">' +
+                  (b.legende ? '<figcaption>' + esc(b.legende) + '</figcaption>' : '') +
+                  '</figure>';
+        }
+      });
+      if (p.etiquette) html += '<span class="etiquette">' + esc(p.etiquette) + '</span>';
+      var a = document.createElement('article');
+      a.className = 'feuille';
+      a.innerHTML = html;
+      carnet.appendChild(a);
+    });
+  }
+
+  fetch(API + '?journal=1')
+    .then(function (r) { if (!r.ok) throw new Error('http'); return r.json(); })
+    .then(function (d) {
+      if (!d || !Array.isArray(d.pages)) throw new Error('format');
+      construire(d.pages);
+    })
+    .catch(function () {
+      var er = document.getElementById('erreur');
+      if (er) { er.textContent = 'Le carnet est indisponible pour le moment.'; er.style.display = 'block'; }
+    })
+    .then(demarrerCarnet);
 })();
   </script>
 </body>
