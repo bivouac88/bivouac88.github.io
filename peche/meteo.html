@@ -951,7 +951,8 @@ function $(id) { return document.getElementById(id); }
 (function () {
   var MOIS = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
   var MOIS_C = ['J','F','M','A','M','J','J','A','S','O','N','D'];
-  var GROUPES = { tous: 'Tous', carnassiers: 'Carnassiers', carpes: 'Carpes', blancs: 'Blancs', autres: 'Autres' };
+var GROUPES = { tous: 'Tous', carnassiers: 'Carnassiers', carpes: 'Carpes', blancs: 'Blancs', autres: 'Autres', plats: 'Plats', 'gadidés': 'Gadidés', 'pélagiques': 'Pélagiques', 'sparidés': 'Sparidés', mer: 'Mer' };
+var GROUPES_MER = { plats: 1, 'gadidés': 1, 'pélagiques': 1, 'sparidés': 1, mer: 1 };
   var LIEN_REGLES = 'https://environnement.wallonie.be/';
   var sec = document.getElementById('poissons-mois');
   var mois = new Date().getMonth(), moisNow = mois, groupe = 'tous', choisi = null, liste = [];
@@ -971,7 +972,7 @@ function $(id) { return document.getElementById(id); }
     var an = '';
     for (var k = 0; k < 12; k++) an += '<span class="' + (r[3].charAt(k) === '1' ? 'on' : '') + (k === moisNow ? ' now' : '') + '" title="' + MOIS[k] + '">' + MOIS_C[k] + '</span>';
     var note = (r[5] || '').replace(/^Statut : [^.]*\.\s*/, '');
-    var liens = '<a href="' + LIEN_REGLES + '" target="_blank" rel="noopener">Réglementation (Wallonie)</a>';
+var liens = GROUPES_MER[r[2]] ? 'Réglementation maritime : à vérifier selon le pays' : '<a href="' + LIEN_REGLES + '" target="_blank" rel="noopener">Réglementation (Wallonie)</a>';
     if (/^https:\/\//.test(r[6] || '')) liens += ' · <a href="' + esc(r[6]) + '" target="_blank" rel="noopener">Fiche FishBase</a>';
     return '<div class="pm-detail"><h3>' + esc(r[0]) + '</h3><div class="pm-sci">' + esc(r[1]) + '</div>'
       + '<div class="pm-an">' + an + '</div>'
