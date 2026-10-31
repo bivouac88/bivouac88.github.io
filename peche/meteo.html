@@ -434,8 +434,24 @@ function couleursCiel(el) {
   f.style.setProperty('--ciel-haut', mix(P[i][1], P[i + 1][1]));
   f.style.setProperty('--ciel-bas', mix(P[i][2], P[i + 1][2]));
 }
-function ombreLune(a, jour) {
-  var s = a.querySelector('svg.phase');
+function couleursSoleil(a, el) {
+  // chaque étape : [hauteur, cœur, bord, halo] en [r, g, b, alpha]
+  var P = [
+    [0,  [255, 190, 110, 1], [255, 130, 50, .65],  [255, 100, 40, .26]],
+    [8,  [255, 226, 160, 1], [255, 200, 110, .55], [255, 175, 80, .2]],
+    [30, [255, 247, 214, 1], [255, 236, 175, .5],  [255, 226, 150, .16]]
+  ];
+  var e = Math.max(0, Math.min(30, el)), i = e < 8 ? 0 : 1;
+  var t = (e - P[i][0]) / (P[i + 1][0] - P[i][0]);
+  function mix(k) {
+    var A = P[i][k], B = P[i + 1][k];
+    return 'rgba(' + [0, 1, 2].map(function (q) { return Math.round(A[q] + (B[q] - A[q]) * t); }).join(',') + ',' + (A[3] + (B[3] - A[3]) * t).toFixed(2) + ')';
+  }
+  a.style.setProperty('--sol-coeur', mix(1));
+  a.style.setProperty('--sol-bord', mix(2));
+  a.style.setProperty('--sol-halo', mix(3));
+}
+function ombreLune(a, jour) {  var s = a.querySelector('svg.phase');
   if (jour) { if (s) s.remove(); return; }
   var L = lune(new Date()), SYN = 29.530588853;
   var c = Math.cos(2 * Math.PI * L.age / SYN);
