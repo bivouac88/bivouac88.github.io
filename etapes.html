@@ -317,8 +317,8 @@ main { --largeur: 1400px; }
         html += '<div class="avis-texte">';
         if (e.note.commentaire) {
           var commentaire = String(e.note.commentaire);
-if (commentaire.length > 100) {
-  commentaire = commentaire.substring(0, 100).trimEnd() + '...';
+if (commentaire.length > 125) {
+  commentaire = commentaire.substring(0, 125).trimEnd() + '...';
 }
     html += '<div class="avis-commentaire">' + esc(commentaire) + '</div>';
 }
@@ -441,8 +441,8 @@ function postComment(jour) {
       if (!el) return;
       el.innerHTML = d.comments.slice(-3).map(function(c) {
   var texte = String(c.commentaire || '');
-  if (texte.length > 50) {
-    texte = texte.substring(0, 50).trimEnd() + '...';
+if (texte.length > 100) {
+    texte = texte.substring(0, 100).trimEnd() + '...';
 }
 return '<div class="comment"><strong>' + esc(c.nom) + '</strong> ' + esc(texte) + '</div>';
     }).join('');
