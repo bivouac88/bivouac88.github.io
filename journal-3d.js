@@ -39,14 +39,16 @@
   function boucle(t) {
     if (!actif) return;
     /* Garde-fou : si les 90 premières images sont trop lentes (< ~35 i/s), on coupe les effets */
-    if (n === 0) t0 = t;
-    if (++n === 90 && (t - t0) / 90 > 28) { actif = false; lampe.remove(); cv.remove(); return; }
+    n++;
+    if (n === 120) t0 = t;
+    if (n === 210 && (t - t0) / 90 > 28) { actif = false; lampe.remove(); cv.remove(); return; }
 
     mx += (tx - mx) * 0.08;
     my += (ty - my) * 0.08;
     lampe.style.setProperty('--mx', mx.toFixed(0) + 'px');
     lampe.style.setProperty('--my', my.toFixed(0) + 'px');
 
+    if (!livre) livre = document.querySelector('.carnet.livre-actif');
     if (livre) {
       var nx = Math.round((0.5 - mx / W) * 40);
       var ny = Math.round(-(my / H - 0.3) * 30);
