@@ -21,193 +21,144 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="style.css">
-  <style>
-  main {
-      --largeur: 1400px;
-    }
-    #journal {
+<style>
+main { --largeur: 1400px; }
+
+#journal {
   list-style: none;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
 }
-    .etape {
-      background: var(--carte);
-      border: 1px solid var(--trait);
-      border-radius: 14px;
-      padding: 16px 18px;
-    }
-    .etape.fait { border-color: var(--accent-trait); }
-    .etape-entete {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      margin-bottom: 4px;
-    }
-    .etape .jour {
-      font: 500 11px var(--mono);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--discret);
-    }
-    .etape.fait .jour { color: var(--accent); }
-    .etape .badge {
-      font: 400 11px var(--mono);
-      color: var(--discret-sombre);
-    }
-    .etape.fait .badge { color: var(--accent); font-weight: 500; }
-    .etape .trajet {
-      font-size: clamp(17px, 2.4vw, 20px);
-      font-weight: 600;
-      margin: 4px 0 6px;
-    }
-    .etape .trajet i { color: var(--accent); font-style: normal; font-family: var(--mono); font-weight: 400; padding: 0 4px; }
-    .etape .meta {
-      font: 400 13px var(--mono);
-      color: var(--discret);
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px 8px;
-    }
-    .etape .meta span.sep { color: var(--trait-actif); }
 
-    .avis-bloc {
-      margin-top: 14px;
-      padding-top: 14px;
-      border-top: 1px solid var(--trait-subtil);
-      display: flex;
-      gap: 14px;
-      align-items: flex-start;
-    }
-    .avis-smiley { font-size: 28px; line-height: 1; flex-shrink: 0; }
-    .avis-texte { flex: 1; min-width: 0; }
-    .avis-commentaire { color: var(--papier); font-size: 14px; line-height: 1.5; }
-      .avis-photo {
-      margin-top: 10px;
-      max-width: 100%;
-      border-radius: 10px;
-      border: 1px solid var(--trait);
-      display: block;
-    }
-    .galerie-photos {
-    margin-top: 10px;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 6px;
+/* Cartes à venir : sobres */
+.etape {
+  background: var(--carte);
+  border: 1px solid var(--trait);
+  border-radius: 14px;
+  padding: 16px 18px;
+}
+.etape.fait { border-color: var(--accent-trait); }
+
+.etape-entete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+.etape .jour {
+  font: 500 11px var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--discret);
+}
+.etape.fait .jour { color: var(--accent); }
+.etape .badge {
+  font: 400 11px var(--mono);
+  color: var(--discret-sombre);
+}
+.etape.fait .badge { color: var(--accent); font-weight: 500; }
+.etape .trajet {
+  font-size: clamp(16px, 2vw, 19px);
+  font-weight: 600;
+  margin: 4px 0 6px;
+}
+.etape .trajet i {
+  color: var(--accent);
+  font-style: normal;
+  font-family: var(--mono);
+  font-weight: 400;
+  padding: 0 4px;
+}
+.etape .meta {
+  font: 400 12px var(--mono);
+  color: var(--discret);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+}
+.etape .meta span.sep { color: var(--trait-actif); }
+
+/* Météo */
+.meteo-bloc {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--trait-subtil);
+}
+.meteo-conditions {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+/* Avis + photos */
+.avis-bloc {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--trait-subtil);
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.avis-smiley { font-size: 26px; line-height: 1; flex-shrink: 0; }
+.avis-texte { flex: 1; min-width: 0; }
+.avis-commentaire {
+  color: var(--papier);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* Galerie 2x2 */
+.galerie-photos {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
 }
 .galerie-photos .avis-photo {
   width: 100%;
-  height: 60px;
+  height: 110px;
   object-fit: cover;
   border-radius: 8px;
-  cursor: pointer;
   border: 1px solid var(--trait);
+  cursor: pointer;
   transition: opacity 0.15s ease;
+  display: block;
 }
-.galerie-photos .avis-photo:hover {
-  opacity: 0.8;
-}
-    .lightbox {
+.galerie-photos .avis-photo:hover { opacity: 0.8; }
+
+/* Lightbox */
+.lightbox {
   display: none;
   position: fixed;
   inset: 0;
   z-index: 9999;
-  background: rgba(0,0,0,0.85);
+  background: rgba(0,0,0,0.88);
   align-items: center;
   justify-content: center;
   cursor: zoom-out;
 }
-.lightbox.active {
-  display: flex;
-}
+.lightbox.active { display: flex; }
 .lightbox img {
   max-width: 90vw;
   max-height: 90vh;
   border-radius: 10px;
   box-shadow: 0 8px 40px rgba(0,0,0,0.6);
 }
-  .comments-bloc {
+
+/* Zone sociale */
+.social-bloc {
   margin-top: 14px;
   padding-top: 14px;
   border-top: 1px solid var(--trait-subtil);
 }
-.comment-form {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
-}
-.comment-form button {
-  width: 100%;
-}
-.comment-form input[placeholder="Ton nom"] {
-  max-width: 120px;
-}
-.comments-list {
-  max-width: 500px;
-}
-.comment-form input {
-  flex: 1;
-  background: var(--fond);
-  border: 1px solid var(--trait);
-  border-radius: 8px;
-  padding: 7px 10px;
-  color: var(--papier);
-  font: 13px var(--mono);
-}
-.comment-form button {
-  background: var(--accent);
-  color: #000;
-  border: none;
-  border-radius: 8px;
-  padding: 7px 14px;
-  font: 500 12px var(--mono);
-  cursor: pointer;
-}
-.comment {
-  font: 13px var(--mono);
-  color: var(--discret);
-  padding: 6px 0;
-  border-bottom: 1px solid var(--trait-subtil);
-}
-.comment strong { color: var(--papier); }
 
-.comments-inline {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-}
-.comments-inline .comments-list {
-  flex: 1;
-}
-.comments-more {
-  font: 500 13px var(--mono);
-  color: var(--discret);
-  text-decoration: none;
-  padding: 4px 8px;
-  border: 1px solid var(--trait);
-  border-radius: 6px;
-  white-space: nowrap;
-  align-self: center;
-}
-.comments-more:hover { color: var(--accent); border-color: var(--accent-trait); }
-.avis-bloc {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
-  align-items: flex-start;
-}
-.comments-side {
-  border-left: 1px solid var(--trait-subtil);
-  padding-left: 14px;
-}
-    .like-bloc {
+/* Like */
+.like-bloc {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 8px;
-  font: 500 12px var(--mono);
+  margin-bottom: 12px;
 }
 .like-btn {
   background: none;
@@ -223,15 +174,64 @@
   color: var(--accent);
   border-color: var(--accent-trait);
 }
-    .meteo-bloc {
-    margin-top: 14px;
-    padding-top: 14px;
-    border-top: 1px solid var(--trait-subtil);
+.like-count {
+  font: 500 12px var(--mono);
+  color: var(--discret);
 }
-    .meteo-conditions {
-      font-size: 15px;
-      font-weight: 600;
-      margin-bottom: 4px;
+
+/* Commentaires */
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.comment {
+  font: 13px var(--mono);
+  color: var(--discret);
+  line-height: 1.4;
+}
+.comment strong {
+  color: var(--papier);
+  margin-right: 4px;
+}
+
+/* Formulaire */
+.comment-form {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 6px;
+}
+.comment-form input {
+  background: var(--fond);
+  border: 1px solid var(--trait);
+  border-radius: 8px;
+  padding: 7px 10px;
+  color: var(--papier);
+  font: 13px var(--mono);
+  width: 100%;
+}
+.comment-form input:focus {
+  outline: none;
+  border-color: var(--trait-actif);
+}
+.comment-form button {
+  grid-column: 1 / -1;
+  background: var(--accent);
+  color: #1a1208;
+  border: none;
+  border-radius: 8px;
+  padding: 8px;
+  font: 600 12px var(--mono);
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+.comment-form button:hover { background: var(--accent-hover); }
+.notif-envoi {
+  color: var(--accent);
+  font: 12px var(--mono);
+  margin-top: 6px;
 }
 </style>
 </head>
