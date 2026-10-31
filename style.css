@@ -133,8 +133,10 @@ main {
   gap: 12px;
   margin-bottom: 18px;
   padding-right: 52px;
+  max-width: var(--largeur-entete, none);
+  margin-left: auto;
+  margin-right: auto;
 }
-
 .marque {
   display: flex;
   flex-wrap: wrap;
