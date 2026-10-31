@@ -146,7 +146,21 @@ main{padding:14px 12px 64px}
 .ligne-haut .prochaine-trajet{font-size:17px;margin-bottom:0}
 .ligne-haut .prochaine-meta{font-size:11px}
 .bouton-theme{top:18px}
+.ligne-haut .compte{margin:0;flex-shrink:0}
 }
+/* Compte à rebours */
+.compte{display:none;margin:0 0 12px;text-align:center}
+.compte.visible{display:block}
+.compte-titre{display:block;font:500 10px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:6px}
+.flips{display:flex;justify-content:center;gap:10px}
+.flip-unit{display:flex;flex-direction:column;align-items:center;gap:4px}
+.flip-carte{position:relative;min-width:46px;padding:7px 8px;background:var(--carte);border:1px solid var(--trait);border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,.2);perspective:200px;overflow:hidden}
+.flip-carte b{display:block;font:600 26px/1 var(--mono);color:var(--papier);font-variant-numeric:tabular-nums}
+.flip-carte::after{content:'';position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(0,0,0,.5);box-shadow:0 1px 0 rgba(255,255,255,.05)}
+.flip-carte.tourne b{animation:flip .45s ease-out}
+@keyframes flip{from{transform:rotateX(-90deg);opacity:0}to{transform:none;opacity:1}}
+.flip-unit small{font:400 9px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--discret)}
+@media(prefers-reduced-motion:reduce){.flip-carte.tourne b{animation:none}}
 </style>
 </head>
 <body>
@@ -157,6 +171,15 @@ main{padding:14px 12px 64px}
 <button id="btn-theme" class="bouton-theme" type="button" aria-label="Changer de thème" title="Thème"></button>
 <div class="ligne-haut">
   <div id="entete-site"></div>
+  <div id="compte" class="compte" aria-label="Compte à rebours avant le départ">
+    <span class="compte-titre">Départ dans</span>
+    <div class="flips">
+      <div class="flip-unit"><div class="flip-carte"><b id="c-j">--</b></div><small>Jours</small></div>
+      <div class="flip-unit"><div class="flip-carte"><b id="c-h">--</b></div><small>Heures</small></div>
+      <div class="flip-unit"><div class="flip-carte"><b id="c-m">--</b></div><small>Min</small></div>
+      <div class="flip-unit"><div class="flip-carte"><b id="c-s">--</b></div><small>Sec</small></div>
+    </div>
+  </div>
   <div id="bloc-prochaine" class="prochaine-carte" role="button" tabindex="0">
     <div class="prochaine-etiquette">Prochaine étape</div>
     <div class="prochaine-trajet"><span id="p-jour"></span><span id="p-dep"></span><i>→</i><span id="p-arr"></span></div>
@@ -454,7 +477,35 @@ main{padding:14px 12px 64px}
 
   // ---- Données : cache local puis réseau ----
   function valide(d) { return !!d && typeof d === 'object' && !d.erreur && !!d.totaux && Array.isArray(d.etapes); }
+  // ---- Compte à rebours ----
+  var minuteur = null;
+  function compte(depart) {
+    clearInterval(minuteur);
+    var bloc = $('compte');
+    var cible = depart ? new Date(depart).getTime() : NaN;
+    if (isNaN(cible) || cible <= Date.now()) { bloc.classList.remove('visible'); return; }
+    var ids = ['c-j', 'c-h', 'c-m', 'c-s'];
+    function maj() {
+      var reste = Math.floor((cible - Date.now()) / 1000);
+      if (reste <= 0) { clearInterval(minuteur); bloc.classList.remove('visible'); return; }
+      var v = [Math.floor(reste / 86400), Math.floor(reste % 86400 / 3600), Math.floor(reste % 3600 / 60), reste % 60];
+      ids.forEach(function (id, i) {
+        var b = $(id), t = (v[i] < 10 ? '0' : '') + v[i];
+        if (b.textContent === t) return;
+        b.textContent = t;
+        var carte = b.parentNode;
+        carte.classList.remove('tourne');
+        void carte.offsetWidth;
+        carte.classList.add('tourne');
+      });
+    }
+    bloc.classList.add('visible');
+    maj();
+    minuteur = setInterval(maj, 1000);
+  }
+
   function rendre(d) {
+    compte(d.depart);
     generation++;
     afficherStats(d.totaux, d.etapes);
     afficherJournal(d.etapes);
