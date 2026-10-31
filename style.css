@@ -491,4 +491,10 @@ h1.titre-page {
 @media (prefers-reduced-motion: reduce) {
   .menu-site, .menu-site li { animation: none !important; }
 }
+/* Instagram : sous-titre sur sa propre ligne */
+.marque--insta small {
+  white-space: normal;
+  flex: 1 1 100%;
+  margin-left: 0;
+}
 @media print { .menu-site, .menu-voile { display: none; } }
