@@ -107,7 +107,7 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
 .details { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; align-items: stretch; }.details .barres { height: 64px; }
 #astre { position: fixed; width: 80px; height: 80px; border-radius: 50%; z-index: 1; pointer-events: none; transition: left 30s linear, top 30s linear; }
 #astre.soleil { background: radial-gradient(circle at 40% 40%, #fff5c0, #ffd98a 40%, #e58e26); box-shadow: 0 0 80px 30px rgba(229,142,38,.4), 0 0 160px 60px rgba(229,142,38,.15); }
-#astre.lune { background: url('lune.webp') center / cover no-repeat; box-shadow: 0 0 50px 15px rgba(200,210,255,.35), 0 0 100px 40px rgba(200,210,255,.12); }
+#astre.lune { width: 170px; height: 170px; background: url('lune.webp') center / 110% no-repeat; box-shadow: 0 0 60px 20px rgba(210,220,255,.45), 0 0 150px 60px rgba(200,210,255,.18); }
 #ciel-svg { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
 /* Cases du haut */
 .haut { display: grid; grid-template-columns: 1.5fr 1.3fr 1fr 1fr; gap: 14px; align-items: stretch; }
