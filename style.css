@@ -497,4 +497,10 @@ h1.titre-page {
   flex: 1 1 100%;
   margin-left: 0;
 }
+.comments-more {
+  color: var(--discret);
+  text-decoration: none;
+  font: 500 13px var(--mono);
+}
+.comments-more:hover { color: var(--accent); }
 @media print { .menu-site, .menu-voile { display: none; } }
