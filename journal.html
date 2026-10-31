@@ -1093,18 +1093,35 @@ function demarrerCarnet() {
       carnet.appendChild(a);
     });
   }
+  var CLE = 'b88-journal-v1';
+  var enCache = null;
+  try { enCache = JSON.parse(localStorage.getItem(CLE)); } catch (e) {}
+  var cacheOk = !!(enCache && Array.isArray(enCache.pages));
 
-  fetch(API + '?journal=1')
-    .then(function (r) { if (!r.ok) throw new Error('http'); return r.json(); })
-    .then(function (d) {
-      if (!d || !Array.isArray(d.pages)) throw new Error('format');
-      construire(d.pages);
-    })
-    .catch(function () {
-      var er = document.getElementById('erreur');
-      if (er) { er.textContent = 'Le carnet est indisponible pour le moment.'; er.style.display = 'block'; }
-    })
-    .then(demarrerCarnet);
+  function charger() {
+    return fetch(API + '?journal=1')
+      .then(function (r) { if (!r.ok) throw new Error('http'); return r.text(); })
+      .then(function (txt) {
+        var d = JSON.parse(txt);
+        if (!d || !Array.isArray(d.pages)) throw new Error('format');
+        try { localStorage.setItem(CLE, txt); } catch (e) {}
+        return d;
+      });
+  }
+
+  if (cacheOk) {
+    construire(enCache.pages);
+    demarrerCarnet();
+    charger().catch(function () {});
+  } else {
+    charger()
+      .then(function (d) { construire(d.pages); })
+      .catch(function () {
+        var er = document.getElementById('erreur');
+        if (er) { er.textContent = 'Le carnet est indisponible pour le moment.'; er.style.display = 'block'; }
+      })
+      .then(demarrerCarnet);
+  }
 })();
   </script>
 </body>
