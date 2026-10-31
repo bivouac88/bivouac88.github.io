@@ -120,15 +120,8 @@ h2.bloc small { font: 400 11px var(--mono); color: var(--discret); }
 /* Fond selon le temps */
 #fond-meteo { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: linear-gradient(180deg, var(--ciel-haut, #1a2a55) 0%, var(--ciel-bas, #2a3a66) 100%); transition: background 1.2s ease; }
   [data-theme="light"] #fond-meteo { opacity: .7; }
-#fond-meteo[data-fond="jour"] { background: radial-gradient(ellipse 90% 60% at 50% -10%, rgba(229,142,38,.28), transparent 70%); }
-#fond-meteo[data-fond="nuit"] { background: linear-gradient(180deg, rgba(25,40,95,.45), transparent 65%); }
-#fond-meteo[data-fond="nuit-nuageux"] { background: linear-gradient(180deg, rgba(40,48,70,.5), transparent 65%); }
-#fond-meteo[data-fond="nuageux"] { background: linear-gradient(180deg, rgba(120,130,145,.28), transparent 60%); }
-#fond-meteo[data-fond="brouillard"] { background: linear-gradient(180deg, rgba(170,170,165,.3), rgba(170,170,165,.08)); }
-#fond-meteo[data-fond="pluie"] { background: linear-gradient(180deg, rgba(60,100,150,.38), transparent 70%); }
-#fond-meteo[data-fond="neige"] { background: linear-gradient(180deg, rgba(200,215,235,.3), transparent 70%); }
-#fond-meteo[data-fond="orage"] { background: linear-gradient(180deg, rgba(70,50,110,.5), transparent 70%); }
-#fond-meteo[data-fond="pluie"]::after, #fond-meteo[data-fond="orage"]::after { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(100deg, rgba(180,200,230,.16) 0 1px, transparent 1px 24px); background-size: 96px 96px; }
+/* anciens fonds par état supprimés : le dégradé vient maintenant de couleursCiel() */
+  #fond-meteo[data-fond="pluie"]::after, #fond-meteo[data-fond="orage"]::after { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(100deg, rgba(180,200,230,.16) 0 1px, transparent 1px 24px); background-size: 96px 96px; }
 @media (prefers-reduced-motion: no-preference) {
   #fond-meteo[data-fond="pluie"]::after, #fond-meteo[data-fond="orage"]::after { animation: pluie .9s linear infinite; }
   @keyframes pluie { to { background-position: -24px 96px; } }
