@@ -1116,9 +1116,9 @@ function demarrerCarnet() {
         if (b.texte) html += paragraphes(b.texte);
         if (b.photo && /^https:\/\//.test(b.photo)) {
           html += '<figure class="photo"><img src="' + esc(b.photo) + '=w800" alt="' +
-                  esc(b.legende || 'Photo') + ' decoding="async">' +
-                  (b.legende ? '<figcaption>' + esc(b.legende) + '</figcaption>' : '') +
-                  '</figure>';
+esc(b.legende || 'Photo') + '" decoding="async">' +
+(b.legende ? '<figcaption>' + esc(b.legende) + '</figcaption>' : '') +
+'</figure>';
         }
       });
       if (p.etiquette) html += '<span class="etiquette">' + esc(p.etiquette) + '</span>';
