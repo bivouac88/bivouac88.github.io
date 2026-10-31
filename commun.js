@@ -47,8 +47,9 @@
 
   // ---- En-tête commun : logo, nom, Soutenir, Partager ----
   function construireEntete() {
-    var marque = el('div', 'marque');
-    var logo = el('a', 'logo');
+var insta = /Instagram/.test(navigator.userAgent);
+var marque = el('div', insta ? 'marque marque--insta' : 'marque');
+     var logo = el('a', 'logo');
     logo.href = dossier + 'index.html';
     logo.setAttribute('aria-label', 'Bivouac88 · accueil');
     var img = document.createElement('img');
