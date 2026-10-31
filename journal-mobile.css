@@ -54,7 +54,7 @@
 
   /* Spirale : passe dans les trous de reliure, au-dessus des pages */
   .m-spirale {
-    position: absolute; z-index: 3500; left: -7px; top: 18px; bottom: 18px; width: 50px; pointer-events: none; transition: opacity 0.5s;
+    position: absolute; display: none; z-index: 3500; left: -7px; top: 18px; bottom: 18px; width: 50px; pointer-events: none; transition: opacity 0.5s;
     background: linear-gradient(90deg, #5b5852, #f1eee7 35%, #a9a49a 62%, #4d4a45);
     -webkit-mask-image: linear-gradient(180deg, transparent 0 8px, #000 8px 15px, transparent 15px 64px); mask-image: linear-gradient(180deg, transparent 0 8px, #000 8px 15px, transparent 15px 64px);
     -webkit-mask-size: 100% 64px; mask-size: 100% 64px; -webkit-mask-repeat: repeat-y; mask-repeat: repeat-y;
@@ -88,7 +88,7 @@
   .m-livre .feuille.garde .feuille-int { background-image: none; display: flex; flex-direction: column; justify-content: center; }
   .m-livre .fondu {
     position: absolute; left: 0; right: 0; bottom: 0; height: 110px; pointer-events: none; transition: opacity 0.25s;
-    background: var(--fibre), var(--papier-c); -webkit-mask-image: linear-gradient(to bottom, transparent, #000 85%); mask-image: linear-gradient(to bottom, transparent, #000 85%);
+    background: linear-gradient(to bottom, rgba(244, 236, 216, 0), var(--papier-c) 85%);
   }
   .m-livre .feuille.fin .fondu { opacity: 0; }
   .m-livre .feuille .feuille-date { font-size: 18px; bottom: 20px; border-width: 5px; }
