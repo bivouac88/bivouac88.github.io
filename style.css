@@ -509,3 +509,15 @@ h1.titre-page {
 }
 .comments-more:hover { color: var(--accent); }
 @media print { .menu-site, .menu-voile { display: none; } }
+/* Menu en rangée sur téléphone large / tablette : plus grand, plus aéré, toujours sur une ligne */
+@media (min-width: 768px) and (max-width: 1099px) {
+  :root { --hauteur-menu: 72px; }
+  .menu-site__barre { padding-top: 8px; }
+  .menu-site__liens { gap: 2px; }
+  .menu-site__liens a {
+    font-size: 15px;
+    padding: 14px 12px;
+    white-space: nowrap;
+  }
+  .menu-site__liens a::after { left: 12px; right: 12px; }
+}
