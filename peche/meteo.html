@@ -917,12 +917,12 @@ function $(id) { return document.getElementById(id); }
     chargerLacs();
     window.addEventListener('resize', placerAstre);
     setInterval(placerAstre, 30000);
-    setInterval(function () { if (!document.hidden) chargerMeteo(POS.lat, POS.lng, true); }, 15 * 60 * 1000);
+setInterval(function () { if (!document.hidden) chargerMeteo(POS.lat, POS.lng, true); }, 5 * 60 * 1000);
     document.addEventListener('visibilitychange', function () {
       document.body.classList.toggle('pause', document.hidden);
-      if (document.hidden) return;
-      if (Date.now() - DERNIERE > 5 * 60 * 1000) chargerMeteo(POS.lat, POS.lng, true);
-      else placerAstre();
+    if (document.hidden) return;
+    if (Date.now() - DERNIERE > 2 * 60 * 1000) chargerMeteo(POS.lat, POS.lng, true);
+    else placerAstre();
     });
   }
   if (!navigator.geolocation) {
