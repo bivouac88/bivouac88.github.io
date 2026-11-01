@@ -821,6 +821,43 @@ function $(id) { return document.getElementById(id); }
   }
   // ── Météo ──
   var DERNIERE = 0;
+    function majSilencieux(c, hh, j, i) {
+    var t = $('meteo').querySelector('.hero-meteo');
+    if (t) {
+      t.querySelector('.panneau h3').textContent = 'Maintenant · ' + h(c.time);
+      t.querySelector('.temp').textContent = n(c.temperature_2m, 1) + '°';
+      t.querySelector('.ciel').textContent = ciel(c.weather_code, c.is_day) + ' · ressenti ' + n(c.apparent_temperature, 1) + '°';
+      var chips = t.querySelectorAll('.chip b');
+      if (chips[0]) chips[0].textContent = n(c.wind_speed_10m) + ' km/h ' + boussole(c.wind_direction_10m);
+      if (chips[1]) chips[1].textContent = n(c.wind_gusts_10m);
+      if (chips[2]) chips[2].textContent = n(c.precipitation, 1) + ' mm';
+      if (chips[3]) chips[3].textContent = n(c.cloud_cover) + ' %';
+      if (chips[4]) chips[4].textContent = n(c.relative_humidity_2m) + ' %';
+      if (chips[5]) chips[5].textContent = h(j.sunrise[1]) + ' → ' + h(j.sunset[1]);
+    }
+    var heuresEl = $('meteo').querySelectorAll('.heure');
+    heuresEl.forEach(function (el, idx) {
+      var k = i + idx;
+      if (k >= hh.time.length) return;
+      var risque = hh.precipitation_probability[k], raf = hh.wind_gusts_10m[k];
+      el.querySelector('.t').textContent = h(hh.time[k]);
+      el.querySelector('.temp').textContent = n(hh.temperature_2m[k]) + '°';
+      var mm = el.querySelectorAll('.m');
+      if (mm[0]) {
+        mm[0].querySelector('span').textContent = n(hh.precipitation[k], 1) + ' mm';
+        mm[0].querySelector('span').className = risque >= 50 ? 'alerte' : '';
+        mm[0].querySelector('.d').textContent = 'risque ' + n(risque) + '%';
+      }
+      if (mm[1]) {
+        mm[1].firstChild.textContent = n(hh.wind_speed_10m[k]) + ' ' + boussole(hh.wind_direction_10m[k]);
+        mm[1].querySelector('.d').textContent = 'raf. ' + n(raf);
+        mm[1].querySelector('.d').className = 'd' + (raf >= 50 ? ' alerte' : '');
+      }
+      if (mm[2]) mm[2].firstChild.textContent = n(hh.cloud_cover[k]) + '%';
+    });
+    dessinerDetails();
+    dessinerPeche();
+  }
   function chargerMeteo(lat, lng, silencieux) {
     var app = $('meteo');
     if (!silencieux) app.innerHTML = '<div class="etat">Chargement météo…</div>';
@@ -834,6 +871,16 @@ function $(id) { return document.getElementById(id); }
       .then(function (d) {
         var c = d.current, hh = d.hourly, j = d.daily, i = 0, k;
         for (k = 0; k < hh.time.length; k++) { if (hh.time[k].slice(0, 13) === c.time.slice(0, 13)) { i = k; break; } }
+        METEO = { c: c, hh: hh, j: j, i: i };
+        DERNIERE = Date.now();
+        appliquerFond(c.weather_code);
+        placerAstre();
+        dessinerDetails();
+        dessinerPeche();
+        if (silencieux) {
+        majSilencieux(c, hh, j, i);
+        return;
+        }
         var html = '';
     // 1. Bandeau « Maintenant » (j[1] = aujourd'hui, la requête inclut past_days=1)
           html += '<section class="haut"><div class="hero">'
@@ -889,13 +936,9 @@ function $(id) { return document.getElementById(id); }
         Array.prototype.forEach.call(app.querySelectorAll('.heures, .jours'), function (el) { defil.push(el.scrollLeft); });
         app.innerHTML = html;
         Array.prototype.forEach.call(app.querySelectorAll('.heures, .jours'), function (el, q) { el.scrollLeft = defil[q] || 0; });
-        var slot = $('slot-poissons');
+                var slot = $('slot-poissons');
         if (slot && pm) slot.appendChild(pm);
-        METEO = { c: c, hh: hh, j: j, i: i };
-        DERNIERE = Date.now();
         dessinerDetails();
-        appliquerFond(c.weather_code);
-        placerAstre();
         dessinerPeche();
       })
       .catch(function (e) { if (!silencieux) { app.innerHTML = ''; erreur('Météo indisponible : ' + e.message); } });
