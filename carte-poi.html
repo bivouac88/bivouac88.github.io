@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Carte des POI</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<link rel="stylesheet" href="style.css">
+<style>
+  /* Propre à cette page : tout passe par les variables de style.css */
+  :root { --largeur: 1400px; }
+
+  #app { display: flex; gap: 12px; }
+
+  #panneau {
+    width: 310px; flex: none; height: 76vh; min-height: 420px; display: flex; flex-direction: column;
+    background: var(--carte); border: 1px solid var(--trait); border-radius: 10px; padding: 10px;
+  }
+  #panneau input[type=search] {
+    width: 100%; padding: 8px 10px; margin-bottom: 6px;
+    background: var(--fond); color: var(--papier);
+    border: 1px solid var(--trait); border-radius: 8px;
+    font: 400 13px var(--mono);
+  }
+  #panneau input[type=search]::placeholder { color: var(--discret); }
+  #panneau input[type=search]:focus { border-color: var(--accent-trait); }
+
+  .rangee { display: flex; gap: 6px; margin: 2px 0 8px; }
+  .rangee button {
+    flex: 1; padding: 7px; font: 500 12px var(--mono); letter-spacing: 0.04em;
+    color: var(--papier-doux); background: none;
+    border: 1px solid var(--trait); border-radius: 8px; cursor: pointer;
+    transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+  }
+  .rangee button:hover { color: var(--accent); border-color: var(--accent-trait); background: var(--carte-hover); }
+
+  #titre-liste { font: 500 12px var(--mono); letter-spacing: 0.06em; color: var(--discret); margin: 4px 0; }
+  #liste { list-style: none; margin: 0; padding: 0; overflow-y: auto; flex: 1; }
+  #liste li { margin: 0; }
+  #liste label {
+    display: flex; align-items: center; gap: 8px; padding: 5px 4px; border-radius: 6px;
+    cursor: pointer; font-size: 14px; color: var(--papier);
+  }
+  #liste label:hover { background: var(--carte-hover); }
+  #liste input[type=checkbox] { accent-color: var(--accent); }
+  .pastille-cat { width: 12px; height: 12px; border-radius: 50%; flex: none; border: 1px solid rgba(0,0,0,.35); }
+  .nom-cat { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .nb-cat { color: var(--discret); font: 400 12px var(--mono); font-variant-numeric: tabular-nums; }
+
+  #cadre {
+    position: relative; flex: 1; height: 76vh; min-height: 420px;
+    border: 1px solid var(--trait); border-radius: 10px; overflow: hidden;
+    background: var(--fond-carte-leaflet);
+  }
+  #cadre.plein { position: fixed; inset: 0; z-index: 9999; height: auto; border-radius: 0; border: 0; }
+  #carte { height: 100%; width: 100%; background: var(--fond-carte-leaflet); }
+  .leaflet-tile-pane { filter: var(--filtre-tuiles); }
+
+  #etat {
+    position: absolute; z-index: 1000; left: 50%; top: 10px; transform: translateX(-50%);
+    background: var(--carte); color: var(--papier);
+    border: 1px solid var(--trait); padding: 6px 14px; border-radius: 8px;
+    font: 400 13px var(--mono); max-width: 85%; text-align: center;
+  }
+
+  .btn-plein {
+    background: var(--carte); color: var(--papier);
+    border: 1px solid var(--trait); border-radius: 8px;
+    padding: 7px 11px; font: 500 12px var(--mono); cursor: pointer;
+  }
+  .btn-plein:hover { background: var(--carte-hover); border-color: var(--trait-actif); color: var(--accent); }
+
+  /* Fenêtres et boutons Leaflet aux couleurs du site */
+  .leaflet-popup-content-wrapper, .leaflet-popup-tip {
+    background: var(--carte); color: var(--papier); border: 1px solid var(--trait);
+  }
+  .leaflet-popup-content-wrapper { border-radius: 10px; }
+  .leaflet-popup-content { font-family: var(--serif); }
+  .leaflet-container a.leaflet-popup-close-button { color: var(--discret); }
+  .leaflet-bar a { background: var(--carte); color: var(--papier); border-bottom-color: var(--trait); }
+  .leaflet-bar a:hover { background: var(--carte-hover); color: var(--accent); }
+  .leaflet-bar { border: 1px solid var(--trait); box-shadow: none; }
+  .leaflet-control-attribution { background: color-mix(in srgb, var(--fond) 75%, transparent) !important; color: var(--discret); }
+  .leaflet-control-attribution a { color: var(--discret); }
+
+  .popup-nom { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
+  .popup-ligne { font: 400 12.5px var(--mono); color: var(--papier-doux); margin: 2px 0; }
+
+  @media (max-width: 800px) {
+    #app { flex-direction: column; }
+    #panneau { width: 100%; height: 40vh; min-height: 260px; }
+    #cadre { height: 65vh; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1 class="titre-page">Carte des POI</h1>
+  <div id="statut" class="sous-titre-page">Chargement des données…</div>
+
+  <div id="app">
+    <aside id="panneau">
+      <input type="search" id="rech-lieu" placeholder="Rechercher un lieu par nom">
+      <input type="search" id="rech-cat" placeholder="Rechercher une catégorie">
+      <div class="rangee">
+        <button type="button" id="tout-cocher">Tout cocher</button>
+        <button type="button" id="tout-decocher">Tout décocher</button>
+      </div>
+      <div id="titre-liste">Catégories</div>
+      <ul id="liste"></ul>
+    </aside>
+    <div id="cadre">
+      <div id="etat">Chargement…</div>
+      <div id="carte"></div>
+    </div>
+  </div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function () {
+  const DOSSIER = 'poi/';
+  const MAX_AFFICHES = 6000;     // au-delà, on demande de zoomer ou de filtrer
+  const SANS_TYPE = '(Sans type)';
+
+  const carte = L.map('carte', { preferCanvas: true });
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; contributeurs <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  }).addTo(carte);
+
+  const cadre = document.getElementById('cadre');
+  const etat = document.getElementById('etat');
+  const statut = document.getElementById('statut');
+  const liste = document.getElementById('liste');
+  const couche = L.layerGroup().addTo(carte);
+  const rendu = L.canvas({ padding: 0.5 });
+
+  const points = [];             // {nom, groupes, type, lat, lon, id, cat}
+  const cats = {};               // nom -> {couleur, n, actif, li}
+  let recherche = '';
+
+  function echapper(t) {
+    return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  // ----- Plein écran (option) -----
+  const BoutonPlein = L.Control.extend({
+    options: { position: 'topright' },
+    onAdd: function () {
+      const b = L.DomUtil.create('button', 'btn-plein');
+      b.type = 'button';
+      b.textContent = 'Plein écran';
+      L.DomEvent.disableClickPropagation(b);
+      L.DomEvent.on(b, 'click', basculerPlein);
+      this._b = b;
+      return b;
+    }
+  });
+  const boutonPlein = new BoutonPlein().addTo(carte);
+
+  function estPlein() {
+    return cadre.classList.contains('plein') || document.fullscreenElement === cadre;
+  }
+  function basculerPlein() {
+    if (estPlein()) {
+      if (document.fullscreenElement) document.exitFullscreen();
+      cadre.classList.remove('plein');
+    } else if (cadre.requestFullscreen) {
+      cadre.requestFullscreen().catch(function () { cadre.classList.add('plein'); });
+    } else {
+      cadre.classList.add('plein');
+    }
+    majBouton();
+  }
+  function majBouton() {
+    setTimeout(function () {
+      boutonPlein._b.textContent = estPlein() ? 'Quitter le plein écran' : 'Plein écran';
+      carte.invalidateSize();
+    }, 150);
+  }
+  document.addEventListener('fullscreenchange', majBouton);
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && cadre.classList.contains('plein')) basculerPlein();
+  });
+
+  // ----- Catégories -----
+  function couleurPourRang(i) {
+    const teinte = (i * 137.508) % 360;         // angle d'or : teintes bien réparties
+    const clarte = [42, 52, 34][i % 3];
+    return 'hsl(' + teinte.toFixed(0) + ',68%,' + clarte + '%)';
+  }
+
+  function construireCategories() {
+    const noms = Object.keys(cats).sort(function (a, b) {
+      return cats[b].n - cats[a].n || a.localeCompare(b, 'fr');
+    });
+    noms.forEach(function (nom, i) {
+      const c = cats[nom];
+      c.couleur = couleurPourRang(i);
+      const li = document.createElement('li');
+      const label = document.createElement('label');
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = true;
+      cb.addEventListener('change', function () { c.actif = cb.checked; actualiser(); });
+      const pastille = document.createElement('span');
+      pastille.className = 'pastille-cat';
+      pastille.style.background = c.couleur;
+      const libelle = document.createElement('span');
+      libelle.className = 'nom-cat';
+      libelle.textContent = nom;
+      libelle.title = nom;
+      const nb = document.createElement('span');
+      nb.className = 'nb-cat';
+      nb.textContent = c.n.toLocaleString('fr-FR');
+      label.append(cb, pastille, libelle, nb);
+      li.appendChild(label);
+      liste.appendChild(li);
+      c.li = li;
+      c.cb = cb;
+    });
+    document.getElementById('titre-liste').textContent = 'Catégories (' + noms.length + ')';
+  }
+
+  function categoriesAffichees() {
+    return Object.keys(cats).filter(function (n) { return cats[n].li.style.display !== 'none'; });
+  }
+
+  document.getElementById('rech-cat').addEventListener('input', function (e) {
+    const q = e.target.value.trim().toLowerCase();
+    Object.keys(cats).forEach(function (n) {
+      cats[n].li.style.display = n.toLowerCase().indexOf(q) === -1 ? 'none' : '';
+    });
+  });
+  document.getElementById('rech-lieu').addEventListener('input', function (e) {
+    recherche = e.target.value.trim().toLowerCase();
+    actualiser();
+  });
+  function cocherTout(valeur) {
+    categoriesAffichees().forEach(function (n) { cats[n].actif = valeur; cats[n].cb.checked = valeur; });
+    actualiser();
+  }
+  document.getElementById('tout-cocher').addEventListener('click', function () { cocherTout(true); });
+  document.getElementById('tout-decocher').addEventListener('click', function () { cocherTout(false); });
+
+  // ----- Affichage des points -----
+  function actualiser() {
+    if (!points.length) return;
+    const vue = carte.getBounds();
+    const retenus = points.filter(function (p) {
+      return cats[p.cat].actif && vue.contains([p.lat, p.lon]) &&
+             (!recherche || p.nom.toLowerCase().indexOf(recherche) !== -1);
+    });
+    couche.clearLayers();
+    if (retenus.length > MAX_AFFICHES) {
+      etat.textContent = retenus.length.toLocaleString('fr-FR') + ' points dans la vue : zoome ou filtre pour les afficher';
+      return;
+    }
+    retenus.forEach(function (p) {
+      const m = L.circleMarker([p.lat, p.lon], {
+        renderer: rendu, radius: 5, weight: 1, color: '#fff',
+        fillColor: cats[p.cat].couleur, fillOpacity: 0.92
+      });
+      m.bindPopup(function () {
+        let html = '<div class="popup-nom">' + echapper(p.nom) + '</div>';
+        html += '<div class="popup-ligne">' + echapper(p.cat) + '</div>';
+        if (p.groupes) html += '<div class="popup-ligne">' + echapper(p.groupes) + '</div>';
+        html += '<div class="popup-ligne">ID ' + echapper(p.id) + '</div>';
+        return html;
+      });
+      couche.addLayer(m);
+    });
+    etat.textContent = retenus.length.toLocaleString('fr-FR') + ' point(s) affiché(s)';
+  }
+
+  // ----- Chargement -----
+  fetch(DOSSIER + 'carres.json')
+    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function (carres) {
+      if (!carres.length) throw new Error('vide');
+      const sud = Math.min.apply(null, carres.map(function (c) { return c.lat; }));
+      const nord = Math.max.apply(null, carres.map(function (c) { return c.lat + 0.5; }));
+      const ouest = Math.min.apply(null, carres.map(function (c) { return c.lon; }));
+      const est = Math.max.apply(null, carres.map(function (c) { return c.lon + 0.5; }));
+      carte.fitBounds([[sud, ouest], [nord, est]]);
+
+      let faits = 0;
+      return Promise.all(carres.map(function (c) {
+        return fetch(DOSSIER + c.id + '.json')
+          .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+          .then(function (lignes) {
+            lignes.forEach(function (l) {
+              const cat = String(l[2] == null ? '' : l[2]).trim() || SANS_TYPE;
+              if (!cats[cat]) cats[cat] = { n: 0, actif: true };
+              cats[cat].n++;
+              points.push({ nom: String(l[0] == null ? '' : l[0]), groupes: l[1], lat: l[3], lon: l[4], id: l[5], cat: cat });
+            });
+          })
+          .catch(function () { return null; })
+          .then(function () {
+            faits++;
+            statut.textContent = 'Chargement des données : ' + faits + ' / ' + carres.length + ' carrés';
+          });
+      }));
+    })
+    .then(function () {
+      construireCategories();
+      statut.textContent = points.length.toLocaleString('fr-FR') + ' lieux dans ' + Object.keys(cats).length + ' catégories';
+      carte.on('moveend', actualiser);
+      actualiser();
+    })
+    .catch(function () {
+      statut.textContent = 'Impossible de lire poi/carres.json';
+      etat.textContent = 'Données indisponibles';
+      carte.setView([46.5, 2.5], 6);
+    });
+})();
+</script>
+</body>
+</html>
