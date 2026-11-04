@@ -43,10 +43,15 @@
   }
   #liste label:hover { background: var(--carte-hover); }
   #liste input[type=checkbox] { accent-color: var(--accent); }
-  .pastille-cat { width: 12px; height: 12px; border-radius: 50%; flex: none; border: 1px solid rgba(0,0,0,.35); }
+
   .nom-cat { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .nb-cat { color: var(--discret); font: 400 12px var(--mono); font-variant-numeric: tabular-nums; }
-
+.pin-wrap { background: none; border: 0; }
+.pin {
+  display: flex; align-items: center; justify-content: center; flex: none;
+  width: 24px; height: 24px; border-radius: 50%; border: 2px solid #fff;
+  font-size: 13px; line-height: 1; box-shadow: 0 1px 3px rgba(0,0,0,.55);
+}
   #cadre {
     position: relative; flex: 1; height: 76vh; min-height: 420px;
     border: 1px solid var(--trait); border-radius: 10px; overflow: hidden;
@@ -194,61 +199,69 @@
     return 'hsl(' + teinte.toFixed(0) + ',68%,' + clarte + '%)';
   }
 
-  function construireCategories() {
-    const noms = Object.keys(cats).sort(function (a, b) {
-      return cats[b].n - cats[a].n || a.localeCompare(b, 'fr');
-    });
-    const TEINTES = {
-  'Courses et nourriture': 28, 'Carburant': 50, 'Eau et sanitaires': 210,
-  'Santé et argent': 355, 'Vélo': 175, 'Pause': 130,
-  'Hébergement': 275, 'Patrimoine': 320
-};
-const parGroupe = {};
-noms.forEach(function (n) {
-  const g = cats[n].groupe || '';
-  (parGroupe[g] = parGroupe[g] || []).push(n);
-});
-Object.keys(parGroupe).forEach(function (g, gi) {
-  const membres = parGroupe[g];
-  const h = g in TEINTES ? TEINTES[g] : (gi * 137.5) % 360;
-  membres.forEach(function (n, j) {
-    const k = membres.length;
-    const clarte = k === 1 ? 45 : 30 + 38 * j / (k - 1);
-    cats[n].couleur = 'hsl(' + Math.round(h) + ',70%,' + Math.round(clarte) + '%)';
+ function construireCategories() {
+  const noms = Object.keys(cats).sort(function (a, b) {
+    return cats[b].n - cats[a].n || a.localeCompare(b, 'fr');
   });
-});
-    noms.forEach(function (nom, i) {
-      const c = cats[nom];
-      const li = document.createElement('li');
-      const label = document.createElement('label');
-      const cb = document.createElement('input');
-      cb.type = 'checkbox';
-      cb.checked = true;
-      cb.addEventListener('change', function () { c.actif = cb.checked; actualiser(); });
-      const pastille = document.createElement('span');
-      pastille.className = 'pastille-cat';
-      pastille.style.background = c.couleur;
-      const libelle = document.createElement('span');
-      libelle.className = 'nom-cat';
-      libelle.textContent = nom;
-      libelle.title = nom;
-      const nb = document.createElement('span');
-      nb.className = 'nb-cat';
-      nb.textContent = c.n.toLocaleString('fr-FR');
-      label.append(cb, pastille, libelle, nb);
-      li.appendChild(label);
-      liste.appendChild(li);
-      c.li = li;
-      c.cb = cb;
+  const TEINTES = {
+    'Courses et nourriture': 28, 'Carburant': 50, 'Eau et sanitaires': 210,
+    'Santé et argent': 355, 'Vélo': 175, 'Pause': 130,
+    'Hébergement': 275, 'Patrimoine': 320
+  };
+  // emoji + libellé séparés
+  noms.forEach(function (n) {
+    const m = n.match(/^(\p{Extended_Pictographic}\S*)\s+(.+)$/u);
+    cats[n].emoji = m ? m[1] : '•';
+    cats[n].libelle = m ? m[2] : n;
+  });
+  // couleurs par groupe
+  const parGroupe = {};
+  noms.forEach(function (n) { (parGroupe[cats[n].groupe || ''] = parGroupe[cats[n].groupe || ''] || []).push(n); });
+  Object.keys(parGroupe).forEach(function (g, gi) {
+    const membres = parGroupe[g], k = membres.length;
+    const h = g in TEINTES ? TEINTES[g] : (gi * 137.5) % 360;
+    membres.forEach(function (n, j) {
+      const clarte = k === 1 ? 50 : 38 + 26 * j / (k - 1);
+      const teinte = h + (j - (k - 1) / 2) * 8;
+      cats[n].couleur = 'hsl(' + Math.round((teinte + 360) % 360) + ',75%,' + Math.round(clarte) + '%)';
     });
-    document.getElementById('titre-liste').textContent = 'Catégories (' + noms.length + ')';
-  }
+  });
+  // liste + icônes
+  noms.forEach(function (nom) {
+    const c = cats[nom];
+    const html = '<span class="pin" style="background:' + c.couleur + '">' + c.emoji + '</span>';
+    c.icone = L.divIcon({ html: html, className: 'pin-wrap', iconSize: [24, 24], iconAnchor: [12, 12], popupAnchor: [0, -12] });
+    const li = document.createElement('li');
+    const label = document.createElement('label');
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = true;
+    cb.addEventListener('change', function () { c.actif = cb.checked; actualiser(); });
+    const pastille = document.createElement('span');
+    pastille.className = 'pin';
+    pastille.style.background = c.couleur;
+    pastille.textContent = c.emoji;
+    const libelle = document.createElement('span');
+    libelle.className = 'nom-cat';
+    libelle.textContent = c.libelle;
+    libelle.title = nom;
+    const nb = document.createElement('span');
+    nb.className = 'nb-cat';
+    nb.textContent = c.n.toLocaleString('fr-FR');
+    label.append(cb, pastille, libelle, nb);
+    li.appendChild(label);
+    liste.appendChild(li);
+    c.li = li;
+    c.cb = cb;
+  });
+  document.getElementById('titre-liste').textContent = 'Catégories (' + noms.length + ')';
+}
 let modeTri = 'nb';
 function trierListe() {
   if (!Object.keys(cats).length) return;
   Object.keys(cats).sort(function (a, b) {
     return modeTri === 'az'
-      ? a.localeCompare(b, 'fr')
+      ? cats[a].libelle.localeCompare(cats[b].libelle, 'fr')
       : cats[b].n - cats[a].n || a.localeCompare(b, 'fr');
   }).forEach(function (n) { liste.appendChild(cats[n].li); }); // déplace les <li> existants
 }
@@ -292,10 +305,12 @@ document.getElementById('tri').addEventListener('click', function () {
       return;
     }
     retenus.forEach(function (p) {
-      const m = L.circleMarker([p.lat, p.lon], {
-        renderer: rendu, radius: 5, weight: 1, color: '#fff',
-        fillColor: cats[p.cat].couleur, fillOpacity: 0.92
-      });
+const m = retenus.length <= 1500
+  ? L.marker([p.lat, p.lon], { icon: cats[p.cat].icone })
+  : L.circleMarker([p.lat, p.lon], {
+      renderer: rendu, radius: 5, weight: 1, color: '#fff',
+      fillColor: cats[p.cat].couleur, fillOpacity: 0.92
+    });
       m.bindPopup(function () {
         let html = '<div class="popup-nom">' + echapper(p.nom) + '</div>';
         html += '<div class="popup-ligne">' + echapper(p.cat) + '</div>';
