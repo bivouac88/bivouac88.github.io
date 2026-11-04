@@ -193,12 +193,6 @@
   });
 
   // ----- Catégories -----
-  function couleurPourRang(i) {
-    const teinte = (i * 137.508) % 360;         // angle d'or : teintes bien réparties
-    const clarte = [42, 52, 34][i % 3];
-    return 'hsl(' + teinte.toFixed(0) + ',68%,' + clarte + '%)';
-  }
-
  function construireCategories() {
   const noms = Object.keys(cats).sort(function (a, b) {
     return cats[b].n - cats[a].n || a.localeCompare(b, 'fr');
