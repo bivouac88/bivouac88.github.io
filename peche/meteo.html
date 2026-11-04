@@ -60,17 +60,22 @@ h2.bloc { display: flex; align-items: baseline; gap: 8px; font: 600 18px var(--s
 .groupes { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
 .groupes button { font: 500 12px var(--mono); color: var(--discret); background: none; border: 1px solid var(--trait); border-radius: 8px; padding: 6px 11px; cursor: pointer; }
 .groupes button[aria-pressed="true"] { color: var(--accent); border-color: var(--accent-trait); background: var(--accent-fond); }
-.poissons { letter-spacing: 2px; line-height: 1.2; white-space: nowrap; }
-.poissons .off { opacity: .18; filter: grayscale(1); }
-.verdict { display: flex; align-items: center; gap: 14px; border: 1px solid var(--trait); border-radius: 12px; padding: 10px 14px; font: 600 15px var(--mono); }
-.verdict .poissons { font-size: 28px; }
-.verdict .score { font: 600 30px var(--serif); margin-left: auto; }
+.verdict { display: flex; align-items: center; gap: 14px; border: 1px solid var(--c, var(--trait)); border-radius: 12px; padding: 10px 14px; color: var(--c, var(--papier)); background: color-mix(in srgb, var(--c, transparent) 12%, transparent); }
+.verdict .v-txt { display: flex; flex-direction: column; gap: 2px; }
+.verdict .v-lib { font: 600 18px var(--serif); }
+.verdict .v-tend { font: 400 12px var(--mono); color: var(--discret); }
+.verdict .score { margin-left: auto; font: 600 38px/1 var(--serif); }
 .verdict .score small { font: 400 12px var(--mono); color: var(--discret); }
-.verdict.n3 { color: var(--succes); border-color: var(--succes); background: rgba(91,163,112,.12); }
-.verdict.n2 { color: var(--accent); border-color: var(--accent-trait); background: var(--accent-fond); }
-.verdict.n1 { color: var(--discret); }
+.jauge { position: relative; height: 8px; margin: 12px 2px 4px; border-radius: 4px; background: linear-gradient(90deg, hsl(0,72%,50%), hsl(18,72%,50%) 25%, hsl(35,72%,50%) 50%, hsl(56,72%,50%) 62%, hsl(80,72%,50%) 75%, hsl(125,72%,50%)); }
+.jauge span { position: absolute; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: var(--papier); border: 2px solid var(--carte); box-shadow: 0 0 0 1px var(--trait-actif); }
 .fenetre { font: 500 13px var(--mono); margin: 12px 0 4px; }
-.pj .poissons { font-size: 13px; letter-spacing: 0; }
+.pj { display: inline-flex; align-items: center; gap: 6px; }
+.pj .pt { display: inline-block; width: 9px; height: 9px; border-radius: 50%; }
+.bande { display: flex; gap: 2px; height: 34px; }
+.bande span { flex: 1; border-radius: 3px; opacity: .92; }
+.bande span.top { box-shadow: inset 0 -3px 0 var(--papier); }
+.bande-et { display: flex; margin: 4px 0 8px; }
+.bande-et span { flex: 1; text-align: center; font: 400 9px var(--mono); color: var(--discret); }
 /* Frise 24 h */
 .frise { position: relative; }
 .heures { display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px 8px; scrollbar-width: none; cursor: grab; user-select: none; -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--fg, 0px), #000 calc(100% - var(--fd, 0px)), transparent 100%); mask-image: linear-gradient(to right, transparent 0, #000 var(--fg, 0px), #000 calc(100% - var(--fd, 0px)), transparent 100%); }
@@ -327,11 +332,6 @@ function $(id) { return document.getElementById(id); }
   function erreur(msg) { var e = $('erreur'); e.textContent = msg; e.style.display = 'block'; }
   function mins(t) { return Number(t.slice(11, 13)) * 60 + Number(t.slice(14, 16)); }
   function hhmm(k) { return ('0' + k).slice(-2) + ':00'; }
-  function poissons(nb) {
-    var s = '';
-    for (var k = 1; k <= 3; k++) s += '<span' + (k > nb ? ' class="off"' : '') + '>🐟</span>';
-    return '<span class="poissons">' + s + '</span>';
-  }
     function barres(vals, etiq, max) {
     var W = 300, H = 90, N = vals.length;
     var pts = vals.map(function (v, k) {
@@ -353,79 +353,130 @@ function $(id) { return document.getElementById(id); }
     return s + '</div>';
   }
   // ── Indicateur pêche (INDICATIF) ──
+  // Score = 50 + points de chaque critère (courbes progressives), lissé sur ±2 h, arrondi. Tous les réglages sont ici.
   var PECHE = {
-    seuils: { bon: 2, moyen: 1 },
-    echelle: { base: 50, pas: 15 },
-    nuagesCouvert: 70, nuagesDegage: 30,
-    ventMini: 10, ventMaxi: 30, ventFort: 40,
-    chaleurCarnassiers: 28,
-    carpe: { optMini: 16, optMaxi: 28, froid: 10, chaud: 30 },
-    autres: { mini: 8, maxi: 28 }
+    base: 50, arrondi: 5, min: 5, max: 95,
+    niveaux: [[75, 'Excellente'], [60, 'Bonne'], [40, 'Correcte'], [25, 'Faible'], [0, 'Mauvaise']],
+    // eau : [début de plage, début d'optimum, fin d'optimum, fin de plage, points max] ; inertie : part de l'écart air/eau rattrapée chaque jour
+    eau: { inertie: 0.2, carnassiers: [4, 10, 20, 26, 22], carpes: [6, 14, 26, 32, 22], blancs: [2, 8, 20, 27, 20], autres: [4, 10, 22, 28, 18] },
+    lumiere: { nuagesDe: 40, nuagesA: 85, neutre: 0.4, poids: 20 },
+    ventCarnassiers: { plage: [3, 10, 25, 40], neutre: 0.3, poids: 14 },
+    ventFort: { de: 25, a: 45, poids: -8 },
+    nuitCarpe: 6,
+    pluie: { de: 1, a: 5, poids: -12 },
+    orage: -20,
+    rafales: { de: 45, a: 70, poids: -8 },
+    froid: { de: 3, a: 8, poids: -10 }
   };
   var GROUPES = { carnassiers: 'Carnassiers', carpes: 'Carpes', blancs: 'Blancs', autres: 'Autres' };
-  var LIBELLES = ['', 'Faible', 'Moyenne', 'Bonne'];
   var groupePeche = 'carnassiers';
   try { var gs = localStorage.getItem('groupePeche'); if (gs && GROUPES[gs]) groupePeche = gs; } catch (e) {}
-  var METEO = null;
-  function evaluerPeche(g, x) {
-    var P = PECHE, s = 0, r = [], t = x.temp;
-    if (g === 'carnassiers') {
-      if (x.nuit === true && !x.aubeCrep) {
-        r.push('Nuit : pas de données pour les carnassiers');
-      } else {
-        if (x.aubeCrep) { s += 1; r.push('Aube ou crépuscule : faible lumière'); }
-        if (x.nuages !== null) {
-          if (x.nuages >= P.nuagesCouvert) { s += 1; r.push('Ciel couvert (' + n(x.nuages) + ' % de nuages) : faible lumière'); }
-          else if (x.nuages <= P.nuagesDegage && !x.aubeCrep) { s -= 1; r.push('Plein soleil (' + n(x.nuages) + ' % de nuages)'); }
+  var METEO = null, HIST = null, HIST_P = Promise.resolve();
+  function rampe(x, a, b) { return Math.max(0, Math.min(1, (x - a) / (b - a))); }
+  function bosse(x, a, b, c, d) { return Math.min(rampe(x, a, b), 1 - rampe(x, c, d)); }
+  function couleur(s) {
+    var t = Math.max(0, Math.min(100, s)), hue = t <= 50 ? t / 50 * 35 : 35 + (t - 50) / 50 * 90;
+    return 'hsl(' + Math.round(hue) + ',72%,50%)';
+  }
+  function libelle(s) {
+    var N = PECHE.niveaux, q;
+    for (q = 0; q < N.length; q++) { if (s >= N[q][0]) return N[q][1]; }
+    return N[N.length - 1][1];
+  }
+  // Historique de l'air (7 jours passés + 7 à venir) : sert à estimer l'eau et à repérer un coup de froid
+  function chargerHistorique(lat, lng) {
+    var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lng
+      + '&daily=temperature_2m_max,temperature_2m_min&past_days=7&forecast_days=7&timezone=auto';
+    HIST_P = fetch(url)
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (d) {
+        var mx = d.daily.temperature_2m_max, mn = d.daily.temperature_2m_min, moy = [], eau = [], e, q;
+        for (q = 0; q < mx.length; q++) {
+          if (mx[q] === null || mn[q] === null) throw new Error('données incomplètes');
+          moy.push((mx[q] + mn[q]) / 2);
         }
+        e = (moy[0] + moy[1] + moy[2]) / 3;
+        for (q = 0; q < moy.length; q++) { e += PECHE.eau.inertie * (moy[q] - e); eau.push(Math.max(1, e)); }
+        HIST = { dates: d.daily.time, moy: moy, eau: eau, t: Date.now() };
+      })
+      .catch(function () {});
+    return HIST_P;
+  }
+  function eauDe(date) { if (!HIST) return null; var q = HIST.dates.indexOf(date); return q < 0 ? null : HIST.eau[q]; }
+  function froidDe(date) { if (!HIST) return null; var q = HIST.dates.indexOf(date); return q < 2 ? null : HIST.moy[q] - HIST.moy[q - 2]; }
+  function evaluerPeche(g, x) {
+    var P = PECHE, T = [], E = P.eau[g], bo = bosse(x.eau, E[0], E[1], E[2], E[3]), W = P.ventCarnassiers, fl, vf, pl, rf, fr, tot;
+    function ajoute(txt, pts, note) { T.push([txt, pts, !!note]); }
+    ajoute('Eau estimée ' + n(x.eau) + ' °' + (bo > 0.8 ? ' : plage idéale' : bo < 0.2 ? ' : peu favorable' : ''), (bo - 0.5) * 2 * E[4]);
+    if (g === 'carnassiers') {
+      if (x.nuit) {
+        ajoute('Nuit : pas de données pour la lumière', 0, true);
+      } else {
+        fl = Math.max(x.aubeCrep, rampe(x.nuages, P.lumiere.nuagesDe, P.lumiere.nuagesA));
+        ajoute(x.aubeCrep > 0.5 ? 'Aube ou crépuscule : faible lumière' : fl > 0.5 ? 'Ciel couvert (' + n(x.nuages) + ' %) : faible lumière' : 'Forte lumière (' + n(x.nuages) + ' % de nuages)', (fl - P.lumiere.neutre) * P.lumiere.poids);
       }
-      if (x.vent !== null) {
-        if (x.vent >= P.ventMini && x.vent <= P.ventMaxi) { s += 1; r.push('Vent modéré (' + n(x.vent) + ' km/h)'); }
-        else if (x.vent >= P.ventFort) { s -= 1; r.push('Vent fort (' + n(x.vent) + ' km/h)'); }
-      }
-      if (x.tmax >= P.chaleurCarnassiers) { s -= 1; r.push('Chaleur (' + n(x.tmax) + ' °)'); }
+      ajoute((x.vent < 6 ? 'Vent faible' : x.vent <= 28 ? 'Vent modéré' : 'Vent fort') + ' (' + n(x.vent) + ' km/h)', (bosse(x.vent, W.plage[0], W.plage[1], W.plage[2], W.plage[3]) - W.neutre) * W.poids);
     } else if (g === 'carpes') {
-      var C = P.carpe;
-      if (t >= C.optMini && t <= C.optMaxi) { s += 2; r.push('Température ' + n(t) + ' ° : alimentation à son maximum'); }
-      else if (t > C.optMaxi && t < C.chaud) { s += 1; r.push('Température chaude (' + n(t) + ' °)'); }
-      else if (t >= C.chaud) { s -= 1; r.push('Forte chaleur (' + n(t) + ' °) : stress possible'); }
-      else if (t >= C.froid) { s += 1; r.push('Température fraîche (' + n(t) + ' °) : alimentation réduite'); }
-      else { s -= 1; r.push('Eau probablement froide (' + n(t) + ' °) : peu d\'activité'); }
-      if (x.nuit === true && t >= C.froid) { s += 1; r.push('Nuit : pic de captures observé chez la carpe'); }
+      if (x.nuit) ajoute('Nuit : pic de captures observé chez la carpe', rampe(x.eau, 10, 16) * P.nuitCarpe);
     } else {
-      var A = P.autres, ok = t >= A.mini && t <= A.maxi;
-      r.push(ok ? 'Température correcte (' + n(t) + ' °)' : 'Température peu favorable (' + n(t) + ' °)');
-      return { niveau: ok ? 2 : 1, score: P.echelle.base + (ok ? P.echelle.pas : 0), raisons: r };
+      vf = rampe(x.vent, P.ventFort.de, P.ventFort.a);
+      if (vf > 0) ajoute('Vent fort (' + n(x.vent) + ' km/h)', vf * P.ventFort.poids);
     }
-    return { niveau: s >= P.seuils.bon ? 3 : (s >= P.seuils.moyen ? 2 : 1), score: Math.max(5, Math.min(95, P.echelle.base + P.echelle.pas * s)), raisons: r };
+    if (x.orage) ajoute('Orage', P.orage);
+    else { pl = rampe(x.pluie, P.pluie.de, P.pluie.a); if (pl > 0) ajoute('Pluie marquée (' + n(x.pluie, 1) + ' mm)', pl * P.pluie.poids); }
+    rf = rampe(x.raf, P.rafales.de, P.rafales.a);
+    if (rf > 0) ajoute('Rafales (' + n(x.raf) + ' km/h)', rf * P.rafales.poids);
+    if (x.froid !== null) {
+      fr = rampe(-x.froid, P.froid.de, P.froid.a);
+      if (fr > 0) ajoute('Coup de froid (' + n(x.froid, 1) + ' ° sur 48 h)', fr * P.froid.poids);
+    }
+    tot = P.base;
+    T.forEach(function (c) { tot += c[1]; });
+    return {
+      score: Math.max(P.min, Math.min(P.max, Math.round(tot / P.arrondi) * P.arrondi)),
+      raisons: T.filter(function (c) { return c[2] || Math.abs(c[1]) >= 1; })
+        .sort(function (u, v) { return (u[2] ? 1 : 0) - (v[2] ? 1 : 0) || Math.abs(v[1]) - Math.abs(u[1]); })
+    };
   }
   function moyenne24(hh, k) {
     var somme = 0, nb = 0, q;
     for (q = Math.max(0, k - 24); q <= k; q++) { if (hh.temperature_2m[q] !== null) { somme += hh.temperature_2m[q]; nb++; } }
     return nb ? somme / nb : hh.temperature_2m[k];
   }
-  function ctxMaintenant(M) {
-    var now = mins(M.c.time), lev = mins(M.j.sunrise[1]), cou = mins(M.j.sunset[1]);
-    return {
-      nuages: M.c.cloud_cover, vent: M.c.wind_speed_10m, temp: moyenne24(M.hh, M.i), tmax: M.c.temperature_2m,
-      nuit: M.c.is_day === 0, aubeCrep: Math.abs(now - lev) <= 90 || Math.abs(now - cou) <= 90
-    };
+  function moyAutour(a, k, r) {
+    var s = 0, nb = 0, q;
+    for (q = Math.max(0, k - r); q <= Math.min(a.length - 1, k + r); q++) { if (a[q] !== null && a[q] !== undefined) { s += a[q]; nb++; } }
+    return nb ? s / nb : 0;
   }
-  function ctxJour(j, m) {
-    var ens = j.sunshine_duration[m], jour = j.daylight_duration[m];
-    return {
-      nuages: (ens !== null && jour) ? Math.round(100 * (1 - ens / jour)) : null,
-      vent: j.wind_speed_10m_max[m], temp: (j.temperature_2m_min[m] + j.temperature_2m_max[m]) / 2,
-      tmax: j.temperature_2m_max[m], nuit: null, aubeCrep: null
-    };
+  function maxAutour(a, k, r) {
+    var m = 0, q;
+    for (q = Math.max(0, k - r); q <= Math.min(a.length - 1, k + r); q++) { if (a[q] !== null && a[q] !== undefined && a[q] > m) m = a[q]; }
+    return m;
   }
+  // Conditions d'une heure, lissées sur quelques heures pour éviter les sauts
   function ctxHeure(M, k) {
-    var hh = M.hh, j = M.j, dj = j.time.indexOf(hh.time[k].slice(0, 10)); if (dj < 0) dj = 1;
+    var hh = M.hh, j = M.j, date = hh.time[k].slice(0, 10), dj = j.time.indexOf(date);
+    if (dj < 0) dj = 1;
     var now = mins(hh.time[k]), lev = mins(j.sunrise[dj]), cou = mins(j.sunset[dj]);
+    var ecart = Math.min(Math.abs(now - lev), Math.abs(now - cou)), eau = eauDe(date);
     return {
-      nuages: hh.cloud_cover[k], vent: hh.wind_speed_10m[k], temp: moyenne24(hh, k), tmax: hh.temperature_2m[k],
-      nuit: hh.is_day[k] === 0, aubeCrep: Math.abs(now - lev) <= 90 || Math.abs(now - cou) <= 90
+      eau: eau !== null ? eau : moyenne24(hh, k),
+      nuages: moyAutour(hh.cloud_cover, k, 2), vent: moyAutour(hh.wind_speed_10m, k, 2),
+      raf: maxAutour(hh.wind_gusts_10m, k, 2), pluie: maxAutour(hh.precipitation, k, 1),
+      orage: !!hh.weather_code && maxAutour(hh.weather_code, k, 2) >= 95,
+      nuit: hh.is_day[k] === 0, aubeCrep: 1 - rampe(ecart, 45, 120),
+      froid: froidDe(date)
     };
+  }
+  // Score d'un jour = moyenne de ses 6 meilleures heures (à partir de maintenant)
+  function scoreJour(M, date) {
+    var hh = M.hh, v = [], k, s = 0;
+    for (k = M.i; k < hh.time.length; k++) { if (hh.time[k].slice(0, 10) === date) v.push(evaluerPeche(groupePeche, ctxHeure(M, k)).score); }
+    if (!v.length) return null;
+    v.sort(function (a, b) { return b - a; });
+    v = v.slice(0, 6);
+    v.forEach(function (x) { s += x; });
+    return Math.round(s / v.length / PECHE.arrondi) * PECHE.arrondi;
   }
   // ── Lune ──
   function lune(d) {
@@ -713,40 +764,48 @@ function $(id) { return document.getElementById(id); }
   }
   // ── Pêche : bandeau + détail ──
   function dessinerPeche() {
-    var M = METEO, zone = $('peche-graph'), hero = $('hero-peche');    
+    var M = METEO, zone = $('peche-graph'), hero = $('hero-peche');
     if (!M || !hero) return;
-    var hh = M.hh, i = M.i, k, sc = [], et = [];
-    var rep = evaluerPeche(groupePeche, ctxMaintenant(M));
+    var hh = M.hh, i = M.i, k, sc = [], et = [], vals, rep, suite, dt, tend, mx, mn, a, b, fen, bande;
     for (k = i; k < Math.min(i + 24, hh.time.length); k++) {
       sc.push(evaluerPeche(groupePeche, ctxHeure(M, k)));
       et.push(hh.time[k].slice(11, 13));
     }
-    var vals = sc.map(function (r) { return r.score; });
-    var mx = Math.max.apply(null, vals), mn = Math.min.apply(null, vals);
-    var fen = 'Aucun créneau ne se démarque sur 24 h';
-    if (mx > mn) {
-      var a = -1, b = -1;
-      for (k = 0; k < vals.length; k++) { if (vals[k] === mx) { if (a < 0) a = k; b = k; } else if (a >= 0) break; }
-      fen = 'Meilleure fenêtre : ' + hhmm(Number(et[a])) + ' – ' + hhmm((Number(et[b]) + 1) % 24);
-    }
+    vals = sc.map(function (r) { return r.score; });
+    rep = sc[0];
+    suite = vals.length > 3 ? (vals[1] + vals[2] + vals[3]) / 3 : vals[0];
+    dt = suite - vals[0];
+    tend = dt >= 5 ? '↗ en amélioration' : dt <= -5 ? '↘ en baisse' : '→ stable';
+    mx = Math.max.apply(null, vals); mn = Math.min.apply(null, vals);
+    a = vals.indexOf(mx); b = a;
+    while (a > 0 && vals[a - 1] >= mx - 5) a--;
+    while (b < vals.length - 1 && vals[b + 1] >= mx - 5) b++;
+    fen = (mx - mn < 10) ? 'Conditions stables sur 24 h' : 'Meilleure fenêtre : ' + hhmm(Number(et[a])) + ' – ' + hhmm((Number(et[b]) + 1) % 24) + ' · ' + mx + '/100';
     hero.innerHTML = '<h3>Pêche · maintenant</h3>'
       + '<div class="groupes">' + Object.keys(GROUPES).map(function (g) {
           return '<button type="button" data-g="' + g + '" aria-pressed="' + (g === groupePeche) + '">' + GROUPES[g] + '</button>';
         }).join('') + '</div>'
-      + '<div class="verdict n' + rep.niveau + '">' + poissons(rep.niveau) + '<span>' + LIBELLES[rep.niveau] + '</span>'
+      + '<div class="verdict" style="--c:' + couleur(rep.score) + '"><div class="v-txt"><span class="v-lib">' + libelle(rep.score) + '</span><span class="v-tend">' + tend + '</span></div>'
       + '<span class="score">' + rep.score + '<small>/100</small></span></div>'
+      + '<div class="jauge"><span style="left:' + rep.score + '%"></span></div>'
       + '<div class="fenetre">' + fen + '</div>'
-      + '<div class="sous">Indice maison</div>';   
-    var graph = '<div class="sous">Score heure par heure · ' + GROUPES[groupePeche] + '</div>'
-    + barres(vals, et, 100);
+      + '<div class="sous">Indice maison</div>';
+    bande = '<div class="bande">' + vals.map(function (v, q) {
+        return '<span' + ((mx - mn >= 10 && q >= a && q <= b) ? ' class="top"' : '') + ' style="background:' + couleur(v) + '" title="' + et[q] + ' h · ' + v + '/100"></span>';
+      }).join('') + '</div><div class="bande-et">' + et.map(function (e, q) { return '<span>' + (q % 3 === 0 ? e : '') + '</span>'; }).join('') + '</div>';
     var html = '';
-    rep.raisons.forEach(function (t) { html += '<div class="l"><span>' + esc(t) + '</span></div>'; });
-    html += '<details><summary>Sources et limites</summary><p>Ce score est un indice que nous calculons nous-mêmes, pas une mesure scientifique. Il part de 50 et ajoute ou retire 15 points par critère retenu : l\'échelle est un choix arbitraire, seuls des écarts nets (par exemple 80 contre 50) ont un sens. Critères : lumière, vent et chaleur pour les carnassiers (étude Shaw et al. 2021, PLOS ONE, doré et maskinongé, un lac du Wisconsin, et article de Carnassiers.com) ; température et nuit pour les carpes (études de laboratoire, captures en compétition) ; température seule pour les blancs et les autres (peu de données). La pression et la lune n\'entrent pas dans le score : aucun effet démontré n\'a été retenu. La température est celle de l\'air (moyenne des dernières 24 h), pas celle de l\'eau. Les 7 jours ne tiennent pas compte de l\'heure.</p></details>';
-    if (zone) zone.innerHTML = graph;
-    hero.insertAdjacentHTML('beforeend', html);    Array.prototype.forEach.call(document.querySelectorAll('.pj'), function (el) {
-      var r = evaluerPeche(groupePeche, ctxJour(M.j, Number(el.getAttribute('data-m'))));
-      el.innerHTML = poissons(r.niveau);
-      el.title = LIBELLES[r.niveau] + ' (' + r.score + '/100)';
+    rep.raisons.forEach(function (c) {
+      var p = Math.round(c[1]);
+      html += '<div class="l"><span>' + esc(c[0]) + '</span><span' + (c[2] ? '' : ' class="' + (p > 0 ? 'hausse' : 'baisse') + '"') + '>' + (c[2] ? '' : (p > 0 ? '+' : '') + n(p)) + '</span></div>';
+    });
+    html += '<details><summary>Sources et limites</summary><p>Ce score est un indice maison de conditions favorables, pas une prédiction de prises ni une mesure scientifique. Il part de 50 (neutre) et ajoute ou retire des points de façon progressive, sans seuil brutal : chaque ligne ci-dessus indique son effet. Les conditions sont lissées sur ±2 h et le score est arrondi de 5 en 5, pour qu\'il ne saute pas à chaque mise à jour. Les poids sont des choix arbitraires : seuls des écarts nets (par exemple 80 contre 50) ont un sens. Température de l\'eau : estimée, pas mesurée, à partir de la moyenne de l\'air des 7 derniers jours (l\'eau réagit lentement) ; plage idéale retenue : carnassiers 10–20 °, carpes 14–26 °, blancs 8–20 °, autres 10–22 °. Carnassiers : faible lumière (aube, crépuscule, ciel couvert) et vent modéré favorables (étude Shaw et al. 2021, PLOS ONE, doré et maskinongé, un lac du Wisconsin, et article de Carnassiers.com) ; la nuit, pas de données sur la lumière. Carpes : température, avec un bonus la nuit (études de laboratoire, captures en compétition). Blancs et autres : peu de données, donc température et vent fort seulement, et un score plafonné plus bas. Pour tous : orage, pluie marquée, rafales fortes et coup de froid (baisse de l\'air d\'au moins 3 ° sur 48 h) pénalisent. La pression et la lune n\'entrent pas dans le score : aucun effet démontré n\'a été retenu. Dans les 7 jours, chaque jour affiche la moyenne de ses 6 meilleures heures.</p></details>';
+    if (zone) zone.innerHTML = '<div class="sous">Score heure par heure · ' + GROUPES[groupePeche] + '</div>' + bande;
+    hero.insertAdjacentHTML('beforeend', html);
+    Array.prototype.forEach.call(document.querySelectorAll('.pj'), function (el) {
+      var s = scoreJour(M, M.j.time[Number(el.getAttribute('data-m'))]);
+      if (s === null) { el.textContent = '–'; return; }
+      el.innerHTML = '<span class="pt" style="background:' + couleur(s) + '"></span>' + s;
+      el.title = libelle(s) + ' (' + s + '/100) · moyenne des meilleures heures';
     });
   }
     window.dessinerPecheGraph = dessinerPeche;
@@ -943,11 +1002,12 @@ function $(id) { return document.getElementById(id); }
     if (!silencieux) app.innerHTML = '<div class="etat">Chargement météo…</div>';
     var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lng
       + '&current=is_day,temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,wind_gusts_10m'
-      + '&hourly=is_day,uv_index,temperature_2m,precipitation_probability,precipitation,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,wind_gusts_10m,visibility'
+      + '&hourly=is_day,weather_code,uv_index,temperature_2m,precipitation_probability,precipitation,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,wind_gusts_10m,visibility'
       + '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,sunrise,sunset,uv_index_max,sunshine_duration,daylight_duration'
       + '&past_days=1&forecast_days=7&timezone=auto';
     fetch(url)
       .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (d) { return HIST_P.then(function () { return d; }); })
       .then(function (d) {
         var c = d.current, hh = d.hourly, j = d.daily, i = 0, k;
         for (k = 0; k < hh.time.length; k++) { if (hh.time[k].slice(0, 13) === c.time.slice(0, 13)) { i = k; break; } }
@@ -1030,11 +1090,16 @@ function $(id) { return document.getElementById(id); }
     var pos = $('pos');
     pos.textContent = lat.toFixed(4) + ', ' + lng.toFixed(4);
     pos.className = 'pos';
+    chargerHistorique(lat, lng);
     chargerMeteo(lat, lng);
     chargerLacs();
     window.addEventListener('resize', placerAstre);
     setInterval(placerAstre, 30000);
-setInterval(function () { if (!document.hidden) chargerMeteo(POS.lat, POS.lng, true); }, 5 * 60 * 1000);
+    setInterval(function () {
+      if (document.hidden) return;
+      if (HIST && Date.now() - HIST.t > 6 * 3600 * 1000) chargerHistorique(POS.lat, POS.lng);
+      chargerMeteo(POS.lat, POS.lng, true);
+    }, 5 * 60 * 1000);
     document.addEventListener('visibilitychange', function () {
       document.body.classList.toggle('pause', document.hidden);
     if (document.hidden) return;
