@@ -119,11 +119,12 @@ var marque = el('div', insta ? 'marque marque--insta' : 'marque');
     // ---- Menu commun ----
     if (!document.querySelector('.menu-site')) {
       var PAGES = [
-        { id: 'index',   nom: 'Accueil',         url: 'index.html' },
-        { id: 'etapes',  nom: 'Étapes',          url: 'etapes.html' },
-        { id: 'stats',   nom: 'Stats',           url: 'stats.html' },
-        { id: 'meteo',   nom: 'Météo & pêche',   url: 'peche/meteo.html' },
-        { id: 'journal', nom: 'Journal de bord', url: 'journal.html' }
+        { id: 'index',     nom: 'Accueil',         url: 'index.html' },
+        { id: 'etapes',    nom: 'Étapes',          url: 'etapes.html' },
+        { id: 'stats',     nom: 'Stats',           url: 'stats.html' },
+        { id: 'journal',   nom: 'Journal de bord', url: 'journal.html' },
+        { id: 'meteo',     nom: 'Météo & pêche',   url: 'peche/meteo.html' },
+        { id: 'carte-poi', nom: 'Carte des POI',   url: 'carte-poi.html' }
       ];
       // Les liens s'adaptent tout seuls à la page dans le dossier peche/
       var segment = location.pathname.split('/').pop().replace(/\.html$/, '') || 'index';
