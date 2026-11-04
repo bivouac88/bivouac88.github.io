@@ -72,19 +72,28 @@ h2.bloc { display: flex; align-items: baseline; gap: 8px; font: 600 18px var(--s
 .fenetre { font: 500 13px var(--mono); margin: 12px 0 4px; }
 .pj .poissons { font-size: 13px; letter-spacing: 0; }
 /* Frise 24 h */
-.heures { display: flex; gap: 0; overflow-x: auto; padding: 10px 8px; background: var(--carte); border: 1px solid var(--trait); border-radius: 14px; scroll-snap-type: x proximity; scrollbar-width: none; }
+.frise { position: relative; }
+.heures { display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px 8px; scrollbar-width: none; cursor: grab; user-select: none; -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--fg, 0px), #000 calc(100% - var(--fd, 0px)), transparent 100%); mask-image: linear-gradient(to right, transparent 0, #000 var(--fg, 0px), #000 calc(100% - var(--fd, 0px)), transparent 100%); }
 .heures::-webkit-scrollbar { display: none; }
-.heures-lib { flex: 0 0 64px; position: sticky; left: 0; z-index: 2; background: var(--carte); padding-right: 6px; font: 500 11px var(--mono); color: var(--discret); text-transform: uppercase; letter-spacing: .06em; }
-.heures-lib .lt { height: 24px; }
-.heures-lib .ltemp { height: 40px; line-height: 40px; }
-.heures-lib .lm { height: 46px; border-top: 1px solid var(--trait-subtil); display: flex; align-items: center; }
-.heure { flex: 0 0 80px; scroll-snap-align: start; background: none; border: 0; border-left: 1px solid var(--trait-subtil); border-radius: 0; padding: 0 4px; text-align: center; font: 400 12px var(--mono); }
-.heure.now { background: var(--accent-fond); border-left-color: transparent; border-radius: 10px; }
-.heure .t { height: 24px; line-height: 24px; color: var(--discret); }
-.heure .temp { height: 40px; margin: 0; font: 600 22px/40px var(--serif); }
-.heure .m { height: 46px; padding: 0; border-top: 1px solid var(--trait-subtil); display: flex; flex-direction: column; justify-content: center; }
-.heure .m:last-child .d { display: none; }
-.heure .d { color: var(--discret); font-size: 11px; }
+.heures.glisse { cursor: grabbing; }
+.heure { flex: 0 0 96px; background: var(--carte); border: 1px solid var(--trait); border-radius: 14px; padding: 8px 6px 10px; text-align: center; font: 400 12px var(--mono); }
+.heure.nuit { background: color-mix(in srgb, var(--carte) 65%, #000); }
+[data-theme="light"] .heure.nuit { background: color-mix(in srgb, var(--carte) 88%, #000); }
+.heure.now { border-color: var(--accent-trait); background: linear-gradient(var(--accent-fond), var(--accent-fond)), var(--carte); }
+.heure.minuit { border-left: 2px solid var(--accent); }
+.heure .rep { height: 14px; font: 600 10px/14px var(--mono); color: var(--accent); text-transform: uppercase; letter-spacing: .06em; }
+.heure .t { height: 18px; line-height: 18px; color: var(--discret); }
+.heure .temp { height: 44px; font: 600 30px/44px var(--serif); letter-spacing: -0.02em; }
+.heure .m { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; height: 42px; border-top: 1px solid var(--trait-subtil); }
+.heure .m .v { font-weight: 500; }
+.heure .m .d { min-height: 13px; font-size: 11px; color: var(--discret); }
+.heure .m.zero { opacity: .4; }
+.frise-fl { position: absolute; top: 50%; transform: translateY(-50%); z-index: 3; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--carte); color: var(--papier); border: 1px solid var(--trait-actif); font: 500 20px/1 var(--mono); cursor: pointer; opacity: 0; pointer-events: none; box-shadow: 0 4px 14px rgba(0,0,0,.3); transition: opacity .2s ease, color .15s ease, border-color .15s ease; }
+.frise-fl.g { left: 6px; }
+.frise-fl.d { right: 6px; }
+.frise:hover .frise-fl.on, .frise-fl.on:focus-visible { opacity: 1; pointer-events: auto; }
+.frise-fl:hover { color: var(--accent); border-color: var(--accent); }
+@media (hover: none) { .frise-fl { display: none; } }
 /* Barres */
 .courbe { display: block; width: 100%; height: 90px; margin-top: 4px; overflow: visible; }
 .courbe .z { fill: var(--accent); opacity: .15; }
@@ -821,6 +830,7 @@ function $(id) { return document.getElementById(id); }
     $('tab-carte').hidden = nom !== 'carte';
     $('tab-liste').hidden = nom !== 'liste';
     $('bloc-filtres').hidden = nom === 'meteo';
+    if (nom === 'meteo') majFrise();
     affiches = PAGE;
     majVues(nom === 'carte' && !carte);
   }
@@ -849,7 +859,67 @@ function $(id) { return document.getElementById(id); }
   }
   // ── Météo ──
   var DERNIERE = 0;
-    function majSilencieux(c, hh, j, i) {
+  // ── Frise 24 h ──
+  function frise24(hh, i) {
+    var s = '', a, risque, raf, mm, nulle, minuit, nuages;
+    for (a = i; a < Math.min(i + 25, hh.time.length); a++) {
+      risque = hh.precipitation_probability[a]; raf = hh.wind_gusts_10m[a]; mm = hh.precipitation[a]; nuages = hh.cloud_cover[a];
+      nulle = !mm && (risque || 0) < 20;
+      minuit = hh.time[a].slice(11, 13) === '00';
+      s += '<div class="heure' + (a === i ? ' now' : '') + (hh.is_day[a] === 0 ? ' nuit' : '') + (minuit ? ' minuit' : '') + '">'
+        + '<div class="rep">' + (minuit ? new Date(hh.time[a].slice(0, 10) + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric' }) : '') + '</div>'
+        + '<div class="t">' + h(hh.time[a]) + '</div>'
+        + '<div class="temp">' + n(hh.temperature_2m[a]) + '°</div>'
+        + '<div class="m' + (nulle ? ' zero' : '') + '"><span class="v' + (risque >= 50 ? ' alerte' : '') + '">💧 ' + n(mm, 1) + ' mm</span><span class="d">risque ' + n(risque) + ' %</span></div>'
+        + '<div class="m"><span class="v">💨 ' + n(hh.wind_speed_10m[a]) + ' ' + boussole(hh.wind_direction_10m[a]) + '</span><span class="d' + (raf >= 50 ? ' alerte' : '') + '">raf. ' + n(raf) + '</span></div>'
+        + '<div class="m' + (nuages <= 5 ? ' zero' : '') + '"><span class="v">☁️ ' + n(nuages) + ' %</span></div>'
+        + '</div>';
+    }
+    return s;
+  }
+  function majFrise() {
+    var z = $('heures'), f = $('frise');
+    if (!z || !f) return;
+    var max = z.scrollWidth - z.clientWidth, x = z.scrollLeft, g = x > 4, d = x < max - 4;
+    z.style.setProperty('--fg', g ? '56px' : '0px');
+    z.style.setProperty('--fd', d ? '56px' : '0px');
+    f.querySelector('.frise-fl.g').classList.toggle('on', g);
+    f.querySelector('.frise-fl.d').classList.toggle('on', d);
+  }
+  var meteoEl = $('meteo'), glisse = null;
+  meteoEl.addEventListener('scroll', function (e) { if (e.target && e.target.id === 'heures') majFrise(); }, true);
+  window.addEventListener('resize', majFrise);
+  meteoEl.addEventListener('click', function (e) {
+    var b = e.target.closest ? e.target.closest('.frise-fl') : null, z = $('heures');
+    if (!b || !z) return;
+    z.scrollBy({ left: (b.classList.contains('g') ? -1 : 1) * Math.round(z.clientWidth * 0.7), behavior: 'smooth' });
+  });
+  meteoEl.addEventListener('wheel', function (e) {
+    var z = e.target.closest ? e.target.closest('#heures') : null;
+    if (!z || Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+    var max = z.scrollWidth - z.clientWidth;
+    if ((e.deltaY < 0 && z.scrollLeft <= 0) || (e.deltaY > 0 && z.scrollLeft >= max - 1)) return;
+    e.preventDefault();
+    z.scrollLeft += e.deltaY;
+  }, { passive: false });
+  meteoEl.addEventListener('pointerdown', function (e) {
+    if (e.pointerType !== 'mouse' || e.button !== 0) return;
+    var z = e.target.closest ? e.target.closest('#heures') : null;
+    if (z) glisse = { z: z, x: e.clientX, g: z.scrollLeft, bouge: false };
+  });
+  window.addEventListener('pointermove', function (e) {
+    if (!glisse) return;
+    var dx = e.clientX - glisse.x;
+    if (!glisse.bouge && Math.abs(dx) < 4) return;
+    glisse.bouge = true;
+    glisse.z.classList.add('glisse');
+    glisse.z.scrollLeft = glisse.g - dx;
+  });
+  window.addEventListener('pointerup', function () {
+    if (glisse) glisse.z.classList.remove('glisse');
+    glisse = null;
+  });
+  function majSilencieux(c, hh, j, i) {
     var t = $('meteo').querySelector('.hero-meteo');
     if (t) {
       t.querySelector('.panneau h3').textContent = 'Maintenant · ' + h(c.time);
@@ -863,26 +933,8 @@ function $(id) { return document.getElementById(id); }
       if (chips[4]) chips[4].textContent = n(c.relative_humidity_2m) + ' %';
       if (chips[5]) chips[5].textContent = h(j.sunrise[1]) + ' → ' + h(j.sunset[1]);
     }
-    var heuresEl = $('meteo').querySelectorAll('.heure');
-    heuresEl.forEach(function (el, idx) {
-      var k = i + idx;
-      if (k >= hh.time.length) return;
-      var risque = hh.precipitation_probability[k], raf = hh.wind_gusts_10m[k];
-      el.querySelector('.t').textContent = h(hh.time[k]);
-      el.querySelector('.temp').textContent = n(hh.temperature_2m[k]) + '°';
-      var mm = el.querySelectorAll('.m');
-      if (mm[0]) {
-        mm[0].querySelector('span').textContent = n(hh.precipitation[k], 1) + ' mm';
-        mm[0].querySelector('span').className = risque >= 50 ? 'alerte' : '';
-        mm[0].querySelector('.d').textContent = 'risque ' + n(risque) + '%';
-      }
-      if (mm[1]) {
-        mm[1].firstChild.textContent = n(hh.wind_speed_10m[k]) + ' ' + boussole(hh.wind_direction_10m[k]);
-        mm[1].querySelector('.d').textContent = 'raf. ' + n(raf);
-        mm[1].querySelector('.d').className = 'd' + (raf >= 50 ? ' alerte' : '');
-      }
-      if (mm[2]) mm[2].firstChild.textContent = n(hh.cloud_cover[k]) + '%';
-    });
+    var z = $('heures');
+    if (z) { var x = z.scrollLeft; z.innerHTML = frise24(hh, i); z.scrollLeft = x; majFrise(); }
     dessinerDetails();
     dessinerPeche();
   }
@@ -927,19 +979,11 @@ function $(id) { return document.getElementById(id); }
           + '<div class="petites" id="petites"></div></section>';
     // 2. Prochaines 24 h
         html += '<div id="slot-poissons"></div>';
-        html += '<section><h2 class="bloc">Prochaines 24 h</h2><div class="heures">'
-        + '<div class="heures-lib"><div class="lt"></div><div class="ltemp">Temp.</div><div class="lm">Pluie</div><div class="lm">Vent</div><div class="lm">Nuages</div></div>';
-        for (var a = i; a < Math.min(i + 25, hh.time.length); a++) {
-          var risque = hh.precipitation_probability[a], raf = hh.wind_gusts_10m[a];
-          html += '<div class="heure' + (a === i ? ' now' : '') + '">'
-            + '<div class="t">' + h(hh.time[a]) + '</div>'
-            + '<div class="temp">' + n(hh.temperature_2m[a]) + '°</div>'
-            + '<div class="m"><span class="' + (risque >= 50 ? 'alerte' : '') + '">' + n(hh.precipitation[a], 1) + ' mm</span><div class="d">risque ' + n(risque) + '%</div></div>'
-            + '<div class="m">' + n(hh.wind_speed_10m[a]) + ' ' + boussole(hh.wind_direction_10m[a]) + '<div class="d ' + (raf >= 50 ? 'alerte' : '') + '">raf. ' + n(raf) + '</div></div>'
-            + '<div class="m">' + n(hh.cloud_cover[a]) + '%<div class="d">nuages</div></div>'
-            + '</div>';
-        }
-        html += '</div></section>';
+        html += '<section><h2 class="bloc">Prochaines 24 h</h2><div class="frise" id="frise">'
+          + '<button type="button" class="frise-fl g" aria-label="Heures précédentes">‹</button>'
+          + '<div class="heures" id="heures">' + frise24(hh, i) + '</div>'
+          + '<button type="button" class="frise-fl d" aria-label="Heures suivantes">›</button>'
+          + '</div></section>';
         // 4. 7 jours
         html += '<section><h2 class="bloc">7 jours</h2><div class="jours">';
         for (var m = 1; m < j.time.length; m++) {
@@ -965,6 +1009,7 @@ function $(id) { return document.getElementById(id); }
         Array.prototype.forEach.call(app.querySelectorAll('.heures, .jours'), function (el, q) { el.scrollLeft = defil[q] || 0; });
                 var slot = $('slot-poissons');
         if (slot && pm) slot.appendChild(pm);
+        majFrise();
         dessinerDetails();
         dessinerPeche();
       })
