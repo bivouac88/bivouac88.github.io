@@ -149,9 +149,9 @@
   const statut = document.getElementById('statut');
   const liste = document.getElementById('liste');
 const couche = L.markerClusterGroup({
-  chunkedLoading: true, maxClusterRadius: 45, showCoverageOnHover: false
+  chunkedLoading: true, maxClusterRadius: 45, showCoverageOnHover: false,
+  disableClusteringAtZoom: 15
 }).addTo(carte);
-
   const points = [];             // {nom, groupes, type, lat, lon, id, cat}
   const cats = {};               // nom -> {couleur, n, actif, li}
   let recherche = '';
