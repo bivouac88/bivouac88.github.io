@@ -296,44 +296,26 @@ document.getElementById('tri').addEventListener('click', function () {
   document.getElementById('tout-decocher').addEventListener('click', function () { cocherTout(false); });
 
   // ----- Affichage des points -----
-function actualiser() {
-  if (!points.length) return;
-  const retenus = points.filter(function (p) {
-    return cats[p.cat].actif && (!recherche || p.nom.toLowerCase().indexOf(recherche) !== -1);
-  });
-  couche.clearLayers();
-  couche.addLayers(retenus.map(function (p) {
-    if (!p.m) {
-      p.m = L.marker([p.lat, p.lon], { icon: cats[p.cat].icone });
-      p.m.bindPopup(function () {
-        let html = '<div class="popup-nom">' + echapper(p.nom) + '</div>';
-        html += '<div class="popup-ligne">' + echapper(p.cat) + '</div>';
-        if (p.groupes) html += '<div class="popup-ligne">' + echapper(p.groupes) + '</div>';
-        html += '<div class="popup-ligne">ID ' + echapper(p.id) + '</div>';
-        return html;
-      });
-    }
-    return p.m;
-  }));
-  etat.textContent = retenus.length.toLocaleString('fr-FR') + ' lieu(x) sélectionné(s)';
-}
-    retenus.forEach(function (p) {
-const m = retenus.length <= 1500
-  ? L.marker([p.lat, p.lon], { icon: cats[p.cat].icone })
-  : L.circleMarker([p.lat, p.lon], {
-      renderer: rendu, radius: 5, weight: 1, color: '#fff',
-      fillColor: cats[p.cat].couleur, fillOpacity: 0.92
+  function actualiser() {
+    if (!points.length) return;
+    const retenus = points.filter(function (p) {
+      return cats[p.cat].actif && (!recherche || p.nom.toLowerCase().indexOf(recherche) !== -1);
     });
-      m.bindPopup(function () {
-        let html = '<div class="popup-nom">' + echapper(p.nom) + '</div>';
-        html += '<div class="popup-ligne">' + echapper(p.cat) + '</div>';
-        if (p.groupes) html += '<div class="popup-ligne">' + echapper(p.groupes) + '</div>';
-        html += '<div class="popup-ligne">ID ' + echapper(p.id) + '</div>';
-        return html;
-      });
-      couche.addLayer(m);
-    });
-    etat.textContent = retenus.length.toLocaleString('fr-FR') + ' point(s) affiché(s)';
+    couche.clearLayers();
+    couche.addLayers(retenus.map(function (p) {
+      if (!p.m) {
+        p.m = L.marker([p.lat, p.lon], { icon: cats[p.cat].icone });
+        p.m.bindPopup(function () {
+          let html = '<div class="popup-nom">' + echapper(p.nom) + '</div>';
+          html += '<div class="popup-ligne">' + echapper(p.cat) + '</div>';
+          if (p.groupes) html += '<div class="popup-ligne">' + echapper(p.groupes) + '</div>';
+          html += '<div class="popup-ligne">ID ' + echapper(p.id) + '</div>';
+          return html;
+        });
+      }
+      return p.m;
+    }));
+    etat.textContent = retenus.length.toLocaleString('fr-FR') + ' lieu(x) sélectionné(s)';
   }
   // ----- Chargement -----
   fetch(DOSSIER + 'carres.json')
