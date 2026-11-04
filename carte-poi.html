@@ -335,7 +335,6 @@ const m = retenus.length <= 1500
     });
     etat.textContent = retenus.length.toLocaleString('fr-FR') + ' point(s) affiché(s)';
   }
-
   // ----- Chargement -----
   fetch(DOSSIER + 'carres.json')
     .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
