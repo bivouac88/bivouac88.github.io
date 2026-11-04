@@ -247,9 +247,7 @@ main { padding-bottom: 80px; }
 
   // ----- Catégories -----
   function construireCategories() {
-    const noms = Object.keys(cats).sort(function (a, b) {
-      return cats[b].n - cats[a].n || cats[a].libelle.localeCompare(cats[b].libelle, 'fr');
-    });
+    const noms = Object.keys(cats);
     const TEINTES = {
       'Courses et nourriture': 28, 'Carburant': 50, 'Eau et sanitaires': 210,
       'Santé et argent': 355, 'Vélo': 175, 'Pause': 130,
