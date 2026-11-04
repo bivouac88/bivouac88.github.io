@@ -34,7 +34,6 @@
     transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
   }
   .rangee button:hover { color: var(--accent); border-color: var(--accent-trait); background: var(--carte-hover); }
-
   #titre-liste { font: 500 12px var(--mono); letter-spacing: 0.06em; color: var(--discret); margin: 4px 0; }
   #liste { list-style: none; margin: 0; padding: 0; overflow-y: auto; flex: 1; }
   #liste li { margin: 0; }
@@ -107,6 +106,7 @@
         <button type="button" id="tout-cocher">Tout cocher</button>
         <button type="button" id="tout-decocher">Tout décocher</button>
       </div>
+      <button type="button" id="tri" class="btn-plein" style="width:100%;margin-bottom:8px">Tri : nombre ↓</button>
       <div id="titre-liste">Catégories</div>
       <ul id="liste"></ul>
     </aside>
@@ -198,9 +198,27 @@
     const noms = Object.keys(cats).sort(function (a, b) {
       return cats[b].n - cats[a].n || a.localeCompare(b, 'fr');
     });
+    const TEINTES = {
+  'Courses et nourriture': 28, 'Carburant': 50, 'Eau et sanitaires': 210,
+  'Santé et argent': 355, 'Vélo': 175, 'Pause': 130,
+  'Hébergement': 275, 'Patrimoine': 320
+};
+const parGroupe = {};
+noms.forEach(function (n) {
+  const g = cats[n].groupe || '';
+  (parGroupe[g] = parGroupe[g] || []).push(n);
+});
+Object.keys(parGroupe).forEach(function (g, gi) {
+  const membres = parGroupe[g];
+  const h = g in TEINTES ? TEINTES[g] : (gi * 137.5) % 360;
+  membres.forEach(function (n, j) {
+    const k = membres.length;
+    const clarte = k === 1 ? 45 : 30 + 38 * j / (k - 1);
+    cats[n].couleur = 'hsl(' + Math.round(h) + ',70%,' + Math.round(clarte) + '%)';
+  });
+});
     noms.forEach(function (nom, i) {
       const c = cats[nom];
-      c.couleur = couleurPourRang(i);
       const li = document.createElement('li');
       const label = document.createElement('label');
       const cb = document.createElement('input');
@@ -225,7 +243,20 @@
     });
     document.getElementById('titre-liste').textContent = 'Catégories (' + noms.length + ')';
   }
-
+let modeTri = 'nb';
+function trierListe() {
+  if (!Object.keys(cats).length) return;
+  Object.keys(cats).sort(function (a, b) {
+    return modeTri === 'az'
+      ? a.localeCompare(b, 'fr')
+      : cats[b].n - cats[a].n || a.localeCompare(b, 'fr');
+  }).forEach(function (n) { liste.appendChild(cats[n].li); }); // déplace les <li> existants
+}
+document.getElementById('tri').addEventListener('click', function () {
+  modeTri = modeTri === 'nb' ? 'az' : 'nb';
+  this.textContent = modeTri === 'nb' ? 'Tri : nombre ↓' : 'Tri : A → Z';
+  trierListe();
+});
   function categoriesAffichees() {
     return Object.keys(cats).filter(function (n) { return cats[n].li.style.display !== 'none'; });
   }
@@ -295,7 +326,7 @@
           .then(function (lignes) {
             lignes.forEach(function (l) {
               const cat = String(l[2] == null ? '' : l[2]).trim() || SANS_TYPE;
-              if (!cats[cat]) cats[cat] = { n: 0, actif: true };
+              if (!cats[cat]) cats[cat] = { n: 0, actif: true, groupe: String(l[1] == null ? '' : l[1]) };
               cats[cat].n++;
               points.push({ nom: String(l[0] == null ? '' : l[0]), groupes: l[1], lat: l[3], lon: l[4], id: l[5], cat: cat });
             });
