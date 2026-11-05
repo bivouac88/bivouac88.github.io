@@ -124,7 +124,7 @@ var marque = el('div', insta ? 'marque marque--insta' : 'marque');
         { id: 'stats',     nom: 'Stats',           url: 'stats.html' },
         { id: 'journal',   nom: 'Journal de bord', url: 'journal.html' },
         { id: 'meteo',     nom: 'Météo & pêche',   url: 'peche/meteo.html' },
-        { id: 'carte-poi', nom: 'Points d'Intérêt',   url: 'carte-poi.html' }
+        { id: 'carte-poi', nom: "Points d'intérêt", url: 'carte-poi.html' }
       ];
       // Les liens s'adaptent tout seuls à la page dans le dossier peche/
       var segment = location.pathname.split('/').pop().replace(/\.html$/, '') || 'index';
