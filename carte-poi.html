@@ -351,15 +351,18 @@ main { padding-bottom: 80px; }
     couche.addLayers(retenus.map(function (p) {
       if (!p.m) {
         p.m = L.marker([p.lat, p.lon], { icon: cats[p.cat].icone });
-p.m.bindPopup(function () {
-  const c = cats[p.cat];
-  const boite = document.createElement('div');
-
-  const nom = document.createElement('div');
-  nom.className = 'popup-nom';
-  nom.textContent = p.nom;
-  boite.appendChild(nom);
-
+  // Ligne catégorie : émoji (inchangé) + libellé cliquable
+  const ligne = document.createElement('div');
+  ligne.className = 'popup-ligne';
+  const prefixe = p.cat.slice(0, p.cat.length - c.libelle.length);
+  if (prefixe) ligne.appendChild(document.createTextNode(prefixe));
+  const lien = document.createElement('a');
+  lien.href = '#';
+  lien.className = 'popup-lien';
+  lien.textContent = c.libelle;
+  lien.title = 'Ouvrir dans une application de cartes';
+  ligne.appendChild(lien);
+  boite.appendChild(ligne);
   // Ligne catégorie cliquable (libellé sans émoji)
   const ligne = document.createElement('div');
   ligne.className = 'popup-ligne';
