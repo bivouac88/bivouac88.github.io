@@ -417,6 +417,12 @@ p.m.bindPopup(function () {
 
   return boite;
 });
+      }
+      return p.m;
+    }));
+    etat.textContent = retenus.length.toLocaleString('fr-FR') + ' lieu(x) sélectionné(s)';
+  }
+
   // ----- Chargement -----
   fetch(DOSSIER + 'carres.json')
     .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
