@@ -360,52 +360,18 @@ main { padding-bottom: 80px; }
           nom.textContent = p.nom;
           boite.appendChild(nom);
 
-          // Ligne catégorie : émoji + libellé cliquable
+          // Ligne catégorie : émoji + libellé, puis bouton « Y aller »
           const ligne = document.createElement('div');
           ligne.className = 'popup-ligne';
-          const prefixe = p.cat.slice(0, p.cat.length - c.libelle.length);
-          if (prefixe) ligne.appendChild(document.createTextNode(prefixe));
-          const lien = document.createElement('a');
-          lien.href = '#';
-          lien.className = 'popup-lien';
-          lien.textContent = c.libelle;
-          lien.title = 'Ouvrir dans une application de cartes';
-          ligne.appendChild(lien);
+          ligne.appendChild(document.createTextNode(p.cat + ' '));
+          const aller = document.createElement('a');
+          aller.className = 'popup-go';
+          aller.textContent = 'Y aller';
+          aller.href = 'https://www.google.com/maps/dir/?api=1&destination=' + p.lat + ',' + p.lon;
+          aller.target = '_blank';
+          aller.rel = 'noopener';
+          ligne.appendChild(aller);
           boite.appendChild(ligne);
-
-          // Menu de choix d'application
-          const pos = p.lat + ',' + p.lon;
-          const typeOsm = { n: 'node', w: 'way', r: 'relation' }[String(p.id)[0]];
-          const choix = [
-            ['Google Maps', 'https://www.google.com/maps/search/?api=1&query=' + pos],
-            ['OpenStreetMap', typeOsm
-              ? 'https://www.openstreetmap.org/' + typeOsm + '/' + String(p.id).slice(1)
-              : 'https://www.openstreetmap.org/?mlat=' + p.lat + '&mlon=' + p.lon + '#map=18/' + p.lat + '/' + p.lon],
-            ['Apple Plans', 'https://maps.apple.com/?ll=' + pos + '&q=' + encodeURIComponent(p.nom)]
-          ];
-          if (window.matchMedia('(pointer: coarse)').matches) {
-            choix.push(['Application GPS', 'geo:' + pos + '?q=' + pos + '(' + encodeURIComponent(p.nom) + ')']);
-          }
-
-          const menu = document.createElement('div');
-          menu.className = 'popup-menu';
-          menu.hidden = true;
-          choix.forEach(function (x) {
-            const a = document.createElement('a');
-            a.textContent = x[0];
-            a.href = x[1];
-            a.target = '_blank';
-            a.rel = 'noopener';
-            menu.appendChild(a);
-          });
-          boite.appendChild(menu);
-
-          lien.addEventListener('click', function (e) {
-            e.preventDefault();
-            menu.hidden = !menu.hidden;
-            p.m.getPopup().update();
-          });
-
           if (p.groupes) {
             const g = document.createElement('div');
             g.className = 'popup-ligne';
