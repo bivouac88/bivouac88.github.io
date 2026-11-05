@@ -129,11 +129,13 @@ main { padding-bottom: 80px; }
 .leaflet-control-attribution a { color: var(--discret); }
 .popup-nom { font: 600 14px var(--serif); margin-bottom: 4px; }
 .popup-ligne { font: 400 12px var(--mono); color: var(--papier-doux); margin: 2px 0; }
-.popup-lien { color: var(--accent); text-decoration: underline; cursor: pointer; }
-.popup-menu { display: flex; flex-direction: column; gap: 2px; margin: 4px 0 4px; padding-left: 8px; border-left: 2px solid var(--trait); font: 400 12px var(--mono); }
-.popup-menu[hidden] { display: none; }
-.popup-menu a { color: var(--papier); text-decoration: none; padding: 2px 0; font: inherit; }
-.popup-menu a:hover { color: var(--accent); }
+.leaflet-container a.popup-go {
+  display: inline-block; margin-left: 6px; padding: 2px 10px;
+  background: var(--accent); color: #111; border-radius: 6px;
+  font: 600 12px var(--mono); text-decoration: none; cursor: pointer;
+}
+.leaflet-container a.popup-go:hover { filter: brightness(1.12); }
+.leaflet-container a.popup-go:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 /* Grappes aux couleurs du site */
 .marker-cluster-small, .marker-cluster-medium, .marker-cluster-large { background: color-mix(in srgb, var(--accent) 35%, transparent); }
 .marker-cluster-small div, .marker-cluster-medium div, .marker-cluster-large div {
