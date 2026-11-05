@@ -130,8 +130,9 @@ main { padding-bottom: 80px; }
 .popup-nom { font: 600 14px var(--serif); margin-bottom: 4px; }
 .popup-ligne { font: 400 12px var(--mono); color: var(--papier-doux); margin: 2px 0; }
 .popup-lien { color: var(--accent); text-decoration: underline; cursor: pointer; }
-.popup-menu { display: flex; flex-direction: column; gap: 2px; margin: 4px 0 2px; padding-left: 8px; border-left: 2px solid var(--trait); }
-.popup-menu a { color: var(--papier); text-decoration: none; padding: 2px 0; }
+.popup-menu { display: flex; flex-direction: column; gap: 2px; margin: 4px 0 4px; padding-left: 8px; border-left: 2px solid var(--trait); font: 400 12px var(--mono); }
+.popup-menu[hidden] { display: none; }
+.popup-menu a { color: var(--papier); text-decoration: none; padding: 2px 0; font: inherit; }
 .popup-menu a:hover { color: var(--accent); }
 /* Grappes aux couleurs du site */
 .marker-cluster-small, .marker-cluster-medium, .marker-cluster-large { background: color-mix(in srgb, var(--accent) 35%, transparent); }
