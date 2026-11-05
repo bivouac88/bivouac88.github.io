@@ -129,7 +129,10 @@ main { padding-bottom: 80px; }
 .leaflet-control-attribution a { color: var(--discret); }
 .popup-nom { font: 600 14px var(--serif); margin-bottom: 4px; }
 .popup-ligne { font: 400 12px var(--mono); color: var(--papier-doux); margin: 2px 0; }
-
+.popup-lien { color: var(--accent); text-decoration: underline; cursor: pointer; }
+.popup-menu { display: flex; flex-direction: column; gap: 2px; margin: 4px 0 2px; padding-left: 8px; border-left: 2px solid var(--trait); }
+.popup-menu a { color: var(--papier); text-decoration: none; padding: 2px 0; }
+.popup-menu a:hover { color: var(--accent); }
 /* Grappes aux couleurs du site */
 .marker-cluster-small, .marker-cluster-medium, .marker-cluster-large { background: color-mix(in srgb, var(--accent) 35%, transparent); }
 .marker-cluster-small div, .marker-cluster-medium div, .marker-cluster-large div {
@@ -347,19 +350,73 @@ main { padding-bottom: 80px; }
     couche.addLayers(retenus.map(function (p) {
       if (!p.m) {
         p.m = L.marker([p.lat, p.lon], { icon: cats[p.cat].icone });
-        p.m.bindPopup(function () {
-          let html = '<div class="popup-nom">' + echapper(p.nom) + '</div>';
-          html += '<div class="popup-ligne">' + echapper(p.cat) + '</div>';
-          if (p.groupes) html += '<div class="popup-ligne">' + echapper(p.groupes) + '</div>';
-          html += '<div class="popup-ligne">ID ' + echapper(p.id) + '</div>';
-          return html;
-        });
-      }
-      return p.m;
-    }));
-    etat.textContent = retenus.length.toLocaleString('fr-FR') + ' lieu(x) sélectionné(s)';
+p.m.bindPopup(function () {
+  const c = cats[p.cat];
+  const boite = document.createElement('div');
+
+  const nom = document.createElement('div');
+  nom.className = 'popup-nom';
+  nom.textContent = p.nom;
+  boite.appendChild(nom);
+
+  // Ligne catégorie cliquable (libellé sans émoji)
+  const ligne = document.createElement('div');
+  ligne.className = 'popup-ligne';
+  const lien = document.createElement('a');
+  lien.href = '#';
+  lien.className = 'popup-lien';
+  lien.textContent = c.libelle;
+  lien.title = 'Ouvrir dans une application de cartes';
+  ligne.appendChild(lien);
+  boite.appendChild(ligne);
+
+  // Menu de choix d'application
+  const pos = p.lat + ',' + p.lon;
+  const typeOsm = { n: 'node', w: 'way', r: 'relation' }[String(p.id)[0]];
+  const choix = [
+    ['Google Maps', 'https://www.google.com/maps/search/?api=1&query=' + pos],
+    ['OpenStreetMap', typeOsm
+      ? 'https://www.openstreetmap.org/' + typeOsm + '/' + String(p.id).slice(1)
+      : 'https://www.openstreetmap.org/?mlat=' + p.lat + '&mlon=' + p.lon + '#map=18/' + p.lat + '/' + p.lon],
+    ['Apple Plans', 'https://maps.apple.com/?ll=' + pos + '&q=' + encodeURIComponent(p.nom)]
+  ];
+  // Application GPS du téléphone (lien geo:), seulement sur écran tactile
+  if (window.matchMedia('(pointer: coarse)').matches) {
+    choix.push(['Application GPS', 'geo:' + pos + '?q=' + pos + '(' + encodeURIComponent(p.nom) + ')']);
   }
 
+  const menu = document.createElement('div');
+  menu.className = 'popup-menu';
+  menu.hidden = true;
+  choix.forEach(function (x) {
+    const a = document.createElement('a');
+    a.textContent = x[0];
+    a.href = x[1];
+    a.target = '_blank';
+    a.rel = 'noopener';
+    menu.appendChild(a);
+  });
+  boite.appendChild(menu);
+
+  lien.addEventListener('click', function (e) {
+    e.preventDefault();
+    menu.hidden = !menu.hidden;
+    p.m.getPopup().update();   // recalcule la taille du pop-up
+  });
+
+  if (p.groupes) {
+    const g = document.createElement('div');
+    g.className = 'popup-ligne';
+    g.textContent = p.groupes;
+    boite.appendChild(g);
+  }
+  const id = document.createElement('div');
+  id.className = 'popup-ligne';
+  id.textContent = 'ID ' + p.id;
+  boite.appendChild(id);
+
+  return boite;
+});
   // ----- Chargement -----
   fetch(DOSSIER + 'carres.json')
     .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
