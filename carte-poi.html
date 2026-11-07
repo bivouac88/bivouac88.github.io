@@ -254,11 +254,12 @@ main { padding-bottom: 80px; }
   // ----- Catégories -----
   function construireCategories() {
     const noms = Object.keys(cats);
-    const TEINTES = {
-      'Courses et nourriture': 28, 'Carburant': 50, 'Eau et sanitaires': 210,
-      'Santé et argent': 355, 'Vélo': 175, 'Pause': 130,
-      'Hébergement': 275, 'Patrimoine': 320
-    };
+const TEINTES = {
+  'Courses et nourriture': 28, 'Carburant': 50, 'Eau et sanitaires': 210,
+  'Santé et argent': 355, 'Vélo': 175, 'Pause et plein air': 130,
+  'Hébergement': 275, 'Patrimoine': 320,
+  'Découverte': 90, 'Information': 240, 'Services pratiques': 20
+};
     noms.forEach(function (n) {
       const m = n.match(/^(\p{Extended_Pictographic}\S*)\s+(.+)$/u);
       cats[n].emoji = m ? m[1] : '•';
