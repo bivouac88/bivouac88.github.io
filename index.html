@@ -249,7 +249,7 @@ main{padding:14px 12px 64px}
     });
   }
   // ---- Carte ----
-  var map = L.map('map', { scrollWheelZoom: false }).setView([46.6, 2.5], 5);
+  var map = L.map('map', { scrollWheelZoom: true }).setView([46.6, 2.5], 5);
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'
