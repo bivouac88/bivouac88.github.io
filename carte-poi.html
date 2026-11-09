@@ -313,27 +313,26 @@ const TEINTES = {
     document.getElementById('titre-liste').textContent = 'Catégories (' + noms.length + ')';
   }
 
-  var modeAz = 'az'; // az ou za
-var modeNb = 'nb'; // nb ou bn
+  var modeAz = 'az';
+var modeNb = 'nb';
 function trierListe() {
   if (!Object.keys(cats).length) return;
   Object.keys(cats).sort(function (a, b) {
-    var az = modeAz === 'az'
-      ? cats[a].libelle.localeCompare(cats[b].libelle, 'fr')
-      : cats[b].libelle.localeCompare(cats[a].libelle, 'fr');
-    var nb = modeNb === 'nb'
-      ? cats[b].n - cats[a].n
-      : cats[a].n - cats[b].n;
-    return az || nb;
+    if (modeAz === 'az') return cats[a].libelle.localeCompare(cats[b].libelle, 'fr');
+    if (modeAz === 'za') return cats[b].libelle.localeCompare(cats[a].libelle, 'fr');
+    if (modeNb === 'nb') return cats[b].n - cats[a].n;
+    return cats[a].n - cats[b].n;
   }).forEach(function (n) { liste.appendChild(cats[n].li); });
 }
 document.getElementById('tri-az').addEventListener('click', function () {
   modeAz = modeAz === 'az' ? 'za' : 'az';
+  modeNb = 'nb';
   this.textContent = modeAz === 'az' ? 'A → Z' : 'Z → A';
   trierListe();
 });
 document.getElementById('tri-nb').addEventListener('click', function () {
   modeNb = modeNb === 'nb' ? 'bn' : 'nb';
+  modeAz = '';
   this.textContent = modeNb === 'nb' ? '9 → 1' : '1 → 9';
   trierListe();
 });
