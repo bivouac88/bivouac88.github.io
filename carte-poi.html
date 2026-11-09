@@ -407,35 +407,64 @@ document.getElementById('tout-toggle').addEventListener('click', function () {
   }
 
   // ----- Chargement -----
+  function chargerTout(done) {
   fetch(DOSSIER + 'carres.json')
     .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(function (carres) {
       if (!carres.length) throw new Error('vide');
-      const sud = Math.min.apply(null, carres.map(function (c) { return c.lat; }));
-      const nord = Math.max.apply(null, carres.map(function (c) { return c.lat + 0.5; }));
-      const ouest = Math.min.apply(null, carres.map(function (c) { return c.lon; }));
-      const est = Math.max.apply(null, carres.map(function (c) { return c.lon + 0.5; }));
+      var sud = Math.min.apply(null, carres.map(function (c) { return c.lat; }));
+      var nord = Math.max.apply(null, carres.map(function (c) { return c.lat + 0.5; }));
+      var ouest = Math.min.apply(null, carres.map(function (c) { return c.lon; }));
+      var est = Math.max.apply(null, carres.map(function (c) { return c.lon + 0.5; }));
       carte.fitBounds([[sud, ouest], [nord, est]]);
-
-      let faits = 0, echecs = 0;
+      var faits = 0, echecs = 0;
       return Promise.all(carres.map(function (c) {
         return fetch(DOSSIER + c.id + '.json')
           .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+          .then(function (lignes) { return lignes; })
+          .catch(function () { echecs++; return []; })
           .then(function (lignes) {
-            lignes.forEach(function (l) {
-              const cat = String(l[2] == null ? '' : l[2]).trim() || SANS_TYPE;
-              if (!cats[cat]) cats[cat] = { n: 0, actif: true, groupe: String(l[1] == null ? '' : l[1]) };
-              cats[cat].n++;
-              points.push({ nom: String(l[0] == null ? '' : l[0]), groupes: l[1], lat: l[3], lon: l[4], id: l[5], cat: cat });
-            });
-          })
-          .catch(function () { echecs++; })
-          .then(function () {
             faits++;
-            statut.textContent = 'Chargement des données : ' + faits + ' / ' + carres.length + ' carrés';
+            statut.textContent = 'Mise à jour : ' + faits + ' / ' + carres.length + ' carrés';
+            return lignes;
           });
-      })).then(function () { return echecs; });
+      })).then(function (tous) {
+        var lignesTout = [];
+        tous.forEach(function (l) { lignesTout = lignesTout.concat(l); });
+        done({ lignes: lignesTout, bounds: [sud, ouest, nord, est], echecs: echecs });
+      });
     })
+    .catch(function () { done(null); });
+}
+
+B88.cache('b88-poi-v1', chargerTout, function (data, estFrais) {
+  if (!data) {
+    statut.textContent = 'Impossible de lire poi/carres.json';
+    etat.textContent = 'Données indisponibles';
+    carte.setView([46.5, 2.5], 6);
+    return;
+  }
+  if (!estFrais) {
+    // Affichage immédiat depuis le cache
+    carte.fitBounds([[data.bounds[0], data.bounds[1]], [data.bounds[2], data.bounds[3]]]);
+  }
+  data.lignes.forEach(function (l) {
+    var cat = String(l[2] == null ? '' : l[2]).trim() || SANS_TYPE;
+    if (!cats[cat]) cats[cat] = { n: 0, actif: true, groupe: String(l[1] == null ? '' : l[1]) };
+    cats[cat].n++;
+    points.push({ nom: String(l[0] == null ? '' : l[0]), groupes: l[1], lat: l[3], lon: l[4], id: l[5], cat: cat });
+  });
+  if (!estFrais) {
+    construireCategories();
+    statut.textContent = points.length.toLocaleString('fr-FR') + ' lieux (cache)';
+    actualiser();
+  } else {
+    construireCategories();
+    statut.textContent = points.length.toLocaleString('fr-FR') + ' lieux dans ' + Object.keys(cats).length + ' catégories' +
+      (data.echecs ? ' · ' + data.echecs + ' carré(s) non chargé(s)' : '');
+    actualiser();
+  }
+});
     .then(function (echecs) {
       construireCategories();
       statut.textContent = points.length.toLocaleString('fr-FR') + ' lieux dans ' + Object.keys(cats).length + ' catégories' +
