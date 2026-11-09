@@ -527,3 +527,8 @@ h1.titre-page {
   text-align: center;
   line-height: 1.3;
 }
+
+/* Répartit les onglets sur toute la largeur */
+.menu-site__liens { width: 100%; }
+.menu-site__liens li { flex: 1 1 auto; display: flex; }
+.menu-site__liens a { flex: 1; }
