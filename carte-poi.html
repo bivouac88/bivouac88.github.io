@@ -51,6 +51,20 @@ main { padding-bottom: 80px; }
   width: 310px; flex: none; height: 76vh; min-height: 420px; display: flex; flex-direction: column;
   background: var(--carte); border: 1px solid var(--trait); border-radius: 12px; padding: 10px;
 }
+/* Recherches compactes côte à côte */
+.rangee-recherche {
+  display: flex; gap: 6px; margin-bottom: 6px;
+}
+.rangee-recherche input[type=search] {
+  flex: 1; min-width: 0; padding: 6px 8px;
+  background: var(--fond); color: var(--papier);
+  border: 1px solid var(--trait); border-radius: 8px;
+  font: 400 11px var(--mono);
+}
+.rangee-recherche input[type=search]::placeholder { color: var(--discret); font-size: 10px; }
+.rangee-recherche input[type=search]:focus { border-color: var(--accent-trait); outline: none; }
+
+/* Fallback si pas de rangee-recherche (ancien HTML) */
 #panneau input[type=search] {
   width: 100%; padding: 8px 10px; margin-bottom: 6px;
   background: var(--fond); color: var(--papier);
@@ -60,16 +74,16 @@ main { padding-bottom: 80px; }
 #panneau input[type=search]::placeholder { color: var(--discret); }
 #panneau input[type=search]:focus { border-color: var(--accent-trait); outline: none; }
 
-.rangee { display: flex; gap: 6px; margin: 2px 0 6px; }
+.rangee { display: flex; gap: 6px; margin: 2px 0 4px; }
 .rangee button {
-  flex: 1; padding: 7px; font: 500 12px var(--mono); letter-spacing: 0.04em;
+  flex: 1; padding: 5px; font: 500 11px var(--mono); letter-spacing: 0.04em;
   color: var(--papier-doux); background: none;
   border: 1px solid var(--trait); border-radius: 8px; cursor: pointer;
   transition: color .15s ease, border-color .15s ease, background-color .15s ease;
 }
 .rangee button:hover { color: var(--accent); border-color: var(--accent-trait); background: var(--carte-hover); }
 .rangee button:focus-visible, .btn-plein:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-#titre-liste { font: 500 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--discret); margin: 6px 0 4px; }
+#titre-liste { font: 500 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--discret); margin: 4px 0 3px; }
 #liste { list-style: none; margin: 0; padding: 0; overflow-y: auto; flex: 1; }
 #liste li { margin: 0; }
 #liste label {
