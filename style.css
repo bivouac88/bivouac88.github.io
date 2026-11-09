@@ -521,21 +521,9 @@ h1.titre-page {
   }
   .menu-site__liens a::after { left: 12px; right: 12px; }
 }
-/* Mobile : texte centré dans les cases/onglets, même sur 2 lignes */
-@media (max-width: 767px) {
-  a, button, summary, label,
-  [role="tab"], [role="button"] {
-    text-align: center;
-  }
-
-  /* Cases en flex : on centre aussi le contenu horizontalement */
-  .menu-site__liens a,
-  main a, main button {
-    justify-content: center;
-  }
-
-  /* Équilibre les retours à la ligne (évite un mot seul sur la 2e ligne) */
-  a, button, h1, h2, h3 {
-    text-wrap: balance;
-  }
+/* Menu en rangée : texte centré dans chaque onglet, même sur 2 lignes */
+.menu-site__liens a {
+  justify-content: center;
+  text-align: center;
+  line-height: 1.3;
 }
