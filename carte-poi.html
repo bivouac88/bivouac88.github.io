@@ -173,16 +173,14 @@ main { padding-bottom: 80px; }
 <div id="app">
   <aside id="panneau" aria-label="Filtres">
 <div class="rangee-recherche">
+  <div class="rangee">
   <input type="search" id="rech-lieu" placeholder="Lieu…" aria-label="Rechercher un lieu par nom">
-  <input type="search" id="rech-cat" placeholder="Catégorie…" aria-label="Rechercher une catégorie">
+  <button type="button" id="tout-toggle">✓ Tout</button>
 </div>
-    <div class="rangee">
-      <button type="button" id="tout-cocher">Tout cocher</button>
-      <button type="button" id="tout-decocher">Tout décocher</button>
-    </div>
-    <div class="rangee">
-      <button type="button" id="tri">Tri : nombre ↓</button>
-    </div>
+<div class="rangee">
+  <button type="button" id="tri-az">A → Z</button>
+  <button type="button" id="tri-nb">9 → 1</button>
+</div>
     <div id="titre-liste">Catégories</div>
     <ul id="liste"></ul>
   </aside>
