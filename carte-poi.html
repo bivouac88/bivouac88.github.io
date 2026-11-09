@@ -444,8 +444,13 @@ B88.cache('b88-poi-v1', chargerTout, function (data, estFrais) {
     carte.setView([46.5, 2.5], 6);
     return;
   }
+  // Réinitialise avant chaque rendu pour éviter les doublons au refresh
+  points.length = 0;
+  Object.keys(cats).forEach(function (k) { delete cats[k]; });
+  liste.innerHTML = '';
+  couche.clearLayers();
+
   if (!estFrais) {
-    // Affichage immédiat depuis le cache
     carte.fitBounds([[data.bounds[0], data.bounds[1]], [data.bounds[2], data.bounds[3]]]);
   }
   data.lignes.forEach(function (l) {
@@ -454,16 +459,14 @@ B88.cache('b88-poi-v1', chargerTout, function (data, estFrais) {
     cats[cat].n++;
     points.push({ nom: String(l[0] == null ? '' : l[0]), groupes: l[1], lat: l[3], lon: l[4], id: l[5], cat: cat });
   });
+  construireCategories();
   if (!estFrais) {
-    construireCategories();
     statut.textContent = points.length.toLocaleString('fr-FR') + ' lieux (cache)';
-    actualiser();
   } else {
-    construireCategories();
     statut.textContent = points.length.toLocaleString('fr-FR') + ' lieux dans ' + Object.keys(cats).length + ' catégories' +
       (data.echecs ? ' · ' + data.echecs + ' carré(s) non chargé(s)' : '');
-    actualiser();
   }
+  actualiser();
 });
 })();
 </script>
