@@ -51,28 +51,16 @@ main { padding-bottom: 80px; }
   width: 310px; flex: none; height: 76vh; min-height: 420px; display: flex; flex-direction: column;
   background: var(--carte); border: 1px solid var(--trait); border-radius: 12px; padding: 10px;
 }
-/* Recherches compactes côte à côte */
-.rangee-recherche {
-  display: flex; gap: 6px; margin-bottom: 6px;
-}
-.rangee-recherche input[type=search] {
+
+/* Fallback si pas de rangee-recherche (ancien HTML) */
+.rangee input[type=search] {
   flex: 1; min-width: 0; padding: 6px 8px;
   background: var(--fond); color: var(--papier);
   border: 1px solid var(--trait); border-radius: 8px;
-  font: 400 11px var(--mono);
+  font: 400 12px var(--mono);
 }
-.rangee-recherche input[type=search]::placeholder { color: var(--discret); font-size: 10px; }
-.rangee-recherche input[type=search]:focus { border-color: var(--accent-trait); outline: none; }
-
-/* Fallback si pas de rangee-recherche (ancien HTML) */
-#panneau input[type=search] {
-  width: 100%; padding: 8px 10px; margin-bottom: 6px;
-  background: var(--fond); color: var(--papier);
-  border: 1px solid var(--trait); border-radius: 8px;
-  font: 400 13px var(--mono);
-}
-#panneau input[type=search]::placeholder { color: var(--discret); }
-#panneau input[type=search]:focus { border-color: var(--accent-trait); outline: none; }
+.rangee input[type=search]::placeholder { color: var(--discret); }
+.rangee input[type=search]:focus { border-color: var(--accent-trait); outline: none; }
 
 .rangee { display: flex; gap: 6px; margin: 2px 0 4px; }
 .rangee button {
@@ -172,18 +160,17 @@ main { padding-bottom: 80px; }
 
 <div id="app">
   <aside id="panneau" aria-label="Filtres">
-<div class="rangee-recherche">
   <div class="rangee">
-  <input type="search" id="rech-lieu" placeholder="Lieu…" aria-label="Rechercher un lieu par nom">
-  <button type="button" id="tout-toggle">✓ Tout</button>
-</div>
-<div class="rangee">
-  <button type="button" id="tri-az">A → Z</button>
-  <button type="button" id="tri-nb">9 → 1</button>
-</div>
-    <div id="titre-liste">Catégories</div>
-    <ul id="liste"></ul>
-  </aside>
+    <input type="search" id="rech-lieu" placeholder="Lieu…" aria-label="Rechercher un lieu par nom">
+    <button type="button" id="tout-toggle">✓ Tout</button>
+  </div>
+  <div class="rangee">
+    <button type="button" id="tri-az">A → Z</button>
+    <button type="button" id="tri-nb">9 → 1</button>
+  </div>
+  <div id="titre-liste">Catégories</div>
+  <ul id="liste"></ul>
+</aside>
   <div id="cadre">
     <div id="etat">Chargement…</div>
     <div id="carte" role="region" aria-label="Carte des points d'intérêt"></div>
@@ -354,12 +341,7 @@ document.getElementById('tri-nb').addEventListener('click', function () {
   function categoriesAffichees() {
     return Object.keys(cats).filter(function (n) { return cats[n].li.style.display !== 'none'; });
   }
-  document.getElementById('rech-cat').addEventListener('input', function (e) {
-    const q = e.target.value.trim().toLowerCase();
-    Object.keys(cats).forEach(function (n) {
-      cats[n].li.style.display = n.toLowerCase().indexOf(q) === -1 ? 'none' : '';
-    });
-  });
+
   document.getElementById('rech-lieu').addEventListener('input', function (e) {
     recherche = e.target.value.trim().toLowerCase();
     actualiser();
