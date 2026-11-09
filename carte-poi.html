@@ -465,17 +465,6 @@ B88.cache('b88-poi-v1', chargerTout, function (data, estFrais) {
     actualiser();
   }
 });
-    .then(function (echecs) {
-      construireCategories();
-      statut.textContent = points.length.toLocaleString('fr-FR') + ' lieux dans ' + Object.keys(cats).length + ' catégories' +
-        (echecs ? ' · ' + echecs + ' carré(s) non chargé(s)' : '');
-      actualiser();
-    })
-    .catch(function () {
-      statut.textContent = 'Impossible de lire poi/carres.json';
-      etat.textContent = 'Données indisponibles';
-      carte.setView([46.5, 2.5], 6);
-    });
 })();
 </script>
 </body>
