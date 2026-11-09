@@ -15,8 +15,18 @@
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
     });
   }
-  window.B88 = Object.freeze({ DON_URL: DON_URL, racine: dossier, esc: esc });
-  var SOLEIL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>';
+function b88Cache(cle, fetcher, callback) {
+  try {
+    var brut = localStorage.getItem(cle);
+    if (brut) callback(JSON.parse(brut), false);
+  } catch (e) {}
+  fetcher(function (data) {
+    try { localStorage.setItem(cle, JSON.stringify(data)); } catch (e) {}
+    callback(data, true);
+  });
+}
+window.B88 = Object.freeze({ DON_URL: DON_URL, racine: dossier, esc: esc, cache: b88Cache });
+   var SOLEIL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>';
   var LUNE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
 
   function el(tag, cls, txt) {
