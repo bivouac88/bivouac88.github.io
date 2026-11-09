@@ -4,9 +4,78 @@
   var lance = false;
   window.demarrerMobile = function () { if (lance) return; lance = true; lancer(); };
   if (window.carnetPret) window.demarrerMobile();
+  function lancerSimple() {
+  var carnet = document.querySelector('.carnet');
+  if (!carnet) return;
+  var feuilles = [], chaps = [], chap = '';
+  Array.prototype.slice.call(carnet.children).forEach(function (el) {
+    if (el.classList.contains('chapitre')) chap = el.textContent.trim();
+    else if (el.classList.contains('feuille')) {
+      if (chap && !el.classList.contains('garde') && !chaps.some(function (c) { return c.nom === chap; })) chaps.push({ nom: chap, i: feuilles.length });
+      feuilles.push(el);
+    }
+  });
+  var couv = carnet.querySelector('.couverture');
+  if (!feuilles.length || !couv) return;
+
+  function d(c) { var e = document.createElement('div'); e.className = c; return e; }
+  function bouton(txt, label) { var b = document.createElement('button'); b.type = 'button'; b.textContent = txt; b.setAttribute('aria-label', label); return b; }
+
+  var N = feuilles.length, cur = 0, ouvert = false;
+
+  var barre = d('onglets-mobile');
+  barre.hidden = true;
+  chaps.forEach(function (c) {
+    var b = bouton(c.nom, 'Aller au chapitre : ' + c.nom);
+    b.addEventListener('click', function () { aller(c.i); });
+    c.btn = b;
+    barre.appendChild(b);
+  });
+  carnet.parentNode.insertBefore(barre, carnet);
+
+  var nav = d('nav-pages');
+  var pv = bouton('‹', 'Page précédente'), nx = bouton('›', 'Page suivante');
+  var cpt = document.createElement('span');
+  cpt.className = 'compteur';
+  cpt.setAttribute('aria-live', 'polite');
+  nav.appendChild(pv); nav.appendChild(cpt); nav.appendChild(nx);
+  pv.addEventListener('click', function () { aller(cur - 1); });
+  nx.addEventListener('click', function () { aller(cur + 1); });
+
+  function aller(i) {
+    if (i < 0 || i >= N) return;
+    cur = i;
+    feuilles.forEach(function (f, k) { f.classList.toggle('courante', k === cur); });
+    cpt.textContent = (cur + 1) + ' / ' + N;
+    pv.disabled = cur === 0;
+    nx.disabled = cur === N - 1;
+    var act = -1;
+    chaps.forEach(function (c, j) { if (c.i <= cur) act = j; });
+    chaps.forEach(function (c, j) { c.btn.classList.toggle('actif', j === act); });
+    var haut = carnet.getBoundingClientRect().top + window.pageYOffset - 130;
+    window.scrollTo(0, Math.max(0, haut));
+  }
+
+  function ouvrir() {
+    if (ouvert) return;
+    ouvert = true;
+    carnet.classList.remove('mobile-ferme');
+    carnet.classList.add('mobile-actif');
+    barre.hidden = false;
+    aller(0);
+  }
+  couv.setAttribute('role', 'button');
+  couv.tabIndex = 0;
+  couv.setAttribute('aria-label', 'Ouvrir le journal');
+  couv.addEventListener('click', ouvrir);
+  couv.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); ouvrir(); } });
+
+  carnet.classList.add('mobile-ferme');
+  carnet.appendChild(nav);
+}
   function lancer() {
   if (!window.matchMedia('(max-width: 1099px)').matches) return;
-  if (/Instagram/.test(navigator.userAgent)) return; // fallback simple, pas de 3D
+if (/Instagram/.test(navigator.userAgent)) { lancerSimple(); return; }
   var TEXTES = { exlibris: 'Ce journal appartient à', proprio: 'Bivouac88' };
   var carnet = document.querySelector('.carnet');
   if (!carnet) return;
