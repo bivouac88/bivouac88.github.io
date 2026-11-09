@@ -204,7 +204,12 @@ new ResizeObserver(function () { carte.invalidateSize(); }).observe(cadre);
     chunkedLoading: true, maxClusterRadius: 20, showCoverageOnHover: false,
     disableClusteringAtZoom: 15
   }).addTo(carte);
-
+B88.geo(function (pos) {
+  if (!pos) return;
+  L.circleMarker([pos.lat, pos.lon], {
+    radius: 8, color: '#3b82f6', fillColor: '#3b82f6', fillOpacity: 0.9, weight: 2
+  }).addTo(carte).bindTooltip('Vous êtes ici', { direction: 'top', offset: [0, -8] });
+});
   const points = [];             // {nom, groupes, lat, lon, id, cat}
   const cats = {};               // nom -> {n, actif, groupe, couleur, emoji, libelle, icone, li, cb}
   let recherche = '';
