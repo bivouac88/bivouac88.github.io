@@ -6,11 +6,11 @@
   if (window.carnetPret) window.demarrerMobile();
   function lancer() {
   if (!window.matchMedia('(max-width: 1099px)').matches) return;
+  if (/Instagram/.test(navigator.userAgent)) return; // fallback simple, pas de 3D
   var TEXTES = { exlibris: 'Ce journal appartient à', proprio: 'Bivouac88' };
   var carnet = document.querySelector('.carnet');
   if (!carnet) return;
   var reduit = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
   var feuilles = [], chaps = [], chap = '';
   Array.prototype.slice.call(carnet.children).forEach(function (el) {
     if (el.classList.contains('chapitre')) chap = el.textContent.trim();
