@@ -122,8 +122,8 @@ var marque = el('div', insta ? 'marque marque--insta' : 'marque');
   }
 
   // Appliqué tout de suite, avant l'affichage
-  document.documentElement.setAttribute('data-theme', themeChoisi() || themeSysteme());
-
+document.documentElement.setAttribute('data-theme', themeChoisi() || themeSysteme());
+if (/Instagram/.test(navigator.userAgent)) document.documentElement.classList.add('insta');
   document.addEventListener('DOMContentLoaded', function () {
     var b = document.getElementById('btn-theme');
     if (!b) { // une nouvelle page n'a pas besoin d'ajouter le bouton à la main
