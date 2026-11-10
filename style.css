@@ -532,3 +532,22 @@ h1.titre-page {
 .menu-site__liens { width: 100%; }
 .menu-site__liens li { flex: 1 1 auto; display: flex; }
 .menu-site__liens a { flex: 1; }
+
+/* Instagram : harmonisation du logo et du footer */
+html.insta .marque--insta .logo img {
+  width: 76px;
+  height: 76px;
+}
+
+html.insta .marque--insta .logo span {
+  font-size: 20px;
+}
+
+html.insta .pied {
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+html.insta .pied img {
+  height: 16px;
+}
