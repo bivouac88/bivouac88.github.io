@@ -648,6 +648,14 @@ html.insta .pied {
 html.insta .pied img {
   height: 16px;
 }
+    /* Hors Instagram : supprimer l'espace réservé à l'ancien tampon */
+html:not(.insta) .feuille[data-chap="Préparatifs"] {
+  padding-bottom: 24px;
+}
+
+html:not(.insta) .livre .feuille[data-chap="Préparatifs"] .feuille-int {
+  padding-bottom: 24px;
+}
 </style>
 <link rel="stylesheet" href="journal-3d.css">
 <link rel="stylesheet" href="journal-mobile.css">
