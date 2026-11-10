@@ -594,32 +594,27 @@ body.page-journal .pied {
     mask-image: none;
   }
 }
-
 /* ---------- Instagram uniquement ---------- */
 html.insta {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }
-
 @media (max-width: 1099px) {
   html.insta .feuille {
     --x-marge: 28px;
     padding: 24px 16px 16px calc(var(--x-marge) + 14px);
   }
-
   html.insta .feuille::before {
     left: 4px;
     width: 16px;
     background: radial-gradient(circle at 8px 8px, #2a1b11 0 4px, rgba(0,0,0,.3) 5px, transparent 7px) 0 0 / 16px 64px repeat-y;
   }
-
   html.insta .feuille h2 {
     font-size: 28px;
     line-height: 40px;
     white-space: nowrap;
     margin-bottom: 20px;
   }
-
 html.insta .feuille .feuille-date {
     float: right;
     display: flex;
@@ -628,11 +623,9 @@ html.insta .feuille .feuille-date {
     padding: 7px 14px;
     font-size: 15px;
   }
-
   html.insta .feuille p {
 font-size: 14px;
   }
-
   html.insta .feuille.garde .mot {
     font-size: 22px;
     line-height: 32px;
@@ -645,6 +638,15 @@ html.insta .marque--insta .logo img {
 
 html.insta .marque--insta .logo span {
   font-size: 20px;
+}
+    /* Footer : une ligne pour les trois liens dans Instagram */
+html.insta .pied {
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+html.insta .pied img {
+  height: 16px;
 }
 </style>
 <link rel="stylesheet" href="journal-3d.css">
