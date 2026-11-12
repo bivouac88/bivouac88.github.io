@@ -90,3 +90,26 @@ h1 { margin: 0; font-size: clamp(1.7rem, 5vw, 2.5rem); }
   font-size: 0.8rem;
   font-weight: 500;
 }
+
+.related-topics {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.related-topics small {
+  width: 100%;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.related-button {
+  background: transparent;
+  color: var(--orange);
+  border: 1px solid var(--line);
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
