@@ -338,3 +338,24 @@
 .b88-tour-controls button:hover:not(:disabled) {
   filter: brightness(1.15);
 }
+
+/* Liens vers les pages Bivouac88 */
+
+.b88-assistant-answer-links {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.b88-assistant-answer-links a {
+  color: #a85d0b;
+  font-size: 12px;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.b88-assistant-answer-links a:hover {
+  color: #e58e26;
+  text-decoration: underline;
+}
