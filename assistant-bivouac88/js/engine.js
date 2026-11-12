@@ -6,15 +6,16 @@ export function createEngine(knowledge) {
   let fallbackIndex = 0;
 
   function buildAnswer(intent) {
-    return {
-      type: "answer",
-      intentId: intent.id,
-      intentLabel: intent.label,
-      text: pickAnswer(intent),
-      action: intent.action || null,
-      related: intent.related || []
-    };
-  }
+  return {
+    type: "answer",
+    intentId: intent.id,
+    intentLabel: intent.label,
+    text: pickAnswer(intent),
+    action: intent.action || null,
+    related: intent.related || [],
+    links: intent.links || []
+  };
+}
 
   function fallback(score = 0) {
     const fallbacks = knowledge.assistant?.fallback || [
