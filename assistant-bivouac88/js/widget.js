@@ -1,3 +1,4 @@
+
 import { startTour } from "./widget-tour.js";
 import { loadKnowledge } from "./knowledge.js";
 import { createEngine } from "./engine.js";
@@ -116,6 +117,31 @@ async function initAssistant() {
     return message;
   }
 
+  function addLinks(links, message) {
+    if (!Array.isArray(links) || !links.length) return;
+
+    const container = document.createElement("div");
+    container.className = "b88-assistant-answer-links";
+
+    links.forEach(link => {
+      if (!link.url || !link.label) return;
+
+      const anchor = document.createElement("a");
+      anchor.href = link.url;
+      anchor.textContent = `↗ ${link.label}`;
+      anchor.target = "_blank";
+      anchor.rel = "noopener noreferrer";
+
+      container.appendChild(anchor);
+    });
+
+    if (container.children.length) {
+      message.appendChild(container);
+    }
+
+    messages.scrollTop = messages.scrollHeight;
+  }
+
   function addChoices(items, callback) {
     if (!Array.isArray(items) || !items.length) return;
 
@@ -145,15 +171,22 @@ async function initAssistant() {
       return;
     }
 
-    addMessage(result.text || "Je n'ai pas de réponse pour le moment.");
+    const answerMessage = addMessage(
+      result.text || "Je n'ai pas de réponse pour le moment."
+    );
+
+    // Affichage des liens associés à la réponse.
+    addLinks(result.links, answerMessage);
 
     if (result.type === "clarification") {
       addChoices(result.choices, choice => {
         const intentId = typeof choice === "string" ? choice : choice.id;
+
         if (intentId) {
           handleResult(engine.askIntent(intentId));
         }
       });
+
       return;
     }
 
@@ -169,15 +202,15 @@ async function initAssistant() {
     }
 
     if (result.action?.type === "tour") {
-  closePanel();
+      closePanel();
 
-  const started = startTour();
+      const started = startTour();
 
-  if (!started) {
-    openPanel();
-    addMessage("Je ne trouve pas les éléments à présenter sur cette page.");
-  }
-}
+      if (!started) {
+        openPanel();
+        addMessage("Je ne trouve pas les éléments à présenter sur cette page.");
+      }
+    }
   }
 
   function ask(question) {
