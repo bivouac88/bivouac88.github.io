@@ -1,5 +1,5 @@
 
-const steps = [
+const STEPS = [
   {
     selector: ".test-nav",
     title: "La navigation",
@@ -27,6 +27,7 @@ const steps = [
   }
 ];
 
+let activeSteps = [];
 let currentStep = 0;
 let overlay = null;
 let activeTarget = null;
@@ -66,11 +67,16 @@ function showStep() {
 
   restoreTarget();
 
-  const step = steps[currentStep];
+  const step = activeSteps[currentStep];
+  if (!step) {
+    finishTour();
+    return;
+  }
+
   const target = document.querySelector(step.selector);
 
   if (!target) {
-    if (currentStep < steps.length - 1) {
+    if (currentStep < activeSteps.length - 1) {
       currentStep++;
       showStep();
     } else {
@@ -95,35 +101,28 @@ function showStep() {
     block: "center"
   });
 
-  const title = overlay.querySelector(".b88-tour-title");
-  const description = overlay.querySelector(".b88-tour-description");
-  const counter = overlay.querySelector(".b88-tour-counter");
-  const previous = overlay.querySelector(".b88-tour-previous");
-  const next = overlay.querySelector(".b88-tour-next");
+  overlay.querySelector(".b88-tour-title").textContent = step.title;
+  overlay.querySelector(".b88-tour-description").textContent = step.text;
+  overlay.querySelector(".b88-tour-counter").textContent =
+    `${currentStep + 1} / ${activeSteps.length}`;
 
-  title.textContent = step.title;
-  description.textContent = step.text;
-  counter.textContent = `${currentStep + 1} / ${steps.length}`;
+  overlay.querySelector(".b88-tour-previous").disabled =
+    currentStep === 0;
 
-  previous.disabled = currentStep === 0;
-  next.textContent =
-    currentStep === steps.length - 1 ? "Terminer" : "Suivant →";
+  overlay.querySelector(".b88-tour-next").textContent =
+    currentStep === activeSteps.length - 1
+      ? "Terminer"
+      : "Suivant →";
 }
 
 export function startTour() {
   if (overlay) finishTour();
 
-  const availableSteps = steps.filter(step =>
+  activeSteps = STEPS.filter(step =>
     document.querySelector(step.selector)
   );
 
-  if (!availableSteps.length) {
-    return false;
-  }
-
-  // On conserve uniquement les étapes présentes sur la page.
-  const originalSteps = steps.splice(0, steps.length);
-  steps.push(...availableSteps);
+  if (!activeSteps.length) return false;
 
   currentStep = 0;
 
@@ -179,7 +178,7 @@ export function startTour() {
 
   overlay.querySelector(".b88-tour-next")
     .addEventListener("click", () => {
-      if (currentStep < steps.length - 1) {
+      if (currentStep < activeSteps.length - 1) {
         currentStep++;
         showStep();
       } else {
@@ -194,6 +193,5 @@ export function startTour() {
   document.addEventListener("keydown", escapeHandler);
 
   showStep();
-
   return true;
 }
