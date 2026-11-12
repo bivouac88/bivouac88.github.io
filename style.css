@@ -550,7 +550,9 @@ html.insta .pied {
 
 html.insta .pied img {
   height: 16px;
-   /* Apparition douce au scroll (la classe est ajoutée par commun.js) */
+}
+
+/* Apparition douce au scroll (la classe est ajoutée par commun.js) */
 .revele {
   opacity: 0;
   transform: translateY(16px);
@@ -560,5 +562,4 @@ html.insta .pied img {
 .revele.vu { opacity: 1; transform: none; }
 @media (prefers-reduced-motion: reduce) {
   .revele { opacity: 1; transform: none; }
-}
 }
