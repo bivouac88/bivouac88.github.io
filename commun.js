@@ -242,7 +242,31 @@ if (/Instagram/.test(navigator.userAgent)) document.documentElement.classList.ad
       (document.querySelector('main') || document.body).appendChild(f);
     }
   });
-
+  // ---- Apparition douce au scroll ----
+  document.addEventListener('DOMContentLoaded', function () {
+    if (!('IntersectionObserver' in window)) return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var CIBLES = '.stat-boite, .stat-secondaire, .carte-stat, .carte-record, .hero, .graphique';
+    if (/etapes/.test(location.pathname)) CIBLES += ', #journal > .etape';
+    var obs = new IntersectionObserver(function (liste) {
+      liste.forEach(function (it) {
+        if (!it.isIntersecting) return;
+        it.target.classList.add('vu');
+        obs.unobserve(it.target);
+      });
+    }, { threshold: 0.08 });
+    function preparer() {
+      document.querySelectorAll(CIBLES).forEach(function (n) {
+        if (n.classList.contains('revele')) return;
+        n.classList.add('revele');
+        obs.observe(n);
+      });
+    }
+    preparer();
+    // Les cartes créées plus tard par les pages (après chargement des données) sont prises en compte
+    var zone = document.querySelector('main') || document.body;
+    new MutationObserver(preparer).observe(zone, { childList: true, subtree: true });
+  });
   // Suit le thème du système tant que la personne n'a rien choisi
   if (window.matchMedia) {
     window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', function (e) {
