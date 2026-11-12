@@ -1,11 +1,26 @@
+
 export async function loadKnowledge() {
-  const response = await fetch("./data/knowledge.json", { cache: "no-store" });
-  if (!response.ok) throw new Error(`Chargement de la base impossible (${response.status})`);
-  return response.json();
+  const url = new URL("../data/knowledge.json", import.meta.url);
+
+  const response = await fetch(url, {
+    cache: "no-store"
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `Impossible de charger la base de connaissances : ${response.status}`
+    );
+  }
+
+  return await response.json();
 }
 
 export function pickAnswer(intent) {
-  const answers = intent?.answers || [];
-  if (!answers.length) return null;
-  return answers[Math.floor(Math.random() * answers.length)];
+  if (!intent || !Array.isArray(intent.answers) || !intent.answers.length) {
+    return "Je n'ai pas encore cette information dans mes sacoches.";
+  }
+
+  return intent.answers[
+    Math.floor(Math.random() * intent.answers.length)
+  ];
 }
