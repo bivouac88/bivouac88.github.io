@@ -1,3 +1,4 @@
+
 {
   "assistant": {
     "name": "Le Bivouaciste",
@@ -27,6 +28,12 @@
       "related": [
         "trip",
         "website"
+      ],
+      "links": [
+        {
+          "label": "Découvrir Bivouac88",
+          "url": "https://bivouac88.github.io/index.html"
+        }
       ]
     },
     {
@@ -48,6 +55,16 @@
       "related": [
         "project",
         "stages"
+      ],
+      "links": [
+        {
+          "label": "Suivre le parcours",
+          "url": "https://bivouac88.github.io/index.html"
+        },
+        {
+          "label": "Consulter le tracé GPS",
+          "url": "https://bivouac88.github.io/trace.html"
+        }
       ]
     },
     {
@@ -70,6 +87,16 @@
       ],
       "related": [
         "map"
+      ],
+      "links": [
+        {
+          "label": "Voir les étapes",
+          "url": "https://bivouac88.github.io/etapes.html"
+        },
+        {
+          "label": "Voir les statistiques",
+          "url": "https://bivouac88.github.io/stats.html"
+        }
       ]
     },
     {
@@ -94,6 +121,12 @@
       ],
       "related": [
         "stages"
+      ],
+      "links": [
+        {
+          "label": "Ouvrir la carte des POI",
+          "url": "https://bivouac88.github.io/carte-poi.html"
+        }
       ]
     },
     {
@@ -112,6 +145,12 @@
       ],
       "related": [
         "comments"
+      ],
+      "links": [
+        {
+          "label": "Voir les photos et les étapes",
+          "url": "https://bivouac88.github.io/etapes.html"
+        }
       ]
     },
     {
@@ -132,6 +171,12 @@
       ],
       "related": [
         "photos"
+      ],
+      "links": [
+        {
+          "label": "Voir les étapes et commentaires",
+          "url": "https://bivouac88.github.io/etapes.html"
+        }
       ]
     },
     {
@@ -152,6 +197,16 @@
       "related": [
         "project",
         "tour"
+      ],
+      "links": [
+        {
+          "label": "Retour à l'accueil",
+          "url": "https://bivouac88.github.io/index.html"
+        },
+        {
+          "label": "Consulter le journal",
+          "url": "https://bivouac88.github.io/journal.html"
+        }
       ]
     },
     {
