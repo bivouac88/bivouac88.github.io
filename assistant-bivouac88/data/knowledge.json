@@ -14,21 +14,13 @@
       "id": "project",
       "label": "Présentation du projet",
       "keywords": [
-        "bivouac88",
-        "c'est quoi",
-        "présente",
-        "projet",
-        "concept",
-        "objectif",
-        "site"
+        "bivouac88", "c'est quoi", "présente", "projet",
+        "concept", "objectif", "site"
       ],
       "answers": [
         "Bivouac88 est le carnet de route numérique d'un voyage à vélo à travers l'Europe. Il rassemble le parcours, les étapes, les photos, les statistiques et les informations utiles autour du voyage."
       ],
-      "related": [
-        "trip",
-        "website"
-      ],
+      "related": ["trip", "website"],
       "links": [
         {
           "label": "Découvrir Bivouac88",
@@ -40,22 +32,13 @@
       "id": "trip",
       "label": "Le voyage",
       "keywords": [
-        "voyage",
-        "europe",
-        "vélo",
-        "bicyclette",
-        "itinéraire",
-        "route",
-        "départ",
-        "parcours"
+        "voyage", "europe", "vélo", "bicyclette",
+        "itinéraire", "route", "départ", "parcours"
       ],
       "answers": [
         "Le projet suit un voyage à vélo à travers l'Europe. Le parcours est amené à évoluer : la liberté et la spontanéité font partie du voyage."
       ],
-      "related": [
-        "project",
-        "stages"
-      ],
+      "related": ["project", "stages"],
       "links": [
         {
           "label": "Suivre le parcours",
@@ -71,23 +54,14 @@
       "id": "stages",
       "label": "Étapes et progression",
       "keywords": [
-        "étape",
-        "étapes",
-        "kilomètre",
-        "kilomètres",
-        "kilometrage",
-        "kilometrès",
-        "dénivelé",
-        "progression",
-        "avancement",
-        "distance"
+        "étape", "étapes", "kilomètre", "kilomètres",
+        "kilometrage", "kilometrès", "dénivelé",
+        "progression", "avancement", "distance"
       ],
       "answers": [
         "La partie étapes sert à suivre les journées de route et la progression : distances, dénivelés et avancement général, selon les données publiées."
       ],
-      "related": [
-        "map"
-      ],
+      "related": ["map", "stats"],
       "links": [
         {
           "label": "Voir les étapes",
@@ -103,25 +77,14 @@
       "id": "map",
       "label": "Carte et points d'intérêt",
       "keywords": [
-        "carte",
-        "poi",
-        "point d'intérêt",
-        "points d'intérêt",
-        "eau",
-        "toilettes",
-        "douche",
-        "réparation",
-        "camping",
-        "bivouac",
-        "pharmacie",
-        "distributeur"
+        "carte", "poi", "point d'intérêt", "points d'intérêt",
+        "eau", "toilettes", "douche", "réparation",
+        "camping", "bivouac", "pharmacie", "distributeur"
       ],
       "answers": [
         "La carte et les POI ont pour but de repérer des services et lieux utiles au voyage : eau, sanitaires, réparateurs vélo, bivouacs et autres points d'intérêt disponibles dans les données."
       ],
-      "related": [
-        "stages"
-      ],
+      "related": ["stages", "fishing_weather"],
       "links": [
         {
           "label": "Ouvrir la carte des POI",
@@ -133,19 +96,12 @@
       "id": "photos",
       "label": "Photos",
       "keywords": [
-        "photo",
-        "photos",
-        "image",
-        "images",
-        "galerie",
-        "album"
+        "photo", "photos", "image", "images", "galerie", "album"
       ],
       "answers": [
         "Les photos permettent de partager des moments du voyage. Selon la page, elles peuvent être consultées directement et ouvertes en grand format."
       ],
-      "related": [
-        "comments"
-      ],
+      "related": ["community"],
       "links": [
         {
           "label": "Voir les photos et les étapes",
@@ -157,21 +113,13 @@
       "id": "community",
       "label": "Participation et interactions",
       "keywords": [
-        "like",
-        "likes",
-        "j'aime",
-        "commentaire",
-        "commentaires",
-        "participer",
-        "communauté",
-        "avis"
+        "like", "likes", "j'aime", "commentaire",
+        "commentaires", "participer", "communauté", "avis"
       ],
       "answers": [
         "Le site prévoit des interactions comme les likes et les commentaires afin que les visiteurs puissent réagir au voyage."
       ],
-      "related": [
-        "photos"
-      ],
+      "related": ["photos"],
       "links": [
         {
           "label": "Voir les étapes et commentaires",
@@ -183,21 +131,13 @@
       "id": "website",
       "label": "Fonctionnement du site",
       "keywords": [
-        "fonctionne",
-        "fonctionnement",
-        "utiliser",
-        "naviguer",
-        "rubrique",
-        "page",
-        "menu"
+        "fonctionne", "fonctionnement", "utiliser",
+        "naviguer", "rubrique", "page", "menu"
       ],
       "answers": [
         "Le site est une vitrine et un carnet de route. Tu peux naviguer entre ses différentes rubriques pour consulter le voyage, les étapes, les photos, les statistiques et les points d'intérêt."
       ],
-      "related": [
-        "project",
-        "tour"
-      ],
+      "related": ["project", "tour"],
       "links": [
         {
           "label": "Retour à l'accueil",
@@ -210,15 +150,90 @@
       ]
     },
     {
+      "id": "stats",
+      "label": "Statistiques du voyage",
+      "keywords": [
+        "statistique", "statistiques", "kilométrage",
+        "kilometres parcourus", "total kilomètres",
+        "record", "records", "moyenne", "moyennes",
+        "performance", "graphique", "courbe"
+      ],
+      "answers": [
+        "La rubrique statistiques permet de prendre du recul sur le voyage : kilomètres parcourus, dénivelé, moyennes, records et progression. Les chiffres évoluent avec les données enregistrées."
+      ],
+      "related": ["stages", "trip"],
+      "links": [
+        {
+          "label": "Consulter les statistiques",
+          "url": "https://bivouac88.github.io/stats.html"
+        }
+      ]
+    },
+    {
+      "id": "journal",
+      "label": "Journal de voyage",
+      "keywords": [
+        "journal", "récit", "récits", "actualité",
+        "actualités", "anecdote", "anecdotes",
+        "histoire", "histoires", "publication"
+      ],
+      "answers": [
+        "Le journal est l'espace consacré aux récits et aux moments du voyage. Il permet de retrouver une dimension plus personnelle que les simples chiffres du parcours."
+      ],
+      "related": ["trip", "photos"],
+      "links": [
+        {
+          "label": "Lire le journal de voyage",
+          "url": "https://bivouac88.github.io/journal.html"
+        }
+      ]
+    },
+    {
+      "id": "gps",
+      "label": "Tracé GPS",
+      "keywords": [
+        "gps", "tracé", "trace", "gpx", "fichier gpx",
+        "trace gps", "itinéraire gps", "parcours gps",
+        "télécharger le parcours"
+      ],
+      "answers": [
+        "Le tracé GPS permet de visualiser le parcours du voyage et de suivre son évolution géographique. Il complète les informations présentées dans les étapes."
+      ],
+      "related": ["trip", "stages"],
+      "links": [
+        {
+          "label": "Consulter le tracé GPS",
+          "url": "https://bivouac88.github.io/trace.html"
+        }
+      ]
+    },
+    {
+      "id": "fishing_weather",
+      "label": "Pêche et météo",
+      "keywords": [
+        "pêche", "peche", "poisson", "poissons",
+        "pêcher", "pecher", "lac", "lacs",
+        "étang", "étangs", "rivière", "rivieres",
+        "météo", "meteo", "prévisions", "prévision",
+        "conditions météo", "plan d'eau", "plans d'eau"
+      ],
+      "answers": [
+        "La rubrique pêche et météo rassemble des informations liées aux conditions météo et aux milieux aquatiques. Tu peux notamment y retrouver une carte des plans d'eau et des informations utiles à la pêche."
+      ],
+      "related": ["map"],
+      "links": [
+        {
+          "label": "Ouvrir la rubrique pêche et météo",
+          "url": "https://bivouac88.github.io/peche/meteo.html"
+        }
+      ]
+    },
+    {
       "id": "tour",
       "label": "Visite guidée",
       "keywords": [
-        "visite guidée",
-        "visite",
-        "tutoriel",
-        "guide",
-        "aide",
-        "comment visiter"
+        "visite guidée", "visite", "tutoriel", "guide",
+        "aide", "comment visiter"
       ],
       "answers": [
         "Une visite guidée interactive est prévue pour présenter les principales zones du site. Elle restera facultative et pourra être quittée à tout moment."
@@ -232,12 +247,8 @@
       "id": "support",
       "label": "Soutenir le projet",
       "keywords": [
-        "soutenir",
-        "don",
-        "donner",
-        "leetchi",
-        "aider",
-        "contribution"
+        "soutenir", "don", "donner", "leetchi",
+        "aider", "contribution"
       ],
       "answers": [
         "Le site peut proposer un lien de soutien facultatif. Le voyage reste indépendant : le soutien n'influence ni l'itinéraire ni les décisions."
