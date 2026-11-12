@@ -1,4 +1,4 @@
-
+import { startTour } from "./widget-tour.js";
 import { loadKnowledge } from "./knowledge.js";
 import { createEngine } from "./engine.js";
 
@@ -169,10 +169,15 @@ async function initAssistant() {
     }
 
     if (result.action?.type === "tour") {
-      addMessage(
-        "La visite guidée sera activée dans une prochaine version. Elle n'est pas encore disponible dans cet espace de test."
-      );
-    }
+  closePanel();
+
+  const started = startTour();
+
+  if (!started) {
+    openPanel();
+    addMessage("Je ne trouve pas les éléments à présenter sur cette page.");
+  }
+}
   }
 
   function ask(question) {
