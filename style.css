@@ -550,4 +550,15 @@ html.insta .pied {
 
 html.insta .pied img {
   height: 16px;
+   /* Apparition douce au scroll (la classe est ajoutée par commun.js) */
+.revele {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.2s ease, background-color 0.2s ease;
+}
+.revele.vu { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .revele { opacity: 1; transform: none; }
+}
 }
