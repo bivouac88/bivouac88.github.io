@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Assistant virtuel Bivouac88">
+  <title>Assistant Bivouac88 — espace de test</title>
+  <link rel="stylesheet" href="./css/assistant.css">
+</head>
+<body>
+  <main class="assistant-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">BIVOUAC88 · ASSISTANT</p>
+        <h1>Le compagnon de visite</h1>
+        <p class="subtitle">Un guide indépendant pour découvrir le projet.</p>
+      </div>
+      <span class="status"><i></i> Mode local</span>
+    </header>
+
+    <section class="chat-panel" aria-label="Conversation avec l'assistant">
+      <div class="chat-heading">
+        <div class="avatar" aria-hidden="true">88</div>
+        <div>
+          <strong>Le Bivouaciste</strong>
+          <p>Je connais le projet. Enfin… ce qu'on m'a appris.</p>
+        </div>
+      </div>
+
+      <div id="messages" class="messages" aria-live="polite">
+        <article class="message bot">
+          <p>Salut ! Bienvenue sur le camp de base Bivouac88.</p>
+          <p>Pose-moi une question sur le projet, le voyage ou le fonctionnement du site. Je ne suis pas une IA omnisciente : si je ne sais pas, je te le dirai.</p>
+        </article>
+      </div>
+
+      <div class="suggestions" id="suggestions">
+        <button type="button" data-question="C'est quoi Bivouac88 ?">C'est quoi Bivouac88 ?</button>
+        <button type="button" data-question="Comment suivre le voyage ?">Suivre le voyage</button>
+        <button type="button" data-question="Que trouve-t-on sur la carte ?">La carte et les POI</button>
+      </div>
+
+      <form id="chat-form" class="composer">
+        <label class="sr-only" for="question">Votre question</label>
+        <input id="question" name="question" type="text" maxlength="500"
+               placeholder="Écris ta question…" autocomplete="off" required>
+        <button type="submit">Envoyer</button>
+      </form>
+      <p class="footnote">Assistant expérimental · réponses issues d'une base locale, sans API externe.</p>
+    </section>
+
+    <section class="tools-panel">
+      <h2>Visite guidée</h2>
+      <p>Le parcours interactif sera activé lors de l'intégration au vrai site, lorsque ses éléments pourront être ciblés.</p>
+      <button type="button" id="tour-preview" class="secondary">Tester le module de visite</button>
+      <div id="tour-status" class="tour-status" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>

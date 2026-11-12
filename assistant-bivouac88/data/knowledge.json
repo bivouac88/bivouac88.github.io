@@ -1,0 +1,190 @@
+{
+  "assistant": {
+    "name": "Le Bivouaciste",
+    "fallback": [
+      "Je n'ai pas encore cette information dans mes sacoches. Essaie une autre formulation.",
+      "Là, tu me poses une colle. Cette réponse n'est pas encore dans ma base de connaissances.",
+      "Je préfère reconnaître que je ne sais pas plutôt que raconter n'importe quoi. Cette question reste à documenter."
+    ],
+    "lowConfidence": "Je ne suis pas certain d'avoir compris. Tu peux reformuler ou essayer une question plus directe ?"
+  },
+  "intents": [
+    {
+      "id": "project",
+      "label": "Présentation du projet",
+      "keywords": [
+        "bivouac88",
+        "c'est quoi",
+        "présente",
+        "projet",
+        "concept",
+        "objectif",
+        "site"
+      ],
+      "answers": [
+        "Bivouac88 est le carnet de route numérique d'un voyage à vélo à travers l'Europe. Il rassemble le parcours, les étapes, les photos, les statistiques et les informations utiles autour du voyage."
+      ],
+      "related": [
+        "trip",
+        "website"
+      ]
+    },
+    {
+      "id": "trip",
+      "label": "Le voyage",
+      "keywords": [
+        "voyage",
+        "europe",
+        "vélo",
+        "bicyclette",
+        "itinéraire",
+        "route",
+        "départ",
+        "parcours"
+      ],
+      "answers": [
+        "Le projet suit un voyage à vélo à travers l'Europe. Le parcours est amené à évoluer : la liberté et la spontanéité font partie du voyage."
+      ],
+      "related": [
+        "project",
+        "stages"
+      ]
+    },
+    {
+      "id": "stages",
+      "label": "Étapes et progression",
+      "keywords": [
+        "étape",
+        "étapes",
+        "kilomètre",
+        "kilométrage",
+        "dénivelé",
+        "progression",
+        "avancement",
+        "distance"
+      ],
+      "answers": [
+        "La partie étapes sert à suivre les journées de route et la progression : distances, dénivelés et avancement général, selon les données publiées."
+      ],
+      "related": [
+        "map"
+      ]
+    },
+    {
+      "id": "map",
+      "label": "Carte et points d'intérêt",
+      "keywords": [
+        "carte",
+        "poi",
+        "point d'intérêt",
+        "points d'intérêt",
+        "eau",
+        "toilettes",
+        "douche",
+        "réparation",
+        "camping",
+        "bivouac",
+        "pharmacie",
+        "distributeur"
+      ],
+      "answers": [
+        "La carte et les POI ont pour but de repérer des services et lieux utiles au voyage : eau, sanitaires, réparateurs vélo, bivouacs et autres points d'intérêt disponibles dans les données."
+      ],
+      "related": [
+        "stages"
+      ]
+    },
+    {
+      "id": "photos",
+      "label": "Photos",
+      "keywords": [
+        "photo",
+        "photos",
+        "image",
+        "images",
+        "galerie",
+        "album"
+      ],
+      "answers": [
+        "Les photos permettent de partager des moments du voyage. Selon la page, elles peuvent être consultées directement et ouvertes en grand format."
+      ],
+      "related": [
+        "comments"
+      ]
+    },
+    {
+      "id": "community",
+      "label": "Participation et interactions",
+      "keywords": [
+        "like",
+        "likes",
+        "j'aime",
+        "commentaire",
+        "commentaires",
+        "participer",
+        "communauté",
+        "avis"
+      ],
+      "answers": [
+        "Le site prévoit des interactions comme les likes et les commentaires afin que les visiteurs puissent réagir au voyage."
+      ],
+      "related": [
+        "photos"
+      ]
+    },
+    {
+      "id": "website",
+      "label": "Fonctionnement du site",
+      "keywords": [
+        "fonctionne",
+        "fonctionnement",
+        "utiliser",
+        "naviguer",
+        "rubrique",
+        "page",
+        "menu"
+      ],
+      "answers": [
+        "Le site est une vitrine et un carnet de route. Tu peux naviguer entre ses différentes rubriques pour consulter le voyage, les étapes, les photos, les statistiques et les points d'intérêt."
+      ],
+      "related": [
+        "project",
+        "tour"
+      ]
+    },
+    {
+      "id": "tour",
+      "label": "Visite guidée",
+      "keywords": [
+        "visite guidée",
+        "visite",
+        "tutoriel",
+        "guide",
+        "aide",
+        "comment visiter"
+      ],
+      "answers": [
+        "Une visite guidée interactive est prévue pour présenter les principales zones du site. Elle restera facultative et pourra être quittée à tout moment."
+      ],
+      "action": {
+        "type": "tour",
+        "label": "Lancer la visite guidée"
+      }
+    },
+    {
+      "id": "support",
+      "label": "Soutenir le projet",
+      "keywords": [
+        "soutenir",
+        "don",
+        "donner",
+        "leetchi",
+        "aider",
+        "contribution"
+      ],
+      "answers": [
+        "Le site peut proposer un lien de soutien facultatif. Le voyage reste indépendant : le soutien n'influence ni l'itinéraire ni les décisions."
+      ]
+    }
+  ]
+}

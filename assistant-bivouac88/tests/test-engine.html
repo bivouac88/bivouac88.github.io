@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title>Tests moteur Bivouac88</title></head>
+<body>
+  <h1>Tests rapides — moteur de réponses</h1>
+  <pre id="results">Tests en cours…</pre>
+  <script type="module">
+    import { createEngine } from "../js/engine.js";
+    import { normalizeText, detectIntent } from "../js/intent.js";
+
+    const knowledge = await (await fetch("../data/knowledge.json")).json();
+    const engine = createEngine(knowledge);
+    const tests = [
+      ["Présentation", "C'est quoi Bivouac88 ?", "project"],
+      ["Carte", "Où trouver les POI et les points d'eau ?", "map"],
+      ["Étapes", "Je veux voir les kilomètres et dénivelés", "stages"],
+      ["Inconnue", "Quelle est la recette du tiramisu ?", null]
+    ];
+    const output = tests.map(([label, question, expected]) => {
+      const result = engine.ask(question);
+      const passed = expected ? result.intentId === expected : result.type === "fallback";
+      return `${passed ? "OK" : "ÉCHEC"} — ${label} : ${result.intentId || result.type}`;
+    });
+    output.unshift(`Normalisation accents : ${normalizeText("découvertes à vélo") === "decouvertes a velo" ? "OK" : "ÉCHEC"}`);
+    document.querySelector("#results").textContent = output.join("\\n");
+  </script>
+</body>
+</html>
