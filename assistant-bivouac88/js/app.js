@@ -20,19 +20,17 @@ function addMessage(text, sender = "bot", result = null) {
   paragraph.textContent = text;
   article.append(paragraph);
 
-  // Action éventuelle
   if (result?.action?.type === "tour") {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "inline-action";
     button.textContent = result.action.label || "Lancer la visite";
-
     button.addEventListener("click", () => tour.start());
     article.append(button);
   }
 
-  // Suggestions de sujets associés
-  if (sender === "bot" && result?.related?.length) {
+  // Suggestions de sujets associés.
+  if (result?.related?.length) {
     const relatedBox = document.createElement("div");
     relatedBox.className = "related-topics";
 
@@ -44,20 +42,37 @@ function addMessage(text, sender = "bot", result = null) {
       const intent = engine.getIntent(intentId);
       if (!intent) return;
 
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "related-button";
-      button.dataset.intent = intent.id;
-      button.textContent = intent.label;
-
-      relatedBox.append(button);
+      relatedBox.append(createIntentButton(intent.id, intent.label));
     });
 
     article.append(relatedBox);
   }
 
+  // Choix proposés lorsque la question est ambiguë.
+  if (result?.type === "clarification") {
+    const choicesBox = document.createElement("div");
+    choicesBox.className = "related-topics";
+
+    result.choices.forEach(choice => {
+      choicesBox.append(
+        createIntentButton(choice.id, choice.label)
+      );
+    });
+
+    article.append(choicesBox);
+  }
+
   messages.append(article);
   messages.scrollTop = messages.scrollHeight;
+}
+
+function createIntentButton(id, label) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "related-button";
+  button.dataset.intent = id;
+  button.textContent = label;
+  return button;
 }
 
 function displayResult(result) {
@@ -77,7 +92,6 @@ function askIntent(intentId) {
   displayResult(engine.askIntent(intentId));
 }
 
-// Envoi d'une question écrite
 form.addEventListener("submit", event => {
   event.preventDefault();
 
@@ -90,7 +104,6 @@ form.addEventListener("submit", event => {
   input.focus();
 });
 
-// Questions suggérées au démarrage
 suggestions.addEventListener("click", event => {
   const button = event.target.closest("[data-question]");
   if (!button || !engine) return;
@@ -98,7 +111,6 @@ suggestions.addEventListener("click", event => {
   ask(button.dataset.question);
 });
 
-// Sujets associés dans les réponses
 messages.addEventListener("click", event => {
   const button = event.target.closest("[data-intent]");
   if (!button || !engine) return;
@@ -106,7 +118,6 @@ messages.addEventListener("click", event => {
   askIntent(button.dataset.intent);
 });
 
-// Module de visite guidée indépendant
 tour = createTour({
   steps: [
     {
@@ -147,7 +158,6 @@ tour = createTour({
   }
 });
 
-// Test du module de visite
 document.querySelector("#tour-preview").addEventListener("click", () => {
   tour.start();
 
@@ -164,25 +174,19 @@ document.querySelector("#tour-preview").addEventListener("click", () => {
     `;
 
     tourStatus.append(controls);
+
+    controls.addEventListener("click", event => {
+      if (event.target.matches("[data-tour-prev]")) tour.previous();
+      if (event.target.matches("[data-tour-next]")) tour.next();
+
+      if (event.target.matches("[data-tour-stop]")) {
+        tour.stop();
+        controls.remove();
+      }
+    });
   }
-
-  controls.addEventListener("click", event => {
-    if (event.target.matches("[data-tour-prev]")) {
-      tour.previous();
-    }
-
-    if (event.target.matches("[data-tour-next]")) {
-      tour.next();
-    }
-
-    if (event.target.matches("[data-tour-stop]")) {
-      tour.stop();
-      controls.remove();
-    }
-  });
 });
 
-// Chargement de la base de connaissances
 try {
   const knowledge = await loadKnowledge();
   engine = createEngine(knowledge);
