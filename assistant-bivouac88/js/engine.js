@@ -47,6 +47,14 @@ export function createEngine(knowledge) {
         knowledge.intents || []
       );
 
+      if (result.ambiguous.length) {
+        return {
+          type: "clarification",
+          text: "Je vois plusieurs possibilités. Tu parles de quoi exactement ?",
+          choices: result.ambiguous
+        };
+      }
+
       if (!result.intent) {
         return fallback(result.score);
       }
@@ -55,12 +63,9 @@ export function createEngine(knowledge) {
     },
 
     askIntent(intentId) {
-      const intent = (knowledge.intents || [])
-        .find(item => item.id === intentId);
+      const intent = this.getIntent(intentId);
 
-      if (!intent) {
-        return fallback();
-      }
+      if (!intent) return fallback();
 
       return buildAnswer(intent);
     },
