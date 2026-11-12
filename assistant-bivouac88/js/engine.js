@@ -6,16 +6,16 @@ export function createEngine(knowledge) {
   let fallbackIndex = 0;
 
   function buildAnswer(intent) {
-  return {
-    type: "answer",
-    intentId: intent.id,
-    intentLabel: intent.label,
-    text: pickAnswer(intent),
-    action: intent.action || null,
-    related: intent.related || [],
-    links: intent.links || []
-  };
-}
+    return {
+      type: "answer",
+      intentId: intent.id,
+      intentLabel: intent.label,
+      text: pickAnswer(intent),
+      action: intent.action || null,
+      related: intent.related || [],
+      links: intent.links || []
+    };
+  }
 
   function fallback(score = 0) {
     const fallbacks = knowledge.assistant?.fallback || [
@@ -66,14 +66,17 @@ export function createEngine(knowledge) {
     askIntent(intentId) {
       const intent = this.getIntent(intentId);
 
-      if (!intent) return fallback();
+      if (!intent) {
+        return fallback();
+      }
 
       return buildAnswer(intent);
     },
 
     getIntent(intentId) {
-      return (knowledge.intents || [])
-        .find(item => item.id === intentId) || null;
+      return (knowledge.intents || []).find(
+        item => item.id === intentId
+      ) || null;
     }
   };
 }
