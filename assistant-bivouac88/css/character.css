@@ -1,0 +1,43 @@
+
+/* ========================================
+   BIVOUAC88 — PERSONNAGE 3D
+======================================== */
+
+.b88-character {
+  position: fixed;
+  bottom: 12px;
+  left: 12px;
+  width: 180px;
+  height: 210px;
+  z-index: 850;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: filter 0.25s ease;
+}
+
+.b88-character:hover {
+  filter: drop-shadow(0 5px 12px rgba(229, 142, 38, 0.35));
+}
+
+.b88-character canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  outline: none;
+}
+
+.b88-character:focus-visible {
+  outline: 2px solid #e58e26;
+  outline-offset: 4px;
+  border-radius: 12px;
+}
+
+/* Petit écran */
+@media (max-width: 600px) {
+  .b88-character {
+    width: 125px;
+    height: 150px;
+    bottom: 8px;
+  }
+}
