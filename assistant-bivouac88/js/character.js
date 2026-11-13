@@ -252,8 +252,9 @@ function initCharacter() {
     }
   }
 
-  container.addEventListener("click", toggleChat);
-
+  container.addEventListener("click", () => {
+  document.dispatchEvent(new CustomEvent("b88:character-click"));
+});
   container.addEventListener("keydown", event => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
