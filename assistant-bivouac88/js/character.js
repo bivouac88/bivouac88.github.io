@@ -256,11 +256,16 @@ function initCharacter() {
   document.dispatchEvent(new CustomEvent("b88:character-click"));
 });
   container.addEventListener("keydown", event => {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      toggleChat();
-    }
-  });
+  if (event.target !== container) return;
+
+  if (event.key === "Enter" || event.key === " ") {
+    event.preventDefault();
+
+    document.dispatchEvent(
+      new CustomEvent("b88:character-click")
+    );
+  }
+});
 
   container.addEventListener("pointerenter", () => {
     hovered = true;
