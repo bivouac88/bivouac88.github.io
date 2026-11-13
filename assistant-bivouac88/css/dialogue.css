@@ -1,0 +1,149 @@
+
+.b88-dialogue {
+  position: absolute;
+  left: 125px;
+  bottom: 145px;
+  width: 260px;
+  z-index: 5;
+  display: none;
+  font-family: Arial, sans-serif;
+  color: #29251f;
+}
+
+.b88-dialogue.active {
+  display: block;
+}
+
+.b88-dialogue-bubble {
+  position: relative;
+  display: none;
+  padding: 17px 18px;
+  background: #fffdf7;
+  border: 2px solid #e58e26;
+  border-radius: 17px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+  font-size: 14px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.b88-dialogue-bubble::after {
+  content: "";
+  position: absolute;
+  left: 20px;
+  bottom: -11px;
+  width: 18px;
+  height: 18px;
+  background: #fffdf7;
+  border-right: 2px solid #e58e26;
+  border-bottom: 2px solid #e58e26;
+  transform: rotate(45deg);
+}
+
+.b88-dialogue-bubble.visible {
+  display: block;
+  animation: b88-bubble-in 0.25s ease-out;
+}
+
+.b88-dialogue-text {
+  padding-right: 12px;
+  white-space: pre-wrap;
+}
+
+.b88-dialogue-close {
+  position: absolute;
+  top: 5px;
+  right: 9px;
+  border: 0;
+  background: transparent;
+  color: #777;
+  font-size: 21px;
+  cursor: pointer;
+}
+
+.b88-dialogue-form {
+  display: none;
+  gap: 6px;
+  margin-top: 15px;
+  padding: 6px;
+  background: #fffdf7;
+  border: 1px solid #e58e26;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16);
+}
+
+.b88-dialogue.active .b88-dialogue-form {
+  display: flex;
+}
+
+.b88-dialogue-form input {
+  min-width: 0;
+  flex: 1;
+  padding: 9px;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: #29251f;
+  font-size: 13px;
+}
+
+.b88-dialogue-form button {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 9px;
+  background: #e58e26;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.b88-dialogue-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.b88-dialogue-choice,
+.b88-dialogue-link {
+  display: inline-block;
+  padding: 6px 10px;
+  border: 1px solid #d9a15d;
+  border-radius: 20px;
+  background: #fff7e9;
+  color: #60421f;
+  font-size: 12px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.b88-dialogue-choice:hover,
+.b88-dialogue-link:hover {
+  background: #f7e4c8;
+}
+
+@keyframes b88-bubble-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 600px) {
+  .b88-dialogue {
+    left: 85px;
+    bottom: 110px;
+    width: min(250px, calc(100vw - 105px));
+  }
+
+  .b88-dialogue-bubble {
+    padding: 14px;
+    font-size: 13px;
+  }
+}
