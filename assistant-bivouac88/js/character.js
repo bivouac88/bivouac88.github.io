@@ -33,8 +33,11 @@ async function initCharacter() {
     const avatar = await createAvatar3D(character);
 
     console.log("Bivouaciste GLB chargé !");
-    console.log("Animations disponibles :", avatar.getAnimationNames());
-
+// TEST : animation de course sur place
+setTimeout(() => {
+  console.log("Test du clip de course 001");
+  avatar.play("course:mixamo.com.001", 0.2);
+}, 1500);
     // Recherche automatique du clip de marche.
     const animations = avatar.getAnimationNames();
 
