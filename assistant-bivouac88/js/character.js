@@ -23,14 +23,16 @@ async function initCharacter() {
   });
 
   character.addEventListener("keydown", event => {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
+  if (event.target !== character) return;
 
-      document.dispatchEvent(
-        new CustomEvent("b88:character-click")
-      );
-    }
-  });
+  if (event.key === "Enter" || event.key === " ") {
+    event.preventDefault();
+
+    document.dispatchEvent(
+      new CustomEvent("b88:character-click")
+    );
+  }
+});
 
   try {
     const avatar = await createAvatar3D(character);
