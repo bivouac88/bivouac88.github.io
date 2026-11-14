@@ -137,16 +137,15 @@ gltf.animations.forEach(clip => {
 
 // Animations du fichier de course
 runGltf.animations.forEach(clip => {
-  const key = clip.name.toLowerCase();
-
-  if (actions[key]) {
-    console.warn("Nom d'animation déjà utilisé :", clip.name);
-    return;
-  }
+  const key = "course:" + clip.name.toLowerCase();
 
   actions[key] = mixer.clipAction(clip, character);
 
-  console.log("Animation ajoutée :", clip.name);
+  console.log("Animation de course ajoutée :", {
+    nom: key,
+    durée: clip.duration,
+    pistes: clip.tracks.map(track => track.name)
+  });
 });
 
   function play(name, fade = 0.25) {
