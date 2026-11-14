@@ -3,7 +3,10 @@ import * as THREE from "https://esm.sh/three@0.180.0";
 import { GLTFLoader } from "https://esm.sh/three@0.180.0/examples/jsm/loaders/GLTFLoader.js";
 
 const MODEL_URL = new URL("../Assets/nomade.glb", import.meta.url);
-
+const RUN_ANIMATION_URL = new URL(
+  "../Assets/bivouaceur qui court.glb",
+  import.meta.url
+);
 export async function createAvatar3D(container, options = {}) {
   if (!container) {
     throw new Error("Conteneur 3D introuvable.");
@@ -73,7 +76,25 @@ export async function createAvatar3D(container, options = {}) {
       "Impossible de charger nomade.glb : " + error.message
     );
   }
+// Chargement du fichier contenant l'animation de course
+let runGltf;
 
+try {
+  runGltf = await loader.loadAsync(RUN_ANIMATION_URL.href);
+
+  console.log("Animation de course chargée !");
+  console.log(
+    "Clips disponibles :",
+    runGltf.animations.map(clip => clip.name)
+  );
+} catch (error) {
+  renderer.dispose();
+  renderer.domElement.remove();
+
+  throw new Error(
+    "Impossible de charger le GLB de course : " + error.message
+  );
+}
   const character = gltf.scene;
   scene.add(character);
 
@@ -108,10 +129,25 @@ export async function createAvatar3D(container, options = {}) {
   const actions = {};
   let currentAction = null;
 
-  gltf.animations.forEach((clip) => {
-    const action = mixer.clipAction(clip);
-    actions[clip.name.toLowerCase()] = action;
-  });
+  // Animations du personnage principal
+gltf.animations.forEach(clip => {
+  const key = clip.name.toLowerCase();
+  actions[key] = mixer.clipAction(clip, character);
+});
+
+// Animations du fichier de course
+runGltf.animations.forEach(clip => {
+  const key = clip.name.toLowerCase();
+
+  if (actions[key]) {
+    console.warn("Nom d'animation déjà utilisé :", clip.name);
+    return;
+  }
+
+  actions[key] = mixer.clipAction(clip, character);
+
+  console.log("Animation ajoutée :", clip.name);
+});
 
   function play(name, fade = 0.25) {
     const action = actions[name.toLowerCase()];
