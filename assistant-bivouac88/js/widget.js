@@ -85,7 +85,19 @@ async function initAssistant() {
   `;
 
   document.body.appendChild(root);
+  const avatarContainer = root.querySelector("#b88-avatar-container");
 
+  let avatar3D = null;
+
+  createAvatar3D(avatarContainer)
+    .then(avatar => {
+      avatar3D = avatar;
+      console.log("Bivouaciste 3D chargé !");
+      console.log("Animations disponibles :", avatar.animations);
+    })
+    .catch(error => {
+      console.error("Erreur de chargement du Bivouaciste 3D :", error);
+    });
   const toggle = root.querySelector(".b88-assistant-toggle");
   const close = root.querySelector(".b88-assistant-close");
   const panel = root.querySelector(".b88-assistant-panel");
