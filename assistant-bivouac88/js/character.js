@@ -33,10 +33,27 @@ async function initCharacter() {
     const avatar = await createAvatar3D(character);
 
     console.log("Bivouaciste GLB chargé !");
-// TEST : animation de course sur place
+// COURSE : traversée complète de l'écran
 setTimeout(() => {
-  console.log("Test du clip de course 001");
+  // Oriente le personnage vers la droite
+  avatar.setRotationY(Math.PI / 2);
+
+  // Lance la course
   avatar.play("course:mixamo.com.001", 0.2);
+
+  // Prépare le déplacement
+  character.style.transition = "none";
+  character.style.left = "12px";
+
+  // Force le navigateur à appliquer la position initiale
+  character.offsetHeight;
+
+  // Départ vers la droite, jusqu'à sortir complètement de l'écran
+  requestAnimationFrame(() => {
+    character.style.transition = "left 6s linear";
+    character.style.left = `${window.innerWidth + character.offsetWidth}px`;
+  });
+
 }, 1500);
     // Recherche automatique du clip de marche.
     const animations = avatar.getAnimationNames();
