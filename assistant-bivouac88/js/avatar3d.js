@@ -237,7 +237,9 @@ runGltf.animations.forEach(clip => {
     setVisible(visible) {
       character.visible = visible;
     },
-
+setRotationY(angle) {
+  character.rotation.y = angle;
+},
     dispose() {
       active = false;
 
