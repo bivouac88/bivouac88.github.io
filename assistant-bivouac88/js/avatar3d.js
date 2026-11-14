@@ -135,17 +135,26 @@ gltf.animations.forEach(clip => {
   actions[key] = mixer.clipAction(clip, character);
 });
 
-// Animations du fichier de course
+  // Animations du fichier de course, converties en course sur place
 runGltf.animations.forEach(clip => {
+  const inPlaceClip = clip.clone();
+
+  inPlaceClip.tracks.forEach(track => {
+    if (/hips?.*\.position$/i.test(track.name)) {
+      const values = track.values;
+
+      // Supprime le déplacement horizontal des hanches
+      // tout en conservant leur mouvement vertical
+      for (let i = 0; i < values.length; i += 3) {
+        values[i] = values[0];
+        values[i + 2] = values[2];
+      }
+    }
+  });
+
   const key = "course:" + clip.name.toLowerCase();
 
-  actions[key] = mixer.clipAction(clip, character);
-
-  console.log("Animation de course ajoutée :", {
-    nom: key,
-    durée: clip.duration,
-    pistes: clip.tracks.map(track => track.name)
-  });
+  actions[key] = mixer.clipAction(inPlaceClip, character);
 });
 
   function play(name, fade = 0.25) {
