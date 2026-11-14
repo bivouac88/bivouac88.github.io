@@ -2,7 +2,7 @@
 import { startTour } from "./widget-tour.js";
 import { loadKnowledge } from "./knowledge.js";
 import { createEngine } from "./engine.js";
-
+import { createAvatar3D } from "./avatar3d.js";
 const ROOT_ID = "b88-assistant-widget";
 
 async function initAssistant() {
