@@ -46,7 +46,9 @@ async function initAssistant() {
           type="button"
           aria-label="Fermer"
         >×</button>
-      </header>
+            </header>
+
+      <div id="b88-avatar-container"></div>
 
       <div class="b88-assistant-messages" aria-live="polite">
         <div class="b88-assistant-message bot">
