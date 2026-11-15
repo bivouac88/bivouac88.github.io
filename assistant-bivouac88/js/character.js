@@ -1,26 +1,19 @@
 
 import { createAvatar3D } from "./avatar3d.js";
 
-const CHARACTER_ID = "b88-character";
-
 async function initCharacter() {
-  if (document.getElementById(CHARACTER_ID)) return;
+  if (document.getElementById("b88-character")) return;
 
-  const character = document.createElement("div");
-  character.id = CHARACTER_ID;
-  character.className = "b88-character";
+  const container = document.createElement("div");
+  container.id = "b88-character";
+  container.className = "b88-character";
 
-  character.style.transition = "none";
-
-  document.body.appendChild(character);
+  document.body.appendChild(container);
 
   try {
-    const avatar = await createAvatar3D(character);
-
+    await createAvatar3D(container);
     console.log("Bivouaciste chargé !");
-    
-  } 
-    catch (error) {
+  } catch (error) {
     console.error("Erreur Bivouaciste :", error);
   }
 }
