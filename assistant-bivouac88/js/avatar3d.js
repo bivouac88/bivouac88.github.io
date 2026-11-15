@@ -76,7 +76,7 @@ export async function createAvatar3D(container) {
 
   camera.position.set(0, height * 0.08, distance);
   camera.lookAt(0, 0, 0);
-
+character.rotation.y = Math.PI / 2;
   // Utilisation de la dernière animation intégrée au GLB
   const clips = gltf.animations;
   const courseClip = clips[clips.length - 1];
