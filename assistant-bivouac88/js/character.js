@@ -91,7 +91,8 @@ new GLTFLoader().load(
     const box = new THREE.Box3().setFromObject(model);
     const size = box.getSize(new THREE.Vector3());
     model.scale.setScalar(CONFIG.heightPx / size.y);
-
+window.__charWidth = size.x * (CONFIG.heightPx / size.y);
+window.__charHeight = CONFIG.heightPx;
     const scaledBox = new THREE.Box3().setFromObject(model);
     const center = scaledBox.getCenter(new THREE.Vector3());
     model.position.x -= center.x;
@@ -144,28 +145,32 @@ let dragging = false;
 let dragOffsetX = 0;
 let dragOffsetY = 0;
 
-window.addEventListener('mousemove', (e) => {
-  if (dragging) {
-    const rect = renderer.domElement.getBoundingClientRect();
-    posX = e.clientX - rect.left - dragOffsetX;
-    posY = rect.height - (e.clientY - rect.top) - dragOffsetY;
-    return;
-  }
+function isOverCharacter(mx, my) {
+  const w = (window.__charWidth || 40) / 2 + 15; // marge de confort
+  const h = (window.__charHeight || 45) + 15;
+  return mx > posX - w && mx < posX + w && my > posY - 10 && my < posY + h;
+}
 
-  // Active le canvas seulement si la souris est proche du perso
+window.addEventListener('mousemove', (e) => {
   const rect = renderer.domElement.getBoundingClientRect();
   const mx = e.clientX - rect.left;
   const my = rect.height - (e.clientY - rect.top);
-  const dist = Math.sqrt((mx - posX) ** 2 + (my - posY) ** 2);
-  container.style.pointerEvents = dist < 60 ? 'auto' : 'none';
+
+  if (dragging) {
+    posX = mx - dragOffsetX;
+    posY = my - dragOffsetY;
+    return;
+  }
+
+  container.style.pointerEvents = isOverCharacter(mx, my) ? 'auto' : 'none';
 });
 
 renderer.domElement.addEventListener('mousedown', (e) => {
   const rect = renderer.domElement.getBoundingClientRect();
   const mx = e.clientX - rect.left;
   const my = rect.height - (e.clientY - rect.top);
-  const dist = Math.sqrt((mx - posX) ** 2 + (my - posY) ** 2);
-  if (dist < 60) {
+
+  if (isOverCharacter(mx, my)) {
     dragging = true;
     dragOffsetX = mx - posX;
     dragOffsetY = my - posY;
