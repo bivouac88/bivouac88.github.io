@@ -98,6 +98,15 @@ export async function createAvatar3D(container) {
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     renderer.setSize(width, height, false);
+    const visibleWidth =
+  2 * distance * Math.tan(
+    THREE.MathUtils.degToRad(camera.fov / 2)
+  ) * camera.aspect;
+
+// Place le personnage à environ 100 pixels du bord gauche
+character.position.x =
+  -visibleWidth / 2 +
+  (100 / width) * visibleWidth;
   }
 
   const resizeObserver = new ResizeObserver(resize);
