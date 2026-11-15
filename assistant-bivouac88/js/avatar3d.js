@@ -4,7 +4,7 @@ import { GLTFLoader } from "https://esm.sh/three@0.180.0/examples/jsm/loaders/GL
 
 const MODEL_URL = new URL("../Assets/nomade.glb", import.meta.url);
 const RUN_ANIMATION_URL = new URL(
-  "../Assets/bivouaceur qui court.glb",
+  "../Assets/Courrir/bivouaceur qui court full ok.glb",
   import.meta.url
 );
 export async function createAvatar3D(container, options = {}) {
