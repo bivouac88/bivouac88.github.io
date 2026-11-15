@@ -98,7 +98,6 @@ setTimeout(() => {
         console.log("Le Bivouaciste a terminé sa marche.");
       }, duration);
     }, 1500);
-
   } catch (error) {
     console.error("Erreur de chargement du Bivouaciste :", error);
   }
