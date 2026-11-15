@@ -40,7 +40,8 @@ async function initCharacter() {
 
       // Lance la course
       avatar.play("course:mixamo.com.001", 0.2);
-
+avatar.play("course:mixamo.com.001", 0.2);
+console.log("Taille personnage:", character.offsetWidth, "Largeur fenêtre:", window.innerWidth);
       // Prépare le déplacement
       character.style.transition = "none";
       character.style.left = "12px";
