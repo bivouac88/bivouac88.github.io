@@ -243,13 +243,36 @@ saveBtn.addEventListener('click', () => {
   scenes.push(scene);
 
   const item = document.createElement('div');
-  item.textContent = `#${scene.id} — ${scene.animation} — ${scene.rotation}° — (${scene.x}, ${scene.y})`;
-  Object.assign(item.style, {
-    padding: '4px 6px', marginBottom: '3px',
-    background: '#2a2520', borderRadius: '3px',
-    border: '1px solid #38332b'
-  });
-  sceneList.appendChild(item);
+Object.assign(item.style, {
+  padding: '4px 6px', marginBottom: '3px',
+  background: '#2a2520', borderRadius: '3px',
+  border: '1px solid #38332b',
+  display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+});
+
+const label = document.createElement('span');
+label.textContent = `#${scene.id} — ${scene.animation}`;
+label.style.overflow = 'hidden';
+label.style.textOverflow = 'ellipsis';
+label.style.whiteSpace = 'nowrap';
+
+const playBtn = document.createElement('button');
+playBtn.textContent = '▶';
+Object.assign(playBtn.style, {
+  background: '#e58e26', border: 'none', borderRadius: '3px',
+  color: '#12100e', cursor: 'pointer', padding: '2px 6px',
+  fontSize: '10px', flexShrink: '0', marginLeft: '6px'
+});
+
+playBtn.addEventListener('click', () => {
+  window.characterMoveTo(scene.x, scene.y);
+  window.characterPlay(scene.animation);
+  window.characterRotate(scene.rotation);
+});
+
+item.appendChild(label);
+item.appendChild(playBtn);
+sceneList.appendChild(item);
 
   console.info('[controller] scène sauvegardée :', scene);
 });
