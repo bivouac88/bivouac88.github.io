@@ -11,7 +11,6 @@ async function initCharacter() {
   character.className = "b88-character";
 
   character.style.transition = "none";
-  character.style.left = "12px";
 
   document.body.appendChild(character);
 
