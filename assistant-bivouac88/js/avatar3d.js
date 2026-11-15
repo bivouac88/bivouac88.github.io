@@ -96,6 +96,7 @@ if (key === "course") console.log("Tracks course:", clip.tracks.map(t => t.name)
         });
 
         actions[key] = mixer.clipAction(inPlaceClip, character);
+        if (key === "course") actions[key].loop = THREE.LoopPingPong;
       });
     } catch (error) {
       console.warn(`Impossible de charger l'animation "${key}" :`, error.message);
