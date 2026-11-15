@@ -178,7 +178,10 @@ new GLTFLoader().load(
       } else {
         console.warn('[character] animation introuvable :', CONFIG.searchClipName);
       }
-    
+    } else {
+      console.warn('[character] aucune animation dans le GLB');
+    }
+
     x = CONFIG.startXPx;
     runner.position.x = x;
   },
