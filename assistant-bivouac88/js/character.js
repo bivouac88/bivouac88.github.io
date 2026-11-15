@@ -13,7 +13,7 @@ const CONFIG = {
   pauseSeconds: 0.8,    // pause hors écran avant de recommencer
   canvasHeightPx: 220,  // hauteur de la bande où il court
   bottomOffsetPx: 6,    // distance entre ses pieds et le bas de l'écran
-  animationName: null,  // ex. "Run" ; null = première animation du fichier
+  animationName: null,  // ex. "Run" ; null = dernière animation du fichier
   // Orientation initiale du modèle : 0 = regarde vers +Z (standard glTF).
   // Si le personnage court de dos ou à reculons, essaie Math.PI / 2 ou -Math.PI / 2.
   facingOffset: 0,
@@ -99,7 +99,7 @@ new GLTFLoader().load(
       const clip =
         (CONFIG.animationName &&
           THREE.AnimationClip.findByName(gltf.animations, CONFIG.animationName)) ||
-        gltf.animations[0];
+        gltf.animations[gltf.animations.length - 1];
       mixer.clipAction(clip).play();
       console.info('[character] animations :', gltf.animations.map((a) => a.name));
     } else {
