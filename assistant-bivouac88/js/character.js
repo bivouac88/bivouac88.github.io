@@ -7,7 +7,7 @@ import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/
 // ---------- Réglages ----------
 const CONFIG = {
   // Chemin du .glb, relatif à ce fichier (js/) -> remonte d'un cran puis Assets/
-  modelUrl: new URL('../Assets/bivouaceur complet.glb', import.meta.url).href,
+  modelUrl: new URL('../Assets/bivouaceur_complet.glb', import.meta.url).href,
   heightPx: 160,        // hauteur du personnage à l'écran (en pixels)
   speedPx: 0,           // 0 = pas de glissement (l'animation seule fait bouger le perso)
   startXPx: 120,         // position de départ depuis le bord gauche
