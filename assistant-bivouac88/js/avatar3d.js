@@ -1,4 +1,3 @@
-
 import * as THREE from "https://esm.sh/three@0.180.0";
 import { GLTFLoader } from "https://esm.sh/three@0.180.0/examples/jsm/loaders/GLTFLoader.js";
 
@@ -24,11 +23,7 @@ export async function createAvatar3D(container) {
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.15;
   renderer.setClearColor(0x000000, 0);
-
-  renderer.domElement.style.width = "100%";
-  renderer.domElement.style.height = "100%";
-  renderer.domElement.style.display = "block";
-
+  renderer.domElement.style.cssText = "width:100%;height:100%;display:block;";
   container.appendChild(renderer.domElement);
 
   scene.add(new THREE.HemisphereLight(0xffffff, 0x606070, 2));
@@ -42,8 +37,6 @@ export async function createAvatar3D(container) {
   scene.add(fillLight);
 
   const loader = new GLTFLoader();
-
-  // Chargement direct du personnage avec son animation intégrée
   const gltf = await loader.loadAsync(COURSE_URL.href);
   const character = gltf.scene;
 
@@ -51,50 +44,48 @@ export async function createAvatar3D(container) {
     throw new Error("Aucune animation trouvée dans le fichier de course.");
   }
 
-  // Le groupe parent permet de positionner le personnage
-  // sans modifier les transformations de son animation.
+  // Choisit automatiquement le clip le plus long : c'est quasi toujours
+  // le vrai cycle de course, les clips très courts étant des poses figées.
+  const courseClip = gltf.animations.reduce((best, clip) =>
+    clip.duration > best.duration ? clip : best
+  );
+
+  console.log(
+    "Clip retenu :", courseClip.name,
+    "| Durée :", courseClip.duration.toFixed(2), "s",
+    "| sur", gltf.animations.length, "clips disponibles"
+  );
+
   const avatarRoot = new THREE.Group();
   scene.add(avatarRoot);
   avatarRoot.add(character);
 
-  // Centrage du personnage
   const box = new THREE.Box3().setFromObject(character);
   const size = box.getSize(new THREE.Vector3());
   const center = box.getCenter(new THREE.Vector3());
+  avatarRoot.position.set(-center.x, -center.y, -center.z);
 
-  avatarRoot.position.set(
-    -center.x,
-    -center.y,
-    -center.z
-  );
+  // Orientation : valeur de départ fiable pour ce type de rig.
+  // Si le personnage court à l'envers (vers la gauche au lieu de la droite),
+  // remplace juste le signe : Math.PI / 2 au lieu de -Math.PI / 2.
+  avatarRoot.rotation.y = -Math.PI / 2;
 
   const height = Math.max(size.y, 0.01);
-
   const distance = height / (
     2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))
   ) * 1.35;
 
   camera.position.set(0, height * 0.08, distance);
   camera.lookAt(0, 0, 0);
-character.rotation.y = Math.PI / 2;
-  // Utilisation de la dernière animation intégrée au GLB
-  const clips = gltf.animations;
-  const courseClip = clips[clips.length - 1];
-
-  console.log(
-    "Personnage chargé :",
-    COURSE_URL.pathname,
-    "| Animation :",
-    courseClip.name,
-    "| Durée :",
-    courseClip.duration.toFixed(2) + " secondes"
-  );
 
   const mixer = new THREE.AnimationMixer(character);
   const courseAction = mixer.clipAction(courseClip);
-
   courseAction.setLoop(THREE.LoopRepeat, Infinity);
   courseAction.play();
+
+  // Avance l'animation d'un cran avant le tout premier rendu,
+  // pour ne jamais laisser apparaître la pose en T de départ.
+  mixer.update(0.001);
 
   const clock = new THREE.Clock();
   let active = true;
@@ -103,23 +94,11 @@ character.rotation.y = Math.PI / 2;
   function resize() {
     const width = container.clientWidth;
     const height = container.clientHeight;
-
     if (!width || !height) return;
 
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     renderer.setSize(width, height, false);
-
-    const visibleWidth =
-      2 * distance * Math.tan(
-        THREE.MathUtils.degToRad(camera.fov / 2)
-      ) * camera.aspect;
-
-    // Position de départ à gauche de l'écran
-    avatarRoot.position.x =
-      -center.x -
-      visibleWidth / 2 +
-      (100 / width) * visibleWidth;
   }
 
   const resizeObserver = new ResizeObserver(resize);
@@ -128,20 +107,14 @@ character.rotation.y = Math.PI / 2;
 
   function animate() {
     if (!active) return;
-
     frameId = requestAnimationFrame(animate);
-
     mixer.update(Math.min(clock.getDelta(), 0.05));
     renderer.render(scene, camera);
   }
-
   animate();
 
   return {
-    setRotationY(angle) {
-      avatarRoot.rotation.y = angle;
-    },
-
+    setRotationY(angle) { avatarRoot.rotation.y = angle; },
     dispose() {
       active = false;
       cancelAnimationFrame(frameId);
