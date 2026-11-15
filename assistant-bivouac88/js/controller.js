@@ -199,4 +199,62 @@ rotSlider.addEventListener('input', () => {
 rotRow.appendChild(rotSlider);
 rotRow.appendChild(rotValue);
 body.appendChild(rotRow);
+
+// --- Section scènes ---
+const scenesLabel = document.createElement('div');
+scenesLabel.textContent = 'SCÈNES';
+Object.assign(scenesLabel.style, { color: '#888', marginBottom: '6px', fontSize: '11px', marginTop: '14px' });
+body.appendChild(scenesLabel);
+
+const scenes = [];
+let currentAnim = 'Angry';
+let currentX = window.innerWidth - 120;
+let currentY = 6;
+let currentRot = 0;
+
+// Mise à jour de l'état courant
+const origPlay = window.characterPlay;
+window.characterPlay = (name) => { currentAnim = name; origPlay(name); };
+const origMove = window.characterMoveTo;
+window.characterMoveTo = (x, y) => { currentX = x; currentY = y; origMove(x, y); };
+const origRotate = window.characterRotate;
+window.characterRotate = (deg) => { currentRot = deg; origRotate(deg); };
+
+const saveBtn = document.createElement('button');
+saveBtn.textContent = '💾 Sauvegarder cette scène';
+Object.assign(saveBtn.style, {
+  width: '100%', background: '#2a2520', border: '1px solid #38332b',
+  borderRadius: '4px', color: '#ccc', padding: '7px',
+  cursor: 'pointer', fontSize: '11px', marginBottom: '8px'
+});
+
+const sceneList = document.createElement('div');
+Object.assign(sceneList.style, { fontSize: '10px', color: '#aaa' });
+
+saveBtn.addEventListener('click', () => {
+  const scene = {
+    id: scenes.length + 1,
+    animation: currentAnim,
+    x: currentX,
+    y: currentY,
+    rotation: currentRot,
+    trigger: 'manuel'
+  };
+  scenes.push(scene);
+
+  const item = document.createElement('div');
+  item.textContent = `#${scene.id} — ${scene.animation} — ${scene.rotation}° — (${scene.x}, ${scene.y})`;
+  Object.assign(item.style, {
+    padding: '4px 6px', marginBottom: '3px',
+    background: '#2a2520', borderRadius: '3px',
+    border: '1px solid #38332b'
+  });
+  sceneList.appendChild(item);
+
+  console.info('[controller] scène sauvegardée :', scene);
+});
+
+body.appendChild(saveBtn);
+body.appendChild(sceneList);
+
 document.body.appendChild(panel);
