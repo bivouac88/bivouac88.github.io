@@ -85,10 +85,14 @@ export async function createAvatar3D(container) {
     try {
       const animGltf = await loader.loadAsync(url.href);
 
-      console.log(
-        `Animation "${key}" chargée. Clips :`,
-        animGltf.animations.map(c => c.name)
-      );
+console.log(
+  `Animation "${key}" :`,
+  animGltf.animations.map(c => ({
+    nom: c.name,
+    durée: c.duration,
+    images: c.tracks.map(t => t.times.length)
+  }))
+);
 
       animGltf.animations.forEach(clip => {
         const inPlaceClip = clip.clone();
