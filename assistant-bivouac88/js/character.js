@@ -23,13 +23,6 @@ async function initCharacter() {
     // Orientation de face
     avatar.setRotationY(0);
 
-    // Déplacement sur toute la largeur de l'écran
-    requestAnimationFrame(() => {
-      character.style.transition = "left 4s linear";
-      character.style.left =
-        `${window.innerWidth + character.offsetWidth}px`;
-    });
-
   } catch (error) {
     console.error("Erreur Bivouaciste :", error);
   }
