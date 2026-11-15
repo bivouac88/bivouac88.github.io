@@ -168,5 +168,35 @@ document.addEventListener('click', (e) => {
   modeBtn.textContent = '📍 Activer placement';
   document.body.style.cursor = '';
 });
+// --- Section orientation ---
+const rotLabel = document.createElement('div');
+rotLabel.textContent = 'ORIENTATION';
+Object.assign(rotLabel.style, { color: '#888', marginBottom: '6px', fontSize: '11px', marginTop: '14px' });
+body.appendChild(rotLabel);
 
+const rotRow = document.createElement('div');
+Object.assign(rotRow.style, { display: 'flex', alignItems: 'center', gap: '8px' });
+
+const rotSlider = document.createElement('input');
+rotSlider.type = 'range';
+rotSlider.min = '0';
+rotSlider.max = '360';
+rotSlider.value = '0';
+Object.assign(rotSlider.style, { flex: '1', accentColor: '#e58e26', cursor: 'pointer' });
+
+const rotValue = document.createElement('span');
+rotValue.textContent = '0°';
+Object.assign(rotValue.style, { color: '#aaa', fontSize: '11px', minWidth: '30px' });
+
+rotSlider.addEventListener('input', () => {
+  const deg = parseInt(rotSlider.value);
+  rotValue.textContent = deg + '°';
+  if (typeof window.characterRotate === 'function') {
+    window.characterRotate(deg);
+  }
+});
+
+rotRow.appendChild(rotSlider);
+rotRow.appendChild(rotValue);
+body.appendChild(rotRow);
 document.body.appendChild(panel);
