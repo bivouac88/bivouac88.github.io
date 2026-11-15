@@ -9,7 +9,8 @@ const CONFIG = {
   // Chemin du .glb, relatif à ce fichier (js/) -> remonte d'un cran puis Assets/
   modelUrl: new URL('../Assets/Courrir/bivouaceur qui court full ok.glb', import.meta.url).href,
   heightPx: 160,        // hauteur du personnage à l'écran (en pixels)
-  speedPx: 140,         // vitesse de course (pixels par seconde)
+  speedPx: 0,           // 0 = pas de glissement (l'animation seule fait bouger le perso)
+  startXPx: 40,         // position de départ depuis le bord gauche
   pauseSeconds: 0.8,    // pause hors écran avant de recommencer
   canvasHeightPx: 220,  // hauteur de la bande où il court
   bottomOffsetPx: 6,    // distance entre ses pieds et le bas de l'écran
@@ -161,7 +162,8 @@ new GLTFLoader().load(
       console.warn('[character] aucune animation dans le GLB');
     }
 
-    x = -runnerWidth;
+    x = CONFIG.startXPx;
+    runner.position.x = x;
   },
   undefined,
   (err) => console.error('[character] chargement du GLB impossible :', err)
@@ -176,8 +178,9 @@ function tick() {
 
   if (mixer) mixer.update(dt);
 
-  if (runner) {
+    if (runner && CONFIG.speedPx > 0) {
     if (pause > 0) {
+      
       pause -= dt;
     } else {
       x += CONFIG.speedPx * dt;
