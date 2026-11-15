@@ -15,6 +15,7 @@ const CONFIG = {
   canvasHeightPx: 220,  // hauteur de la bande où il court
   bottomOffsetPx: 6,    // distance entre ses pieds et le bas de l'écran
   animationName: null,  // ex. "Run" ; null = dernière animation du fichier
+  searchAnimationName: 'mixamo.com.004', // animation jouée après la course (nom exact)
   // Maillages à retirer par leur nom (doublons / tests restés dans le GLB).
   // Si le coureur disparaît, remplace par ['geometry_0_BACKUP_POIDS'].
 hideMeshes: ['geometry_0_BACKUP_POIDS'],
