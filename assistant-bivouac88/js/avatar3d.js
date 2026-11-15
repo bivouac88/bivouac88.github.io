@@ -1,3 +1,4 @@
+
 import * as THREE from "https://esm.sh/three@0.180.0";
 import { GLTFLoader } from "https://esm.sh/three@0.180.0/examples/jsm/loaders/GLTFLoader.js";
 
@@ -48,6 +49,7 @@ export async function createAvatar3D(container) {
   const loader = new GLTFLoader();
 
   let gltf;
+
   try {
     gltf = await loader.loadAsync(MODEL_URL.href);
   } catch (error) {
@@ -62,10 +64,13 @@ export async function createAvatar3D(container) {
   const box = new THREE.Box3().setFromObject(character);
   const size = box.getSize(new THREE.Vector3());
   const center = box.getCenter(new THREE.Vector3());
+
   character.position.sub(center);
 
   const height = Math.max(size.y, 0.01);
-  const cameraDistance = height / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)));
+  const cameraDistance = height / (
+    2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))
+  );
   const distance = cameraDistance * 1.35;
 
   camera.position.set(0, height * 0.08, distance);
@@ -75,19 +80,23 @@ export async function createAvatar3D(container) {
   const actions = {};
   let currentAction = null;
 
-  // Charge chaque fichier d'animation externe, en place (sans déplacement des hanches)
+  // Chargement des animations
   for (const [key, url] of Object.entries(ANIMATION_FILES)) {
     try {
       const animGltf = await loader.loadAsync(url.href);
 
-      console.log(`Animation "${key}" chargée. Clips :`, animGltf.animations.map(c => c.name));
+      console.log(
+        `Animation "${key}" chargée. Clips :`,
+        animGltf.animations.map(c => c.name)
+      );
 
       animGltf.animations.forEach(clip => {
         const inPlaceClip = clip.clone();
-if (key === "course") console.log("Tracks course:", clip.tracks.map(t => t.name));
+
         inPlaceClip.tracks.forEach(track => {
           if (/hips?.*\.position$/i.test(track.name)) {
             const values = track.values;
+
             for (let i = 0; i < values.length; i += 3) {
               values[i] = values[0];
               values[i + 2] = values[2];
@@ -96,13 +105,17 @@ if (key === "course") console.log("Tracks course:", clip.tracks.map(t => t.name)
         });
 
         actions[key] = mixer.clipAction(inPlaceClip, character);
-        if (key === "course") actions[key].loop = THREE.LoopPingPong;
       });
+
     } catch (error) {
-      console.warn(`Impossible de charger l'animation "${key}" :`, error.message);
+      console.warn(
+        `Impossible de charger l'animation "${key}" :`,
+        error.message
+      );
     }
   }
 
+  // Animation en boucle
   function play(name, fade = 0.25) {
     const action = actions[name];
 
@@ -115,6 +128,8 @@ if (key === "course") console.log("Tracks course:", clip.tracks.map(t => t.name)
 
     action.reset();
     action.enabled = true;
+    action.setLoop(THREE.LoopRepeat, Infinity);
+    action.clampWhenFinished = false;
     action.setEffectiveWeight(1);
     action.setEffectiveTimeScale(1);
     action.fadeIn(fade);
@@ -129,6 +144,43 @@ if (key === "course") console.log("Tracks course:", clip.tracks.map(t => t.name)
     return true;
   }
 
+  // Animation jouée une seule fois
+  function playOnce(name, fade = 0.25) {
+    const action = actions[name];
+
+    if (!action) {
+      console.warn("Animation inconnue :", name);
+      return Promise.resolve(false);
+    }
+
+    return new Promise(resolve => {
+      function onFinished(event) {
+        if (event.action !== action) return;
+
+        mixer.removeEventListener("finished", onFinished);
+        resolve(true);
+      }
+
+      mixer.addEventListener("finished", onFinished);
+
+      action.reset();
+      action.enabled = true;
+      action.setLoop(THREE.LoopOnce, 1);
+      action.clampWhenFinished = true;
+      action.setEffectiveWeight(1);
+      action.setEffectiveTimeScale(1);
+      action.fadeIn(fade);
+
+      if (currentAction) {
+        currentAction.fadeOut(fade);
+      }
+
+      action.play();
+      currentAction = action;
+    });
+  }
+
+  // Moteur d'animation
   const clock = new THREE.Clock();
   let active = true;
   let frameId = null;
@@ -136,6 +188,7 @@ if (key === "course") console.log("Tracks course:", clip.tracks.map(t => t.name)
   function resize() {
     const width = container.clientWidth;
     const height = container.clientHeight;
+
     if (!width || !height) return;
 
     camera.aspect = width / height;
@@ -149,9 +202,11 @@ if (key === "course") console.log("Tracks course:", clip.tracks.map(t => t.name)
 
   function animate() {
     if (!active) return;
+
     frameId = requestAnimationFrame(animate);
 
     const delta = Math.min(clock.getDelta(), 0.05);
+
     mixer.update(delta);
     renderer.render(scene, camera);
   }
@@ -162,15 +217,20 @@ if (key === "course") console.log("Tracks course:", clip.tracks.map(t => t.name)
     character,
     mixer,
     play,
+    playOnce,
+
     getAnimationNames() {
       return Object.keys(actions);
     },
+
     setVisible(visible) {
       character.visible = visible;
     },
+
     setRotationY(angle) {
       character.rotation.y = angle;
     },
+
     dispose() {
       active = false;
       cancelAnimationFrame(frameId);
@@ -181,7 +241,11 @@ if (key === "course") console.log("Tracks course:", clip.tracks.map(t => t.name)
       character.traverse(object => {
         if (object.isMesh) {
           object.geometry.dispose();
-          const materials = Array.isArray(object.material) ? object.material : [object.material];
+
+          const materials = Array.isArray(object.material)
+            ? object.material
+            : [object.material];
+
           materials.forEach(material => material.dispose());
         }
       });
