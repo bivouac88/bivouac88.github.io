@@ -84,7 +84,7 @@ export async function createAvatar3D(container) {
 
       animGltf.animations.forEach(clip => {
         const inPlaceClip = clip.clone();
-
+if (key === "course") console.log("Tracks course:", clip.tracks.map(t => t.name));
         inPlaceClip.tracks.forEach(track => {
           if (/hips?.*\.position$/i.test(track.name)) {
             const values = track.values;
