@@ -1,4 +1,3 @@
-
 import { createAvatar3D } from "./avatar3d.js";
 
 const CHARACTER_ID = "b88-character";
@@ -33,71 +32,30 @@ async function initCharacter() {
     const avatar = await createAvatar3D(character);
 
     console.log("Bivouaciste GLB chargé !");
-// COURSE : traversée complète de l'écran
-setTimeout(() => {
-  // Oriente le personnage vers la droite
-  avatar.setRotationY(Math.PI / 2);
 
-  // Lance la course
-  avatar.play("course:mixamo.com.001", 0.2);
-
-  // Prépare le déplacement
-  character.style.transition = "none";
-  character.style.left = "12px";
-
-  // Force le navigateur à appliquer la position initiale
-  character.offsetHeight;
-
-  // Départ vers la droite, jusqu'à sortir complètement de l'écran
-  requestAnimationFrame(() => {
-    character.style.transition = "left 6s linear";
-    character.style.left = `${window.innerWidth + character.offsetWidth}px`;
-  });
-
-}, 1500);
-    // Recherche automatique du clip de marche.
-    const animations = avatar.getAnimationNames();
-
-    const walkClip = animations.find(name =>
-      /walk|walking|marche|marcher/i.test(name)
-    );
-
-    const idleClip = animations.find(name =>
-      /idle|repos|wait|attente/i.test(name)
-    );
-
-    if (!walkClip) {
-      console.warn("Aucune animation de marche détectée dans le GLB.");
-    }
-
-    // Lancement du test après le chargement du personnage.
+    // COURSE : traversée complète de l'écran
     setTimeout(() => {
-      const start = 12;
-      const destination = Math.max(
-        start,
-        window.innerWidth * 0.5 - character.offsetWidth / 2
-      );
+      // Oriente le personnage vers la droite
+      avatar.setRotationY(Math.PI / 2);
 
-      const duration = 5000;
+      // Lance la course
+      avatar.play("course:mixamo.com.001", 0.2);
 
-      console.log("Début du déplacement.");
+      // Prépare le déplacement
+      character.style.transition = "none";
+      character.style.left = "12px";
 
-      if (walkClip) {
-        avatar.play(walkClip);
-      }
+      // Force le navigateur à appliquer la position initiale
+      character.offsetHeight;
 
-      character.style.transition = `left ${duration}ms linear`;
-      character.style.left = `${destination}px`;
+      // Départ vers la droite, jusqu'à sortir complètement de l'écran
+      requestAnimationFrame(() => {
+        character.style.transition = "left 6s linear";
+        character.style.left = `${window.innerWidth + character.offsetWidth}px`;
+      });
 
-      setTimeout(() => {
-        if (idleClip) {
-          avatar.play(idleClip);
-        }
-
-        character.style.transition = "filter 0.25s ease";
-        console.log("Le Bivouaciste a terminé sa marche.");
-      }, duration);
     }, 1500);
+
   } catch (error) {
     console.error("Erreur de chargement du Bivouaciste :", error);
   }
