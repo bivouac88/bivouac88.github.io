@@ -3,7 +3,7 @@ import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/
 
 const CONFIG = {
   modelUrl: new URL('../Assets/Nouvelle_IA.glb', import.meta.url).href,
-  heightPx: 160,
+  heightPx: 45,
   canvasHeightPx: 220,
   bottomOffsetPx: 6,
 };
