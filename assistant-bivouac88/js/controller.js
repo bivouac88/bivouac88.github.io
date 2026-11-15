@@ -278,6 +278,30 @@ sceneList.appendChild(item);
 });
 
 body.appendChild(saveBtn);
+const exportBtn = document.createElement('button');
+exportBtn.textContent = '📤 Exporter JSON';
+Object.assign(exportBtn.style, {
+  width: '100%', background: '#2a2520', border: '1px solid #38332b',
+  borderRadius: '4px', color: '#ccc', padding: '7px',
+  cursor: 'pointer', fontSize: '11px', marginBottom: '8px'
+});
+
+exportBtn.addEventListener('click', () => {
+  if (!scenes.length) {
+    alert('Aucune scène à exporter.');
+    return;
+  }
+  const json = JSON.stringify({ scenes }, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'scenes.json';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+body.appendChild(exportBtn);
 body.appendChild(sceneList);
 
 document.body.appendChild(panel);
