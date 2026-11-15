@@ -1,4 +1,3 @@
-
 .b88-character {
   position: fixed;
   bottom: 12px;
@@ -7,8 +6,9 @@
   height: 210px;
   z-index: 850;
   pointer-events: none;
-  user-select: none;
+  overflow: hidden;
 }
+
 
 
 .b88-character:hover {
