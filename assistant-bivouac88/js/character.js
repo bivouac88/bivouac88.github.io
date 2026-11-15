@@ -72,6 +72,46 @@ new GLTFLoader().load(
     const model = gltf.scene;
     model.rotation.y = CONFIG.facingOffset;
 
+    // Choix de l'animation (dernière du fichier par défaut)
+    const clip = gltf.animations.length
+      ? (CONFIG.animationName &&
+          THREE.AnimationClip.findByName(gltf.animations, CONFIG.animationName)) ||
+        gltf.animations[gltf.animations.length - 1]
+      : null;
+
+    console.info(
+      '[character] animations :',
+      gltf.animations.map((a) => `${a.name} (${a.duration.toFixed(2)} s)`),
+      '| jouée :', clip && clip.name
+    );
+
+    // On ne garde que ce que l'animation fait réellement bouger.
+    // Tout le reste (ex. copie en T-pose) est retiré de la scène.
+    if (clip) {
+      const animatedNodes = new Set();
+      clip.tracks.forEach((track) => {
+        const { nodeName } = THREE.PropertyBinding.parseTrackName(track.name);
+        const node = THREE.PropertyBinding.findNode(model, nodeName);
+        if (node) animatedNodes.add(node);
+      });
+
+      const underAnimatedNode = (obj) => {
+        for (let p = obj; p; p = p.parent) if (animatedNodes.has(p)) return true;
+        return false;
+      };
+
+      const toRemove = [];
+      model.traverse((obj) => {
+        if (obj.isSkinnedMesh) {
+          if (!obj.skeleton.bones.some((b) => animatedNodes.has(b))) toRemove.push(obj);
+        } else if (obj.isMesh && !underAnimatedNode(obj)) {
+          toRemove.push(obj);
+        }
+      });
+      console.info('[character] objets retirés :', toRemove.map((o) => o.name || o.type));
+      toRemove.forEach((o) => o.removeFromParent());
+    }
+
     // Mise à l'échelle + pieds posés sur y = 0
     const box = new THREE.Box3().setFromObject(model);
     const size = box.getSize(new THREE.Vector3());
@@ -94,14 +134,9 @@ new GLTFLoader().load(
     scene.add(runner);
 
     // Animation de course
-    if (gltf.animations.length) {
+    if (clip) {
       mixer = new THREE.AnimationMixer(model);
-      const clip =
-        (CONFIG.animationName &&
-          THREE.AnimationClip.findByName(gltf.animations, CONFIG.animationName)) ||
-        gltf.animations[gltf.animations.length - 1];
       mixer.clipAction(clip).play();
-      console.info('[character] animations :', gltf.animations.map((a) => a.name));
     } else {
       console.warn('[character] aucune animation dans le GLB');
     }
