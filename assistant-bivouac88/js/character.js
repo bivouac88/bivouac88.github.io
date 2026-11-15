@@ -173,9 +173,9 @@ new GLTFLoader().load(
             '[character] animations du GLB chercher :',
             g2.animations.map((a, i) => `${i}: ${a.name} (${a.duration.toFixed(2)} s)`)
           );
-          const searchClip = g2.animations[CONFIG.searchClipIndex];
+          const searchClip = THREE.AnimationClip.findByName(g2.animations, CONFIG.searchClipName);
           if (!searchClip) {
-            console.warn("[character] pas d'animation à l'index", CONFIG.searchClipIndex);
+            console.warn("[character] animation introuvable :", CONFIG.searchClipName);
             return;
           }
           const searchAction = mixer.clipAction(searchClip);
