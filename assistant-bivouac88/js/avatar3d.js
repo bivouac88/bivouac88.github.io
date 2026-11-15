@@ -3,18 +3,10 @@ import * as THREE from "https://esm.sh/three@0.180.0";
 import { GLTFLoader } from "https://esm.sh/three@0.180.0/examples/jsm/loaders/GLTFLoader.js";
 
 const MODEL_URL = new URL("../Assets/nomade.glb", import.meta.url);
-
-const ANIMATION_FILES = {
-  course: new URL("../Assets/Courrir/bivouaceur qui court full ok.glb", import.meta.url),
-  chercher: new URL("../Assets/Chercher/bivouaceur qui cherche full ok.glb", import.meta.url),
-  chill: new URL("../Assets/Chill/chill.glb", import.meta.url),
-  lever: new URL("../Assets/Se lever/assi debout.glb", import.meta.url)
-};
+const COURSE_URL = new URL("../Assets/Courrir/bivouaceur qui court full ok.glb", import.meta.url);
 
 export async function createAvatar3D(container) {
-  if (!container) {
-    throw new Error("Conteneur 3D introuvable.");
-  }
+  if (!container) throw new Error("Conteneur 3D introuvable.");
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(32, 1, 0.01, 100);
@@ -30,6 +22,7 @@ export async function createAvatar3D(container) {
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.15;
   renderer.setClearColor(0x000000, 0);
+
   renderer.domElement.style.width = "100%";
   renderer.domElement.style.height = "100%";
   renderer.domElement.style.display = "block";
@@ -48,17 +41,10 @@ export async function createAvatar3D(container) {
 
   const loader = new GLTFLoader();
 
-  let gltf;
-
-  try {
-    gltf = await loader.loadAsync(MODEL_URL.href);
-  } catch (error) {
-    renderer.dispose();
-    renderer.domElement.remove();
-    throw new Error("Impossible de charger nomade.glb : " + error.message);
-  }
-
+  // Chargement du personnage
+  const gltf = await loader.loadAsync(MODEL_URL.href);
   const character = gltf.scene;
+
   scene.add(character);
 
   const box = new THREE.Box3().setFromObject(character);
@@ -68,122 +54,52 @@ export async function createAvatar3D(container) {
   character.position.sub(center);
 
   const height = Math.max(size.y, 0.01);
-  const cameraDistance = height / (
+  const distance = height / (
     2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))
-  );
-  const distance = cameraDistance * 1.35;
+  ) * 1.35;
 
   camera.position.set(0, height * 0.08, distance);
   camera.lookAt(0, 0, 0);
 
+  // Chargement de la course
+  const courseGltf = await loader.loadAsync(COURSE_URL.href);
+
+  if (!courseGltf.animations.length) {
+    throw new Error("Aucune animation trouvée dans le fichier de course.");
+  }
+
+  // On utilise systématiquement le dernier clip
+  const clips = courseGltf.animations;
+  const courseClip = clips[clips.length - 1].clone();
+
+  console.log(
+    "Clip de course sélectionné :",
+    courseClip.name,
+    courseClip.duration.toFixed(2) + " secondes"
+  );
+
+  // Suppression du déplacement horizontal des hanches
+  courseClip.tracks.forEach(track => {
+    if (/hips?.*\.position$/i.test(track.name)) {
+      const values = track.values;
+
+      for (let i = 0; i < values.length; i += 3) {
+        values[i] = values[0];
+        values[i + 2] = values[2];
+      }
+    }
+  });
+
   const mixer = new THREE.AnimationMixer(character);
-  const actions = {};
-  let currentAction = null;
+  const courseAction = mixer.clipAction(courseClip);
 
-  // Chargement des animations
-  for (const [key, url] of Object.entries(ANIMATION_FILES)) {
-    try {
-      const animGltf = await loader.loadAsync(url.href);
+  courseAction.setLoop(THREE.LoopRepeat, Infinity);
+  courseAction.play();
 
-Animation "course" :
-mixamo.com.001 — 4.00 secondes
-mixamo.com.002 — 4.00 secondes
-mixamo.com.003 — 4.00 secondes
-
-      animGltf.animations.forEach(clip => {
-        const inPlaceClip = clip.clone();
-
-        inPlaceClip.tracks.forEach(track => {
-          if (/hips?.*\.position$/i.test(track.name)) {
-            const values = track.values;
-
-            for (let i = 0; i < values.length; i += 3) {
-              values[i] = values[0];
-              values[i + 2] = values[2];
-            }
-          }
-        });
-
-        actions[key] = mixer.clipAction(inPlaceClip, character);
-      });
-
-    } catch (error) {
-      console.warn(
-        `Impossible de charger l'animation "${key}" :`,
-        error.message
-      );
-    }
-  }
-
-  // Animation en boucle
-  function play(name, fade = 0.25) {
-    const action = actions[name];
-
-    if (!action) {
-      console.warn("Animation inconnue :", name);
-      return false;
-    }
-
-    if (currentAction === action) return true;
-
-    action.reset();
-    action.enabled = true;
-    action.setLoop(THREE.LoopRepeat, Infinity);
-    action.clampWhenFinished = false;
-    action.setEffectiveWeight(1);
-    action.setEffectiveTimeScale(1);
-    action.fadeIn(fade);
-
-    if (currentAction) {
-      currentAction.fadeOut(fade);
-    }
-
-    action.play();
-    currentAction = action;
-
-    return true;
-  }
-
-  // Animation jouée une seule fois
-  function playOnce(name, fade = 0.25) {
-    const action = actions[name];
-
-    if (!action) {
-      console.warn("Animation inconnue :", name);
-      return Promise.resolve(false);
-    }
-
-    return new Promise(resolve => {
-      function onFinished(event) {
-        if (event.action !== action) return;
-
-        mixer.removeEventListener("finished", onFinished);
-        resolve(true);
-      }
-
-      mixer.addEventListener("finished", onFinished);
-
-      action.reset();
-      action.enabled = true;
-      action.setLoop(THREE.LoopOnce, 1);
-      action.clampWhenFinished = true;
-      action.setEffectiveWeight(1);
-      action.setEffectiveTimeScale(1);
-      action.fadeIn(fade);
-
-      if (currentAction) {
-        currentAction.fadeOut(fade);
-      }
-
-      action.play();
-      currentAction = action;
-    });
-  }
-
-  // Moteur d'animation
+  // Moteur 3D
   const clock = new THREE.Clock();
   let active = true;
-  let frameId = null;
+  let frameId;
 
   function resize() {
     const width = container.clientWidth;
@@ -205,28 +121,13 @@ mixamo.com.003 — 4.00 secondes
 
     frameId = requestAnimationFrame(animate);
 
-    const delta = Math.min(clock.getDelta(), 0.05);
-
-    mixer.update(delta);
+    mixer.update(Math.min(clock.getDelta(), 0.05));
     renderer.render(scene, camera);
   }
 
   animate();
 
   return {
-    character,
-    mixer,
-    play,
-    playOnce,
-
-    getAnimationNames() {
-      return Object.keys(actions);
-    },
-
-    setVisible(visible) {
-      character.visible = visible;
-    },
-
     setRotationY(angle) {
       character.rotation.y = angle;
     },
@@ -236,20 +137,6 @@ mixamo.com.003 — 4.00 secondes
       cancelAnimationFrame(frameId);
       resizeObserver.disconnect();
       mixer.stopAllAction();
-      scene.remove(character);
-
-      character.traverse(object => {
-        if (object.isMesh) {
-          object.geometry.dispose();
-
-          const materials = Array.isArray(object.material)
-            ? object.material
-            : [object.material];
-
-          materials.forEach(material => material.dispose());
-        }
-      });
-
       renderer.dispose();
       renderer.domElement.remove();
     }
