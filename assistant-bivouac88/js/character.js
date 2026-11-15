@@ -139,3 +139,38 @@ window.characterMoveTo = (x, y) => { posX = x; posY = y; };
 window.characterRotate = (deg) => {
   if (runner) runner.rotation.y = deg * (Math.PI / 180);
 };
+// --- Drag & drop ---
+let dragging = false;
+let dragOffsetX = 0;
+let dragOffsetY = 0;
+
+renderer.domElement.addEventListener('mousedown', (e) => {
+  const rect = renderer.domElement.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = rect.height - (e.clientY - rect.top);
+  const dx = mx - posX;
+  const dy = my - posY;
+  if (Math.sqrt(dx*dx + dy*dy) < 60) {
+    dragging = true;
+    dragOffsetX = dx;
+    dragOffsetY = dy;
+    renderer.domElement.style.pointerEvents = 'auto';
+    e.preventDefault();
+  }
+});
+
+window.addEventListener('mousemove', (e) => {
+  if (!dragging) return;
+  const rect = renderer.domElement.getBoundingClientRect();
+  posX = e.clientX - rect.left - dragOffsetX;
+  posY = rect.height - (e.clientY - rect.top) - dragOffsetY;
+});
+
+window.addEventListener('mouseup', () => {
+  if (dragging) {
+    dragging = false;
+    if (typeof window.characterMoveTo === 'function') {
+      window.characterMoveTo(posX, posY);
+    }
+  }
+});
