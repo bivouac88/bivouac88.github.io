@@ -112,6 +112,16 @@ new GLTFLoader().load(
       toRemove.forEach((o) => o.removeFromParent());
     }
 
+    // Diagnostic : arbre de ce qui reste dans la scène
+    const lines = [];
+    const dump = (obj, depth) => {
+      const kind = obj.isSkinnedMesh ? 'SkinnedMesh' : obj.isMesh ? 'Mesh' : obj.isBone ? 'Bone' : obj.type;
+      if (!obj.isBone) lines.push(`${'  '.repeat(depth)}${kind} "${obj.name}"`);
+      obj.children.forEach((c) => dump(c, depth + 1));
+    };
+    dump(model, 0);
+    console.info('[character] contenu restant :\n' + lines.join('\n'));
+
     // Mise à l'échelle + pieds posés sur y = 0
     const box = new THREE.Box3().setFromObject(model);
     const size = box.getSize(new THREE.Vector3());
