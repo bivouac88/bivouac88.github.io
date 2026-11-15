@@ -2,8 +2,10 @@
 import * as THREE from "https://esm.sh/three@0.180.0";
 import { GLTFLoader } from "https://esm.sh/three@0.180.0/examples/jsm/loaders/GLTFLoader.js";
 
-const MODEL_URL = new URL("../Assets/nomade.glb", import.meta.url);
-const COURSE_URL = new URL("../Assets/Courrir/bivouaceur qui court full ok.glb", import.meta.url);
+const COURSE_URL = new URL(
+  "../Assets/Courrir/bivouaceur qui court full ok.glb",
+  import.meta.url
+);
 
 export async function createAvatar3D(container) {
   if (!container) throw new Error("Conteneur 3D introuvable.");
@@ -41,19 +43,33 @@ export async function createAvatar3D(container) {
 
   const loader = new GLTFLoader();
 
-  // Chargement du personnage
-  const gltf = await loader.loadAsync(MODEL_URL.href);
+  // Chargement direct du personnage avec son animation intégrée
+  const gltf = await loader.loadAsync(COURSE_URL.href);
   const character = gltf.scene;
 
-  scene.add(character);
+  if (!gltf.animations.length) {
+    throw new Error("Aucune animation trouvée dans le fichier de course.");
+  }
 
+  // Le groupe parent permet de positionner le personnage
+  // sans modifier les transformations de son animation.
+  const avatarRoot = new THREE.Group();
+  scene.add(avatarRoot);
+  avatarRoot.add(character);
+
+  // Centrage du personnage
   const box = new THREE.Box3().setFromObject(character);
   const size = box.getSize(new THREE.Vector3());
   const center = box.getCenter(new THREE.Vector3());
 
-  character.position.sub(center);
+  avatarRoot.position.set(
+    -center.x,
+    -center.y,
+    -center.z
+  );
 
   const height = Math.max(size.y, 0.01);
+
   const distance = height / (
     2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))
   ) * 1.35;
@@ -61,20 +77,16 @@ export async function createAvatar3D(container) {
   camera.position.set(0, height * 0.08, distance);
   camera.lookAt(0, 0, 0);
 
-  // Chargement de la course
-  const courseGltf = await loader.loadAsync(COURSE_URL.href);
-
-  if (!courseGltf.animations.length) {
-    throw new Error("Aucune animation trouvée dans le fichier de course.");
-  }
-
-  // On utilise systématiquement le dernier clip
-  const clips = courseGltf.animations;
-  const courseClip = clips[clips.length - 1].clone();
+  // Utilisation de la dernière animation intégrée au GLB
+  const clips = gltf.animations;
+  const courseClip = clips[clips.length - 1];
 
   console.log(
-    "Clip de course sélectionné :",
+    "Personnage chargé :",
+    COURSE_URL.pathname,
+    "| Animation :",
     courseClip.name,
+    "| Durée :",
     courseClip.duration.toFixed(2) + " secondes"
   );
 
@@ -84,7 +96,6 @@ export async function createAvatar3D(container) {
   courseAction.setLoop(THREE.LoopRepeat, Infinity);
   courseAction.play();
 
-  // Moteur 3D
   const clock = new THREE.Clock();
   let active = true;
   let frameId;
@@ -98,15 +109,17 @@ export async function createAvatar3D(container) {
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     renderer.setSize(width, height, false);
-    const visibleWidth =
-  2 * distance * Math.tan(
-    THREE.MathUtils.degToRad(camera.fov / 2)
-  ) * camera.aspect;
 
-// Place le personnage à environ 100 pixels du bord gauche
-character.position.x =
-  -visibleWidth / 2 +
-  (100 / width) * visibleWidth;
+    const visibleWidth =
+      2 * distance * Math.tan(
+        THREE.MathUtils.degToRad(camera.fov / 2)
+      ) * camera.aspect;
+
+    // Position de départ à gauche de l'écran
+    avatarRoot.position.x =
+      -center.x -
+      visibleWidth / 2 +
+      (100 / width) * visibleWidth;
   }
 
   const resizeObserver = new ResizeObserver(resize);
@@ -126,7 +139,7 @@ character.position.x =
 
   return {
     setRotationY(angle) {
-      character.rotation.y = angle;
+      avatarRoot.rotation.y = angle;
     },
 
     dispose() {
