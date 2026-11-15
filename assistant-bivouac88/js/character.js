@@ -136,3 +136,6 @@ tick();
 // --- API publique pour déclencher les animations depuis l'extérieur ---
 window.characterPlay = (name) => playAnimation(name);
 window.characterMoveTo = (x, y) => { posX = x; posY = y; };
+window.characterRotate = (deg) => {
+  if (runner) runner.rotation.y = deg * (Math.PI / 180);
+};
