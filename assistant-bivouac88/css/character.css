@@ -2,16 +2,14 @@
 .b88-character {
   position: fixed;
   bottom: 12px;
-  left: 12px;
-  width: 180px;
+  left: 0;
+  width: 100vw;
   height: 210px;
   z-index: 850;
-  cursor: pointer;
+  pointer-events: none;
   user-select: none;
-  -webkit-tap-highlight-color: transparent;
-  transform-origin: bottom center;
-  transition: filter 0.25s ease;
 }
+
 
 .b88-character:hover {
   filter: drop-shadow(0 5px 12px rgba(229, 142, 38, 0.35));
