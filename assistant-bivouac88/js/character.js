@@ -21,9 +21,10 @@ async function initCharacter() {
     console.log("Bivouaciste chargé !");
 
     // Orientation de face
-    avatar.setRotationY(0);
-
-  } catch (error) {
+    avatar.setRotationY(Math.PI / 2);
+    
+  } 
+    catch (error) {
     console.error("Erreur Bivouaciste :", error);
   }
 }
