@@ -1,25 +1,139 @@
+// Personnage animé qui court en ligne droite, vu de profil,
+// du bas gauche au bas droite de l'écran, en boucle.
 
-import { createAvatar3D } from "./avatar3d.js";
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/+esm';
+import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js/+esm';
 
-async function initCharacter() {
-  if (document.getElementById("b88-character")) return;
+// ---------- Réglages ----------
+const CONFIG = {
+  // Chemin du .glb, relatif à ce fichier (js/) -> remonte d'un cran puis Assets/
+  modelUrl: new URL('../Assets/Courrir/bivouaceur qui court full ok.glb', import.meta.url).href,
+  heightPx: 160,        // hauteur du personnage à l'écran (en pixels)
+  speedPx: 140,         // vitesse de course (pixels par seconde)
+  pauseSeconds: 0.8,    // pause hors écran avant de recommencer
+  canvasHeightPx: 220,  // hauteur de la bande où il court
+  bottomOffsetPx: 6,    // distance entre ses pieds et le bas de l'écran
+  animationName: null,  // ex. "Run" ; null = première animation du fichier
+  // Orientation initiale du modèle : 0 = regarde vers +Z (standard glTF).
+  // Si le personnage court de dos ou à reculons, essaie Math.PI / 2 ou -Math.PI / 2.
+  facingOffset: 0,
+};
 
-  const container = document.createElement("div");
-  container.id = "b88-character";
-  container.className = "b88-character";
+// ---------- Scène ----------
+const container = document.createElement('div');
+container.id = 'character-runner';
+container.style.height = CONFIG.canvasHeightPx + 'px';
+document.body.appendChild(container);
 
-  document.body.appendChild(container);
+const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+container.appendChild(renderer.domElement);
 
-  try {
-    await createAvatar3D(container);
-    console.log("Bivouaciste chargé !");
-  } catch (error) {
-    console.error("Erreur Bivouaciste :", error);
+const scene = new THREE.Scene();
+
+// Caméra orthographique : 1 unité = 1 pixel, vue strictement de côté (axe Z)
+const camera = new THREE.OrthographicCamera(0, 1, 1, 0, -1000, 1000);
+camera.position.set(0, 0, 500);
+
+scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 2.2));
+const sun = new THREE.DirectionalLight(0xffffff, 2.5);
+sun.position.set(-200, 400, 300);
+scene.add(sun);
+
+let width = 0;
+let height = 0;
+
+function resize() {
+  width = container.clientWidth;
+  height = container.clientHeight;
+  renderer.setSize(width, height, false);
+  renderer.domElement.style.width = '100%';
+  renderer.domElement.style.height = '100%';
+  camera.left = 0;
+  camera.right = width;
+  camera.top = height;
+  camera.bottom = 0;
+  camera.updateProjectionMatrix();
+}
+resize();
+window.addEventListener('resize', resize);
+
+// ---------- Modèle ----------
+let runner = null;   // groupe qui se déplace
+let mixer = null;
+let runnerWidth = 0; // largeur à l'écran, pour sortir complètement du cadre
+let x = 0;
+let pause = 0;
+
+new GLTFLoader().load(
+  CONFIG.modelUrl,
+  (gltf) => {
+    const model = gltf.scene;
+    model.rotation.y = CONFIG.facingOffset;
+
+    // Mise à l'échelle + pieds posés sur y = 0
+    const box = new THREE.Box3().setFromObject(model);
+    const size = box.getSize(new THREE.Vector3());
+    const scale = CONFIG.heightPx / size.y;
+    model.scale.setScalar(scale);
+
+    const box2 = new THREE.Box3().setFromObject(model);
+    const center = box2.getCenter(new THREE.Vector3());
+    model.position.x -= center.x;
+    model.position.z -= center.z;
+    model.position.y -= box2.min.y;
+
+    runnerWidth = box2.getSize(new THREE.Vector3()).x;
+
+    // Le personnage regarde vers la droite de l'écran (+X)
+    runner = new THREE.Group();
+    runner.rotation.y = Math.PI / 2;
+    runner.add(model);
+    runner.position.y = CONFIG.bottomOffsetPx;
+    scene.add(runner);
+
+    // Animation de course
+    if (gltf.animations.length) {
+      mixer = new THREE.AnimationMixer(model);
+      const clip =
+        (CONFIG.animationName &&
+          THREE.AnimationClip.findByName(gltf.animations, CONFIG.animationName)) ||
+        gltf.animations[0];
+      mixer.clipAction(clip).play();
+      console.info('[character] animations :', gltf.animations.map((a) => a.name));
+    } else {
+      console.warn('[character] aucune animation dans le GLB');
+    }
+
+    x = -runnerWidth;
+  },
+  undefined,
+  (err) => console.error('[character] chargement du GLB impossible :', err)
+);
+
+// ---------- Boucle ----------
+const clock = new THREE.Clock();
+
+function tick() {
+  requestAnimationFrame(tick);
+  const dt = Math.min(clock.getDelta(), 0.1);
+
+  if (mixer) mixer.update(dt);
+
+  if (runner) {
+    if (pause > 0) {
+      pause -= dt;
+    } else {
+      x += CONFIG.speedPx * dt;
+      if (x > width + runnerWidth) {
+        x = -runnerWidth;
+        pause = CONFIG.pauseSeconds;
+      }
+    }
+    runner.position.x = x;
   }
-}
 
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initCharacter, { once: true });
-} else {
-  initCharacter();
+  renderer.render(scene, camera);
 }
+tick();
