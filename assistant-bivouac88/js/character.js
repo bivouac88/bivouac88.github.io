@@ -17,7 +17,7 @@ const CONFIG = {
   animationName: null,  // ex. "Run" ; null = dernière animation du fichier
   // GLB de l'animation « chercher » : remplace par le vrai dossier et le vrai nom
   searchModelUrl: new URL('../Assets/Chercher/bivouaceur qui cherche full ok.glb', import.meta.url).href,
-  searchClipIndex: 4,   // 4e animation du fichier (on compte à partir de 0)
+  searchClipName: 'action chercher', // nom exact de l'animation dans le GLB chercher
   // Maillages à retirer par leur nom (doublons / tests restés dans le GLB).
   // Si le coureur disparaît, remplace par ['geometry_0_BACKUP_POIDS'].
 hideMeshes: ['geometry_0_BACKUP_POIDS'],
