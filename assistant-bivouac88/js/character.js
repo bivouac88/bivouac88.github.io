@@ -7,17 +7,16 @@ import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/
 // ---------- Réglages ----------
 const CONFIG = {
   // Chemin du .glb, relatif à ce fichier (js/) -> remonte d'un cran puis Assets/
-  modelUrl: new URL('../Assets/Courrir/bivouaceur qui court full ok.glb', import.meta.url).href,
+  modelUrl: new URL('../Assets/bivouaceur complet.glb', import.meta.url).href,
   heightPx: 160,        // hauteur du personnage à l'écran (en pixels)
   speedPx: 0,           // 0 = pas de glissement (l'animation seule fait bouger le perso)
   startXPx: 120,         // position de départ depuis le bord gauche
   pauseSeconds: 0.8,    // pause hors écran avant de recommencer
   canvasHeightPx: 220,  // hauteur de la bande où il court
   bottomOffsetPx: 6,    // distance entre ses pieds et le bas de l'écran
-  animationName: null,  // ex. "Run" ; null = dernière animation du fichier
-  // GLB de l'animation « chercher » : remplace par le vrai dossier et le vrai nom
-  searchModelUrl: new URL('../Assets/Chercher/bivouaceur qui cherche full ok.glb', import.meta.url).href,
-  searchClipName: 'action chercher', // nom exact de l'animation dans le GLB chercher
+  animationName: 'Courir',            // animation de course (nom exact)
+  searchClipName: 'Action chercher',  // animation jouée après la course (nom exact)
+  
   // Maillages à retirer par leur nom (doublons / tests restés dans le GLB).
   // Si le coureur disparaît, remplace par ['geometry_0_BACKUP_POIDS'].
 hideMeshes: ['geometry_0_BACKUP_POIDS'],
@@ -165,35 +164,24 @@ new GLTFLoader().load(
       runAction.clampWhenFinished = true;
       runAction.play();
 
-      // Enchaînement : course -> chercher (en boucle), depuis un second GLB
-      new GLTFLoader().load(
-        CONFIG.searchModelUrl,
-        (g2) => {
-          console.info(
-            '[character] animations du GLB chercher :',
-            g2.animations.map((a, i) => `${i}: ${a.name} (${a.duration.toFixed(2)} s)`)
-          );
-          const searchClip = THREE.AnimationClip.findByName(g2.animations, CONFIG.searchClipName);
-          if (!searchClip) {
-            console.warn("[character] animation introuvable :", CONFIG.searchClipName);
-            return;
+            // Enchaînement : course -> chercher (en boucle), dans le même GLB
+      const searchClip = THREE.AnimationClip.findByName(gltf.animations, CONFIG.searchClipName);
+      if (searchClip) {
+        const searchAction = mixer.clipAction(searchClip);
+        searchAction.setLoop(THREE.LoopRepeat, Infinity);
+        mixer.addEventListener('finished', (e) => {
+          if (e.action === runAction) {
+            searchAction.reset().play();
+            searchAction.crossFadeFrom(runAction, 0.3, false);
           }
-          const searchAction = mixer.clipAction(searchClip);
-          searchAction.setLoop(THREE.LoopRepeat, Infinity);
-          mixer.addEventListener('finished', (e) => {
-            if (e.action === runAction) {
-              searchAction.reset().play();
-              searchAction.crossFadeFrom(runAction, 0.3, false);
-            }
-          });
-        },
-        undefined,
-        (err) => console.error('[character] chargement du GLB chercher impossible :', err)
-      );
+        });
+      } else {
+        console.warn('[character] animation introuvable :', CONFIG.searchClipName);
+      }
     } else {
       console.warn('[character] aucune animation dans le GLB');
     }
-    
+
     x = CONFIG.startXPx;
     runner.position.x = x;
   },
