@@ -16,8 +16,6 @@ const CONFIG = {
   searchClipName: 'Action chercher',
 
   hideMeshes: ['geometry_0_BACKUP_POIDS'],
-
-  // Durée du pivot final vers la caméra.
   turnDuration: 0.7
 };
 
@@ -78,6 +76,7 @@ let runAction = null;
 let searchAction = null;
 
 let rootMotionNode = null;
+let rootMotionInitialPosition = null;
 let runStartPosition = null;
 
 let state = 'loading';
@@ -85,7 +84,7 @@ let turnElapsed = 0;
 
 const clock = new THREE.Clock();
 
-// Recherche du nœud qui porte la translation de l'animation.
+// ---------- Détection du déplacement intégré ----------
 function findRootMotionNode(model, clip) {
   const candidates = new Set();
 
@@ -101,7 +100,6 @@ function findRootMotionNode(model, clip) {
 
   if (!candidates.size) return null;
 
-  // On privilégie le nœud animé le plus proche de la racine du modèle.
   function depth(node) {
     let value = 0;
 
@@ -116,24 +114,28 @@ function findRootMotionNode(model, clip) {
   return [...candidates].sort((a, b) => depth(a) - depth(b))[0];
 }
 
-function getWorldPosition(object) {
+// Position d'un objet exprimée dans les coordonnées de la scène.
+function getScenePosition(object) {
   model.updateMatrixWorld(true);
-  return object.getWorldPosition(new THREE.Vector3());
+  scene.updateMatrixWorld(true);
+
+  const worldPosition = object.getWorldPosition(new THREE.Vector3());
+
+  return scene.worldToLocal(worldPosition);
 }
 
 // ---------- Enchaînement des animations ----------
 function startRunning() {
   if (!runAction) return;
 
-  // Profil : le personnage regarde vers la droite.
+  // Orientation de profil : le personnage court vers la droite.
   runner.rotation.y = Math.PI / 2;
 
   if (rootMotionNode) {
-    runStartPosition = getWorldPosition(rootMotionNode);
+    rootMotionInitialPosition = rootMotionNode.position.clone();
+    runStartPosition = getScenePosition(rootMotionNode);
   } else {
-    console.warn(
-      '[character] aucune piste de position détectée dans Courir.'
-    );
+    console.warn('[character] aucune piste de déplacement détectée.');
   }
 
   state = 'running';
@@ -147,8 +149,6 @@ function startRunning() {
 }
 
 function startTurning() {
-  if (!runner) return;
-
   state = 'turning';
   turnElapsed = 0;
 
@@ -162,13 +162,25 @@ function startSearching() {
     return;
   }
 
+  // Préparation de la recherche face caméra.
   runner.rotation.y = 0;
 
   state = 'searching';
 
+  // Démarrer la recherche avant de libérer la course.
   searchAction.reset();
   searchAction.setLoop(THREE.LoopRepeat, Infinity);
   searchAction.play();
+
+  // La course est arrêtée uniquement maintenant :
+  // sa pose finale est conservée jusqu'à l'application
+  // de la première image de l'animation de recherche.
+  if (runAction) {
+    runAction.stop();
+  }
+
+  // Appliquer immédiatement la première pose de recherche.
+  mixer.update(0);
 
   console.info('[character] début de Action chercher');
 }
@@ -176,24 +188,34 @@ function startSearching() {
 function finishRunning() {
   if (state !== 'running') return;
 
-  // Capture de la position atteinte par l'animation.
-  let displacement = new THREE.Vector3();
+  if (rootMotionNode && runStartPosition && rootMotionInitialPosition) {
+    // Capturer la position réellement atteinte par les hanches.
+    const endPosition = getScenePosition(rootMotionNode);
 
-  if (rootMotionNode && runStartPosition) {
-    const endPosition = getWorldPosition(rootMotionNode);
+    const displacement = endPosition.sub(runStartPosition);
 
-    displacement.subVectors(endPosition, runStartPosition);
+    // Le déplacement est transféré au groupe extérieur.
+    // Il est exprimé dans le repère de la scène, pas dans
+    // celui du modèle ou des hanches.
+    runner.position.add(displacement);
 
-    // On conserve le déplacement horizontal, sans le mouvement vertical
-    // éventuel du bassin ou du corps pendant la dernière foulée.
-    displacement.y = 0;
+    // Remettre les hanches à leur position initiale sans
+    // déplacer visuellement le personnage.
+    rootMotionNode.position.copy(rootMotionInitialPosition);
+
+    console.info(
+      '[character] déplacement transféré :',
+      displacement.x.toFixed(2),
+      displacement.y.toFixed(2),
+      displacement.z.toFixed(2)
+    );
+
+    // Garder la pose finale de course pendant le pivot.
+    runAction.paused = true;
+  } else {
+    runAction.paused = true;
+    console.warn('[character] transfert du déplacement impossible.');
   }
-
-  // Arrêt net de Courir : les transformations animées sont réinitialisées.
-  runAction.stop();
-
-  // Le déplacement de l'animation est transféré au groupe extérieur.
-  runner.position.add(displacement);
 
   model.updateMatrixWorld(true);
 
@@ -238,7 +260,7 @@ new GLTFLoader().load(
     );
 
     if (!standClip || !runClip || !searchClip) {
-      console.error('[character] une ou plusieurs animations sont introuvables', {
+      console.error('[character] animations manquantes :', {
         stand: Boolean(standClip),
         run: Boolean(runClip),
         search: Boolean(searchClip)
@@ -288,7 +310,7 @@ new GLTFLoader().load(
       else console.warn('[character] maillage introuvable :', name);
     });
 
-    // Mise à l'échelle et positionnement des pieds.
+    // Mise à l'échelle et positionnement.
     const box = new THREE.Box3().setFromObject(model);
     const size = box.getSize(new THREE.Vector3());
 
@@ -297,8 +319,7 @@ new GLTFLoader().load(
       return;
     }
 
-    const scale = CONFIG.heightPx / size.y;
-    model.scale.setScalar(scale);
+    model.scale.setScalar(CONFIG.heightPx / size.y);
 
     const scaledBox = new THREE.Box3().setFromObject(model);
     const center = scaledBox.getCenter(new THREE.Vector3());
@@ -307,12 +328,13 @@ new GLTFLoader().load(
     model.position.z -= center.z;
     model.position.y -= scaledBox.min.y;
 
-    // Groupe externe : position et orientation du personnage à l'écran.
+    // Groupe externe : position et orientation à l'écran.
     runner = new THREE.Group();
     runner.position.set(CONFIG.startXPx, CONFIG.bottomOffsetPx, 0);
     runner.add(model);
     scene.add(runner);
 
+    // Création du moteur d'animation.
     mixer = new THREE.AnimationMixer(model);
 
     standAction = mixer.clipAction(standClip);
@@ -326,7 +348,6 @@ new GLTFLoader().load(
       rootMotionNode?.name || 'non détecté'
     );
 
-    // Toutes les animations sont exécutées séparément.
     standAction.setLoop(THREE.LoopOnce, 1);
     standAction.clampWhenFinished = true;
 
@@ -342,7 +363,7 @@ new GLTFLoader().load(
       }
     });
 
-    // Départ : le personnage est face caméra et se lève.
+    // Départ face caméra : le personnage se lève.
     runner.rotation.y = 0;
 
     state = 'standing';
@@ -376,7 +397,6 @@ function tick() {
       1
     );
 
-    // Interpolation douce.
     const eased = progress * progress * (3 - 2 * progress);
 
     runner.rotation.y = Math.PI / 2 * (1 - eased);
