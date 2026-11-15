@@ -144,33 +144,35 @@ let dragging = false;
 let dragOffsetX = 0;
 let dragOffsetY = 0;
 
+window.addEventListener('mousemove', (e) => {
+  if (dragging) {
+    const rect = renderer.domElement.getBoundingClientRect();
+    posX = e.clientX - rect.left - dragOffsetX;
+    posY = rect.height - (e.clientY - rect.top) - dragOffsetY;
+    return;
+  }
+
+  // Active le canvas seulement si la souris est proche du perso
+  const rect = renderer.domElement.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = rect.height - (e.clientY - rect.top);
+  const dist = Math.sqrt((mx - posX) ** 2 + (my - posY) ** 2);
+  container.style.pointerEvents = dist < 60 ? 'auto' : 'none';
+});
+
 renderer.domElement.addEventListener('mousedown', (e) => {
   const rect = renderer.domElement.getBoundingClientRect();
   const mx = e.clientX - rect.left;
   const my = rect.height - (e.clientY - rect.top);
-  const dx = mx - posX;
-  const dy = my - posY;
-  if (Math.sqrt(dx*dx + dy*dy) < 60) {
+  const dist = Math.sqrt((mx - posX) ** 2 + (my - posY) ** 2);
+  if (dist < 60) {
     dragging = true;
-    dragOffsetX = dx;
-    dragOffsetY = dy;
-    renderer.domElement.style.pointerEvents = 'auto';
+    dragOffsetX = mx - posX;
+    dragOffsetY = my - posY;
     e.preventDefault();
   }
 });
 
-window.addEventListener('mousemove', (e) => {
-  if (!dragging) return;
-  const rect = renderer.domElement.getBoundingClientRect();
-  posX = e.clientX - rect.left - dragOffsetX;
-  posY = rect.height - (e.clientY - rect.top) - dragOffsetY;
-});
-
 window.addEventListener('mouseup', () => {
-  if (dragging) {
-    dragging = false;
-    if (typeof window.characterMoveTo === 'function') {
-      window.characterMoveTo(posX, posY);
-    }
-  }
+  dragging = false;
 });
