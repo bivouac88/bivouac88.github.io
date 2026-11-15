@@ -78,18 +78,6 @@ export async function createAvatar3D(container) {
     courseClip.duration.toFixed(2) + " secondes"
   );
 
-  // Suppression du déplacement horizontal des hanches
-  courseClip.tracks.forEach(track => {
-    if (/hips?.*\.position$/i.test(track.name)) {
-      const values = track.values;
-
-      for (let i = 0; i < values.length; i += 3) {
-        values[i] = values[0];
-        values[i + 2] = values[2];
-      }
-    }
-  });
-
   const mixer = new THREE.AnimationMixer(character);
   const courseAction = mixer.clipAction(courseClip);
 

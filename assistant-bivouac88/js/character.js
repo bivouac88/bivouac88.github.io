@@ -21,16 +21,10 @@ async function initCharacter() {
     console.log("Bivouaciste chargé !");
 
     // Orientation de face
-    avatar.setRotationY(0);
-
-    // Déplacement sur toute la largeur de l'écran
-    requestAnimationFrame(() => {
-      character.style.transition = "left 4s linear";
-      character.style.left =
-        `${window.innerWidth + character.offsetWidth}px`;
-    });
-
-  } catch (error) {
+    avatar.setRotationY(Math.PI / 2);
+    
+  } 
+    catch (error) {
     console.error("Erreur Bivouaciste :", error);
   }
 }
