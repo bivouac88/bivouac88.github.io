@@ -16,7 +16,7 @@ const CONFIG = {
   animationName: null,  // ex. "Run" ; null = dernière animation du fichier
   // Maillages à retirer par leur nom (doublons / tests restés dans le GLB).
   // Si le coureur disparaît, remplace par ['geometry_0_BACKUP_POIDS'].
-  hideMeshes: ['geometry_0_TEST_GEOMETRIQUE'],
+hideMeshes: ['geometry_0_BACKUP_POIDS'],
   // Orientation initiale du modèle : 0 = regarde vers +Z (standard glTF).
   // Si le personnage court de dos ou à reculons, essaie Math.PI / 2 ou -Math.PI / 2.
   facingOffset: 0,
