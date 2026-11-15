@@ -158,10 +158,28 @@ new GLTFLoader().load(
     // Animation de course
     if (clip) {
       mixer = new THREE.AnimationMixer(model);
-      const action = mixer.clipAction(clip);
-      action.setLoop(THREE.LoopOnce, 1);
-      action.clampWhenFinished = true;
-      action.play();
+            const runAction = mixer.clipAction(clip);
+      runAction.setLoop(THREE.LoopOnce, 1);
+      runAction.clampWhenFinished = true;
+      runAction.play();
+
+      // Enchaînement : course -> chercher (en boucle)
+      const searchClip = THREE.AnimationClip.findByName(
+        gltf.animations,
+        CONFIG.searchAnimationName
+      );
+      if (searchClip) {
+        const searchAction = mixer.clipAction(searchClip);
+        searchAction.setLoop(THREE.LoopRepeat, Infinity);
+        mixer.addEventListener('finished', (e) => {
+          if (e.action === runAction) {
+            searchAction.reset().play();
+            searchAction.crossFadeFrom(runAction, 0.3, false);
+          }
+        });
+      } else {
+        console.warn('[character] animation introuvable :', CONFIG.searchAnimationName);
+      }
     } else {
       console.warn('[character] aucune animation dans le GLB');
     }
