@@ -33,8 +33,25 @@ export async function createAvatar3D(container) {
   const loader = new GLTFLoader();
   const gltf = await loader.loadAsync(MODEL_URL.href);
 
-  scene.add(gltf.scene);
+const animatedMeshes = [];
 
+gltf.scene.traverse((object) => {
+  if (object.isSkinnedMesh) {
+    animatedMeshes.push(object);
+  }
+});
+
+if (!animatedMeshes.length) {
+  throw new Error("Aucun personnage animé (SkinnedMesh) trouvé.");
+}
+
+const animatedCharacter = new THREE.Group();
+
+animatedMeshes.forEach((mesh) => {
+  animatedCharacter.add(mesh);
+});
+
+scene.add(animatedCharacter);
   // Cadrage automatique
   const bounds = new THREE.Box3().setFromObject(gltf.scene);
   const center = bounds.getCenter(new THREE.Vector3());
@@ -54,7 +71,7 @@ export async function createAvatar3D(container) {
   }
 
   const clip = gltf.animations[gltf.animations.length - 1];
-  const mixer = new THREE.AnimationMixer(gltf.scene);
+const mixer = new THREE.AnimationMixer(gltf.scene);
   const action = mixer.clipAction(clip);
 
   action.setLoop(THREE.LoopRepeat, Infinity);
