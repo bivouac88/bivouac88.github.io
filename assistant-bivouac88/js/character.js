@@ -14,6 +14,9 @@ const CONFIG = {
   canvasHeightPx: 220,  // hauteur de la bande où il court
   bottomOffsetPx: 6,    // distance entre ses pieds et le bas de l'écran
   animationName: null,  // ex. "Run" ; null = dernière animation du fichier
+  // Maillages à retirer par leur nom (doublons / tests restés dans le GLB).
+  // Si le coureur disparaît, remplace par ['geometry_0_BACKUP_POIDS'].
+  hideMeshes: ['geometry_0_TEST_GEOMETRIQUE'],
   // Orientation initiale du modèle : 0 = regarde vers +Z (standard glTF).
   // Si le personnage court de dos ou à reculons, essaie Math.PI / 2 ou -Math.PI / 2.
   facingOffset: 0,
@@ -111,6 +114,13 @@ new GLTFLoader().load(
       console.info('[character] objets retirés :', toRemove.map((o) => o.name || o.type));
       toRemove.forEach((o) => o.removeFromParent());
     }
+
+    // Retrait manuel par nom
+    CONFIG.hideMeshes.forEach((name) => {
+      const obj = model.getObjectByName(name);
+      if (obj) obj.removeFromParent();
+      else console.warn('[character] maillage introuvable :', name);
+    });
 
     // Diagnostic : arbre de ce qui reste dans la scène
     const lines = [];
