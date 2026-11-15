@@ -15,7 +15,9 @@ const CONFIG = {
   canvasHeightPx: 220,  // hauteur de la bande où il court
   bottomOffsetPx: 6,    // distance entre ses pieds et le bas de l'écran
   animationName: null,  // ex. "Run" ; null = dernière animation du fichier
-  searchAnimationName: 'mixamo.com.004', // animation jouée après la course (nom exact)
+  // GLB de l'animation « chercher » : remplace par le vrai dossier et le vrai nom
+  searchModelUrl: new URL('../Assets/Chercher/bivouaceur qui cherche full ok.glb', import.meta.url).href,
+  searchClipIndex: 3,   // 4e animation du fichier (on compte à partir de 0)
   // Maillages à retirer par leur nom (doublons / tests restés dans le GLB).
   // Si le coureur disparaît, remplace par ['geometry_0_BACKUP_POIDS'].
 hideMeshes: ['geometry_0_BACKUP_POIDS'],
@@ -155,35 +157,43 @@ new GLTFLoader().load(
     runner.position.y = CONFIG.bottomOffsetPx;
     scene.add(runner);
 
-    // Animation de course
+       // Animation de course
     if (clip) {
       mixer = new THREE.AnimationMixer(model);
-            const runAction = mixer.clipAction(clip);
+      const runAction = mixer.clipAction(clip);
       runAction.setLoop(THREE.LoopOnce, 1);
       runAction.clampWhenFinished = true;
       runAction.play();
 
-      // Enchaînement : course -> chercher (en boucle)
-      const searchClip = THREE.AnimationClip.findByName(
-        gltf.animations,
-        CONFIG.searchAnimationName
-      );
-      if (searchClip) {
-        const searchAction = mixer.clipAction(searchClip);
-        searchAction.setLoop(THREE.LoopRepeat, Infinity);
-        mixer.addEventListener('finished', (e) => {
-          if (e.action === runAction) {
-            searchAction.reset().play();
-            searchAction.crossFadeFrom(runAction, 0.3, false);
+      // Enchaînement : course -> chercher (en boucle), depuis un second GLB
+      new GLTFLoader().load(
+        CONFIG.searchModelUrl,
+        (g2) => {
+          console.info(
+            '[character] animations du GLB chercher :',
+            g2.animations.map((a, i) => `${i}: ${a.name} (${a.duration.toFixed(2)} s)`)
+          );
+          const searchClip = g2.animations[CONFIG.searchClipIndex];
+          if (!searchClip) {
+            console.warn("[character] pas d'animation à l'index", CONFIG.searchClipIndex);
+            return;
           }
-        });
-      } else {
-        console.warn('[character] animation introuvable :', CONFIG.searchAnimationName);
-      }
+          const searchAction = mixer.clipAction(searchClip);
+          searchAction.setLoop(THREE.LoopRepeat, Infinity);
+          mixer.addEventListener('finished', (e) => {
+            if (e.action === runAction) {
+              searchAction.reset().play();
+              searchAction.crossFadeFrom(runAction, 0.3, false);
+            }
+          });
+        },
+        undefined,
+        (err) => console.error('[character] chargement du GLB chercher impossible :', err)
+      );
     } else {
       console.warn('[character] aucune animation dans le GLB');
     }
-
+    
     x = CONFIG.startXPx;
     runner.position.x = x;
   },
