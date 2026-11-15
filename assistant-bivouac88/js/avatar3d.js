@@ -1,25 +1,22 @@
-
 import * as THREE from "https://esm.sh/three@0.180.0";
 import { GLTFLoader } from "https://esm.sh/three@0.180.0/examples/jsm/loaders/GLTFLoader.js";
 
 const MODEL_URL = new URL("../Assets/nomade.glb", import.meta.url);
-const RUN_ANIMATION_URL = new URL(
-  "../Assets/Courrir/bivouaceur qui court full ok.glb",
-  import.meta.url
-);
-export async function createAvatar3D(container, options = {}) {
+
+const ANIMATION_FILES = {
+  course: new URL("../Assets/Courrir/bivouaceur qui court full ok.glb", import.meta.url),
+  chercher: new URL("../Assets/Chercher/bivouaceur qui cherche full ok.glb", import.meta.url),
+  chill: new URL("../Assets/Chill/chill.glb", import.meta.url),
+  lever: new URL("../Assets/Se lever/assi debout.glb", import.meta.url)
+};
+
+export async function createAvatar3D(container) {
   if (!container) {
     throw new Error("Conteneur 3D introuvable.");
   }
 
   const scene = new THREE.Scene();
-
-  const camera = new THREE.PerspectiveCamera(
-    32,
-    1,
-    0.01,
-    100
-  );
+  const camera = new THREE.PerspectiveCamera(32, 1, 0.01, 100);
 
   const renderer = new THREE.WebGLRenderer({
     alpha: true,
@@ -31,7 +28,6 @@ export async function createAvatar3D(container, options = {}) {
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.15;
-
   renderer.setClearColor(0x000000, 0);
   renderer.domElement.style.width = "100%";
   renderer.domElement.style.height = "100%";
@@ -39,126 +35,75 @@ export async function createAvatar3D(container, options = {}) {
 
   container.appendChild(renderer.domElement);
 
-  // Éclairage
-  scene.add(new THREE.HemisphereLight(
-    0xffffff,
-    0x606070,
-    2
-  ));
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x606070, 2));
 
-  const mainLight = new THREE.DirectionalLight(
-    0xffffff,
-    2.5
-  );
-
+  const mainLight = new THREE.DirectionalLight(0xffffff, 2.5);
   mainLight.position.set(3, 5, 4);
   scene.add(mainLight);
 
-  const fillLight = new THREE.DirectionalLight(
-    0xffffff,
-    1.2
-  );
-
+  const fillLight = new THREE.DirectionalLight(0xffffff, 1.2);
   fillLight.position.set(-4, 2, -3);
   scene.add(fillLight);
 
-  // Chargement du personnage
   const loader = new GLTFLoader();
 
   let gltf;
-
   try {
     gltf = await loader.loadAsync(MODEL_URL.href);
   } catch (error) {
     renderer.dispose();
     renderer.domElement.remove();
-    throw new Error(
-      "Impossible de charger nomade.glb : " + error.message
-    );
+    throw new Error("Impossible de charger nomade.glb : " + error.message);
   }
-// Chargement du fichier contenant l'animation de course
-let runGltf;
 
-try {
-  runGltf = await loader.loadAsync(RUN_ANIMATION_URL.href);
-
-  console.log("Animation de course chargée !");
-  console.log(
-    "Clips disponibles :",
-    runGltf.animations.map(clip => clip.name)
-  );
-} catch (error) {
-  renderer.dispose();
-  renderer.domElement.remove();
-
-  throw new Error(
-    "Impossible de charger le GLB de course : " + error.message
-  );
-}
   const character = gltf.scene;
   scene.add(character);
 
-  // Centrage et cadrage automatiques
   const box = new THREE.Box3().setFromObject(character);
   const size = box.getSize(new THREE.Vector3());
   const center = box.getCenter(new THREE.Vector3());
-
   character.position.sub(center);
 
   const height = Math.max(size.y, 0.01);
-
-  const cameraDistance = height / (
-    2 * Math.tan(THREE.MathUtils.degToRad(
-      camera.fov / 2
-    ))
-  );
-
+  const cameraDistance = height / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)));
   const distance = cameraDistance * 1.35;
 
-  camera.position.set(
-    0,
-    height * 0.08,
-    distance
-  );
-
+  camera.position.set(0, height * 0.08, distance);
   camera.lookAt(0, 0, 0);
 
-  // Animations Blender
   const mixer = new THREE.AnimationMixer(character);
-
   const actions = {};
   let currentAction = null;
 
-  // Animations du personnage principal
-gltf.animations.forEach(clip => {
-  const key = clip.name.toLowerCase();
-  actions[key] = mixer.clipAction(clip, character);
-});
+  // Charge chaque fichier d'animation externe, en place (sans déplacement des hanches)
+  for (const [key, url] of Object.entries(ANIMATION_FILES)) {
+    try {
+      const animGltf = await loader.loadAsync(url.href);
 
-  // Animations du fichier de course, converties en course sur place
-runGltf.animations.forEach(clip => {
-  const inPlaceClip = clip.clone();
+      console.log(`Animation "${key}" chargée. Clips :`, animGltf.animations.map(c => c.name));
 
-  inPlaceClip.tracks.forEach(track => {
-    if (/hips?.*\.position$/i.test(track.name)) {
-      const values = track.values;
+      animGltf.animations.forEach(clip => {
+        const inPlaceClip = clip.clone();
 
-      // Supprime le déplacement horizontal des hanches
-      // tout en conservant leur mouvement vertical
-      for (let i = 0; i < values.length; i += 3) {
-        values[i] = values[0];
-        values[i + 2] = values[2];
-      }
+        inPlaceClip.tracks.forEach(track => {
+          if (/hips?.*\.position$/i.test(track.name)) {
+            const values = track.values;
+            for (let i = 0; i < values.length; i += 3) {
+              values[i] = values[0];
+              values[i + 2] = values[2];
+            }
+          }
+        });
+
+        actions[key] = mixer.clipAction(inPlaceClip, character);
+      });
+    } catch (error) {
+      console.warn(`Impossible de charger l'animation "${key}" :`, error.message);
     }
-  });
-
-  const key = "course:" + clip.name.toLowerCase();
-
-  actions[key] = mixer.clipAction(inPlaceClip, character);
-});
+  }
 
   function play(name, fade = 0.25) {
-    const action = actions[name.toLowerCase()];
+    const action = actions[name];
 
     if (!action) {
       console.warn("Animation inconnue :", name);
@@ -183,34 +128,17 @@ runGltf.animations.forEach(clip => {
     return true;
   }
 
-  // Animation de repos par défaut
-  const idle = Object.keys(actions).find(name =>
-    name.includes("idle") ||
-    name.includes("repos") ||
-    name.includes("wait")
-  );
-
-  if (idle) {
-    play(idle, 0);
-  } else if (gltf.animations.length > 0) {
-    play(gltf.animations[0].name, 0);
-  }
-
-  // Gestion du rendu
   const clock = new THREE.Clock();
-
   let active = true;
   let frameId = null;
 
   function resize() {
     const width = container.clientWidth;
     const height = container.clientHeight;
-
     if (!width || !height) return;
 
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
-
     renderer.setSize(width, height, false);
   }
 
@@ -220,53 +148,39 @@ runGltf.animations.forEach(clip => {
 
   function animate() {
     if (!active) return;
-
     frameId = requestAnimationFrame(animate);
 
     const delta = Math.min(clock.getDelta(), 0.05);
-
     mixer.update(delta);
     renderer.render(scene, camera);
   }
 
   animate();
 
-  // API accessible depuis widget.js
   return {
     character,
     mixer,
-    animations: Object.keys(actions),
-
     play,
-
     getAnimationNames() {
       return Object.keys(actions);
     },
-
     setVisible(visible) {
       character.visible = visible;
     },
-setRotationY(angle) {
-  character.rotation.y = angle;
-},
+    setRotationY(angle) {
+      character.rotation.y = angle;
+    },
     dispose() {
       active = false;
-
       cancelAnimationFrame(frameId);
       resizeObserver.disconnect();
-
       mixer.stopAllAction();
-
       scene.remove(character);
 
-      character.traverse((object) => {
+      character.traverse(object => {
         if (object.isMesh) {
           object.geometry.dispose();
-
-          const materials = Array.isArray(object.material)
-            ? object.material
-            : [object.material];
-
+          const materials = Array.isArray(object.material) ? object.material : [object.material];
           materials.forEach(material => material.dispose());
         }
       });
