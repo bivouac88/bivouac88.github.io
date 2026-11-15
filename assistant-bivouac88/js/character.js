@@ -10,7 +10,7 @@ const CONFIG = {
   modelUrl: new URL('../Assets/Courrir/bivouaceur qui court full ok.glb', import.meta.url).href,
   heightPx: 160,        // hauteur du personnage à l'écran (en pixels)
   speedPx: 0,           // 0 = pas de glissement (l'animation seule fait bouger le perso)
-  startXPx: 40,         // position de départ depuis le bord gauche
+  startXPx: 120,         // position de départ depuis le bord gauche
   pauseSeconds: 0.8,    // pause hors écran avant de recommencer
   canvasHeightPx: 220,  // hauteur de la bande où il court
   bottomOffsetPx: 6,    // distance entre ses pieds et le bas de l'écran
@@ -157,7 +157,10 @@ new GLTFLoader().load(
     // Animation de course
     if (clip) {
       mixer = new THREE.AnimationMixer(model);
-      mixer.clipAction(clip).play();
+      const action = mixer.clipAction(clip);
+      action.setLoop(THREE.LoopOnce, 1);
+      action.clampWhenFinished = true;
+      action.play();
     } else {
       console.warn('[character] aucune animation dans le GLB');
     }
