@@ -11,7 +11,6 @@ async function initCharacter() {
   character.className = "b88-character";
 
   character.style.transition = "none";
-  character.style.left = "12px";
 
   document.body.appendChild(character);
 
@@ -19,9 +18,6 @@ async function initCharacter() {
     const avatar = await createAvatar3D(character);
 
     console.log("Bivouaciste chargé !");
-
-    // Orientation de face
-    avatar.setRotationY(Math.PI / 2);
     
   } 
     catch (error) {
