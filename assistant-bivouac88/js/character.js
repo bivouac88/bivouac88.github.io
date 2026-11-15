@@ -21,7 +21,6 @@ async function initCharacter() {
 
   character.addEventListener("keydown", event => {
     if (event.target !== character) return;
-
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       document.dispatchEvent(new CustomEvent("b88:character-click"));
@@ -32,29 +31,21 @@ async function initCharacter() {
     const avatar = await createAvatar3D(character);
 
     console.log("Bivouaciste GLB chargé !");
+    console.log("Animations disponibles :", avatar.getAnimationNames());
 
-    // COURSE : traversée complète de l'écran
     setTimeout(() => {
-      // Oriente le personnage vers la droite
       avatar.setRotationY(Math.PI / 2);
+      avatar.play("course", 0.2);
 
-      // Lance la course
-      avatar.play("course:mixamo.com.002", 0.2);
-
-      // Prépare le déplacement
       character.style.transition = "none";
       character.style.left = "12px";
-
-      // Force le navigateur à appliquer la position initiale
       character.offsetHeight;
 
-      // Départ vers la droite, jusqu'à sortir complètement de l'écran
       requestAnimationFrame(() => {
         character.style.transition = "left 6s linear";
         character.style.left = `${window.innerWidth + character.offsetWidth}px`;
       });
-
-    }, 1500);
+    }, 1000);
 
   } catch (error) {
     console.error("Erreur de chargement du Bivouaciste :", error);
