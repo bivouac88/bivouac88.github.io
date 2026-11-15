@@ -85,14 +85,10 @@ export async function createAvatar3D(container) {
     try {
       const animGltf = await loader.loadAsync(url.href);
 
-console.log(
-  `Animation "${key}" :`,
-  animGltf.animations.map(c => ({
-    nom: c.name,
-    durée: c.duration,
-    images: c.tracks.map(t => t.times.length)
-  }))
-);
+Animation "course" :
+mixamo.com.001 — 4.00 secondes
+mixamo.com.002 — 4.00 secondes
+mixamo.com.003 — 4.00 secondes
 
       animGltf.animations.forEach(clip => {
         const inPlaceClip = clip.clone();
