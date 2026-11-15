@@ -39,9 +39,8 @@ async function initCharacter() {
       avatar.setRotationY(Math.PI / 2);
 
       // Lance la course
-      avatar.play("course:mixamo.com.001", 0.2);
-avatar.play("course:mixamo.com.001", 0.2);
-console.log("Taille personnage:", character.offsetWidth, "Largeur fenêtre:", window.innerWidth);
+      avatar.play("course:mixamo.com.002", 0.2);
+
       // Prépare le déplacement
       character.style.transition = "none";
       character.style.left = "12px";
