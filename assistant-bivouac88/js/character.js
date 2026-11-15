@@ -1,28 +1,24 @@
-// Personnage animé qui court en ligne droite, vu de profil,
-// du bas gauche au bas droite de l'écran, en boucle.
 
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/+esm';
 import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js/+esm';
 
 // ---------- Réglages ----------
 const CONFIG = {
-  // Chemin du .glb, relatif à ce fichier (js/) -> remonte d'un cran puis Assets/
   modelUrl: new URL('../Assets/bivouaceur_complet.glb', import.meta.url).href,
-  heightPx: 160,        // hauteur du personnage à l'écran (en pixels)
-  speedPx: 0,           // 0 = pas de glissement (l'animation seule fait bouger le perso)
-  startXPx: 120,         // position de départ depuis le bord gauche
-  pauseSeconds: 0.8,    // pause hors écran avant de recommencer
-  canvasHeightPx: 220,  // hauteur de la bande où il court
-  bottomOffsetPx: 6,    // distance entre ses pieds et le bas de l'écran
-  animationName: 'Courir',            // animation de course (nom exact)
-  searchClipName: 'Action chercher',  // animation jouée après la course (nom exact)
-  
-  // Maillages à retirer par leur nom (doublons / tests restés dans le GLB).
-  // Si le coureur disparaît, remplace par ['geometry_0_BACKUP_POIDS'].
-hideMeshes: ['geometry_0_BACKUP_POIDS'],
-  // Orientation initiale du modèle : 0 = regarde vers +Z (standard glTF).
-  // Si le personnage court de dos ou à reculons, essaie Math.PI / 2 ou -Math.PI / 2.
+  heightPx: 160,
+  startXPx: 120,
+  canvasHeightPx: 220,
+  bottomOffsetPx: 6,
   facingOffset: 0,
+
+  standClipName: 'Se lever',
+  runClipName: 'Courir',
+  searchClipName: 'Action chercher',
+
+  hideMeshes: ['geometry_0_BACKUP_POIDS'],
+
+  // Durée du pivot final vers la caméra.
+  turnDuration: 0.7
 };
 
 // ---------- Scène ----------
@@ -31,18 +27,22 @@ container.id = 'character-runner';
 container.style.height = CONFIG.canvasHeightPx + 'px';
 document.body.appendChild(container);
 
-const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+const renderer = new THREE.WebGLRenderer({
+  alpha: true,
+  antialias: true
+});
+
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 container.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
 
-// Caméra orthographique : 1 unité = 1 pixel, vue strictement de côté (axe Z)
 const camera = new THREE.OrthographicCamera(0, 1, 1, 0, -1000, 1000);
 camera.position.set(0, 0, 500);
 
 scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 2.2));
+
 const sun = new THREE.DirectionalLight(0xffffff, 2.5);
 sun.position.set(-200, 400, 300);
 scene.add(sun);
@@ -53,165 +53,340 @@ let height = 0;
 function resize() {
   width = container.clientWidth;
   height = container.clientHeight;
+
   renderer.setSize(width, height, false);
   renderer.domElement.style.width = '100%';
   renderer.domElement.style.height = '100%';
+
   camera.left = 0;
   camera.right = width;
   camera.top = height;
   camera.bottom = 0;
   camera.updateProjectionMatrix();
 }
+
 resize();
 window.addEventListener('resize', resize);
 
-// ---------- Modèle ----------
-let runner = null;   // groupe qui se déplace
+// ---------- Personnage et animations ----------
+let runner = null;
+let model = null;
 let mixer = null;
-let runnerWidth = 0; // largeur à l'écran, pour sortir complètement du cadre
-let x = 0;
-let pause = 0;
 
+let standAction = null;
+let runAction = null;
+let searchAction = null;
+
+let rootMotionNode = null;
+let runStartPosition = null;
+
+let state = 'loading';
+let turnElapsed = 0;
+
+const clock = new THREE.Clock();
+
+// Recherche du nœud qui porte la translation de l'animation.
+function findRootMotionNode(model, clip) {
+  const candidates = new Set();
+
+  for (const track of clip.tracks) {
+    const parsed = THREE.PropertyBinding.parseTrackName(track.name);
+
+    if (parsed.propertyName !== 'position') continue;
+
+    const node = THREE.PropertyBinding.findNode(model, parsed.nodeName);
+
+    if (node) candidates.add(node);
+  }
+
+  if (!candidates.size) return null;
+
+  // On privilégie le nœud animé le plus proche de la racine du modèle.
+  function depth(node) {
+    let value = 0;
+
+    while (node && node !== model) {
+      value++;
+      node = node.parent;
+    }
+
+    return value;
+  }
+
+  return [...candidates].sort((a, b) => depth(a) - depth(b))[0];
+}
+
+function getWorldPosition(object) {
+  model.updateMatrixWorld(true);
+  return object.getWorldPosition(new THREE.Vector3());
+}
+
+// ---------- Enchaînement des animations ----------
+function startRunning() {
+  if (!runAction) return;
+
+  // Profil : le personnage regarde vers la droite.
+  runner.rotation.y = Math.PI / 2;
+
+  if (rootMotionNode) {
+    runStartPosition = getWorldPosition(rootMotionNode);
+  } else {
+    console.warn(
+      '[character] aucune piste de position détectée dans Courir.'
+    );
+  }
+
+  state = 'running';
+
+  runAction.reset();
+  runAction.setLoop(THREE.LoopOnce, 1);
+  runAction.clampWhenFinished = true;
+  runAction.play();
+
+  console.info('[character] début de la course');
+}
+
+function startTurning() {
+  if (!runner) return;
+
+  state = 'turning';
+  turnElapsed = 0;
+
+  console.info('[character] fin de course, pivot vers la caméra');
+}
+
+function startSearching() {
+  if (!searchAction) {
+    state = 'finished';
+    console.warn('[character] animation Action chercher introuvable');
+    return;
+  }
+
+  runner.rotation.y = 0;
+
+  state = 'searching';
+
+  searchAction.reset();
+  searchAction.setLoop(THREE.LoopRepeat, Infinity);
+  searchAction.play();
+
+  console.info('[character] début de Action chercher');
+}
+
+function finishRunning() {
+  if (state !== 'running') return;
+
+  // Capture de la position atteinte par l'animation.
+  let displacement = new THREE.Vector3();
+
+  if (rootMotionNode && runStartPosition) {
+    const endPosition = getWorldPosition(rootMotionNode);
+
+    displacement.subVectors(endPosition, runStartPosition);
+
+    // On conserve le déplacement horizontal, sans le mouvement vertical
+    // éventuel du bassin ou du corps pendant la dernière foulée.
+    displacement.y = 0;
+  }
+
+  // Arrêt net de Courir : les transformations animées sont réinitialisées.
+  runAction.stop();
+
+  // Le déplacement de l'animation est transféré au groupe extérieur.
+  runner.position.add(displacement);
+
+  model.updateMatrixWorld(true);
+
+  startTurning();
+}
+
+function finishStanding() {
+  if (state !== 'standing') return;
+
+  standAction.stop();
+  startRunning();
+}
+
+// ---------- Chargement du GLB ----------
 new GLTFLoader().load(
   CONFIG.modelUrl,
+
   (gltf) => {
-    const model = gltf.scene;
+    model = gltf.scene;
     model.rotation.y = CONFIG.facingOffset;
 
-    // Choix de l'animation (dernière du fichier par défaut)
-    const clip = gltf.animations.length
-      ? (CONFIG.animationName &&
-          THREE.AnimationClip.findByName(gltf.animations, CONFIG.animationName)) ||
-        gltf.animations[gltf.animations.length - 1]
-      : null;
+    const standClip = THREE.AnimationClip.findByName(
+      gltf.animations,
+      CONFIG.standClipName
+    );
+
+    const runClip = THREE.AnimationClip.findByName(
+      gltf.animations,
+      CONFIG.runClipName
+    );
+
+    const searchClip = THREE.AnimationClip.findByName(
+      gltf.animations,
+      CONFIG.searchClipName
+    );
 
     console.info(
       '[character] animations :',
-      gltf.animations.map((a) => `${a.name} (${a.duration.toFixed(2)} s)`),
-      '| jouée :', clip && clip.name
+      gltf.animations.map(
+        clip => `${clip.name} (${clip.duration.toFixed(2)} s)`
+      )
     );
 
-    // On ne garde que ce que l'animation fait réellement bouger.
-    // Tout le reste (ex. copie en T-pose) est retiré de la scène.
-    if (clip) {
-      const animatedNodes = new Set();
-      clip.tracks.forEach((track) => {
-        const { nodeName } = THREE.PropertyBinding.parseTrackName(track.name);
-        const node = THREE.PropertyBinding.findNode(model, nodeName);
-        if (node) animatedNodes.add(node);
+    if (!standClip || !runClip || !searchClip) {
+      console.error('[character] une ou plusieurs animations sont introuvables', {
+        stand: Boolean(standClip),
+        run: Boolean(runClip),
+        search: Boolean(searchClip)
       });
-
-      const underAnimatedNode = (obj) => {
-        for (let p = obj; p; p = p.parent) if (animatedNodes.has(p)) return true;
-        return false;
-      };
-
-      const toRemove = [];
-      model.traverse((obj) => {
-        if (obj.isSkinnedMesh) {
-          if (!obj.skeleton.bones.some((b) => animatedNodes.has(b))) toRemove.push(obj);
-        } else if (obj.isMesh && !underAnimatedNode(obj)) {
-          toRemove.push(obj);
-        }
-      });
-      console.info('[character] objets retirés :', toRemove.map((o) => o.name || o.type));
-      toRemove.forEach((o) => o.removeFromParent());
+      return;
     }
 
-    // Retrait manuel par nom
+    // Conserver les maillages nécessaires aux trois animations.
+    const animatedNodes = new Set();
+
+    for (const clip of [standClip, runClip, searchClip]) {
+      for (const track of clip.tracks) {
+        const parsed = THREE.PropertyBinding.parseTrackName(track.name);
+        const node = THREE.PropertyBinding.findNode(model, parsed.nodeName);
+
+        if (node) animatedNodes.add(node);
+      }
+    }
+
+    const underAnimatedNode = (obj) => {
+      for (let parent = obj; parent; parent = parent.parent) {
+        if (animatedNodes.has(parent)) return true;
+      }
+
+      return false;
+    };
+
+    const toRemove = [];
+
+    model.traverse((obj) => {
+      if (obj.isSkinnedMesh) {
+        if (!obj.skeleton.bones.some(bone => animatedNodes.has(bone))) {
+          toRemove.push(obj);
+        }
+      } else if (obj.isMesh && !underAnimatedNode(obj)) {
+        toRemove.push(obj);
+      }
+    });
+
+    toRemove.forEach(obj => obj.removeFromParent());
+
+    // Retrait manuel des maillages indésirables.
     CONFIG.hideMeshes.forEach((name) => {
       const obj = model.getObjectByName(name);
+
       if (obj) obj.removeFromParent();
       else console.warn('[character] maillage introuvable :', name);
     });
 
-    // Diagnostic : arbre de ce qui reste dans la scène
-    const lines = [];
-    const dump = (obj, depth) => {
-      const kind = obj.isSkinnedMesh ? 'SkinnedMesh' : obj.isMesh ? 'Mesh' : obj.isBone ? 'Bone' : obj.type;
-      if (!obj.isBone) lines.push(`${'  '.repeat(depth)}${kind} "${obj.name}"`);
-      obj.children.forEach((c) => dump(c, depth + 1));
-    };
-    dump(model, 0);
-    console.info('[character] contenu restant :\n' + lines.join('\n'));
-
-    // Mise à l'échelle + pieds posés sur y = 0
+    // Mise à l'échelle et positionnement des pieds.
     const box = new THREE.Box3().setFromObject(model);
     const size = box.getSize(new THREE.Vector3());
+
+    if (!size.y) {
+      console.error('[character] dimensions invalides du modèle');
+      return;
+    }
+
     const scale = CONFIG.heightPx / size.y;
     model.scale.setScalar(scale);
 
-    const box2 = new THREE.Box3().setFromObject(model);
-    const center = box2.getCenter(new THREE.Vector3());
+    const scaledBox = new THREE.Box3().setFromObject(model);
+    const center = scaledBox.getCenter(new THREE.Vector3());
+
     model.position.x -= center.x;
     model.position.z -= center.z;
-    model.position.y -= box2.min.y;
+    model.position.y -= scaledBox.min.y;
 
-    runnerWidth = box2.getSize(new THREE.Vector3()).x;
-
-    // Le personnage regarde vers la droite de l'écran (+X)
+    // Groupe externe : position et orientation du personnage à l'écran.
     runner = new THREE.Group();
-    runner.rotation.y = Math.PI / 2;
+    runner.position.set(CONFIG.startXPx, CONFIG.bottomOffsetPx, 0);
     runner.add(model);
-    runner.position.y = CONFIG.bottomOffsetPx;
     scene.add(runner);
 
-       // Animation de course
-    if (clip) {
-      mixer = new THREE.AnimationMixer(model);
-      const runAction = mixer.clipAction(clip);
-      runAction.setLoop(THREE.LoopOnce, 1);
-      runAction.clampWhenFinished = true;
-      runAction.play();
+    mixer = new THREE.AnimationMixer(model);
 
-            // Enchaînement : course -> chercher (en boucle), dans le même GLB
-      const searchClip = THREE.AnimationClip.findByName(gltf.animations, CONFIG.searchClipName);
-      if (searchClip) {
-        const searchAction = mixer.clipAction(searchClip);
-        searchAction.setLoop(THREE.LoopRepeat, Infinity);
-        mixer.addEventListener('finished', (e) => {
-          if (e.action === runAction) {
-            searchAction.reset().play();
-            searchAction.crossFadeFrom(runAction, 0.3, false);
-          }
-        });
-      } else {
-        console.warn('[character] animation introuvable :', CONFIG.searchClipName);
+    standAction = mixer.clipAction(standClip);
+    runAction = mixer.clipAction(runClip);
+    searchAction = mixer.clipAction(searchClip);
+
+    rootMotionNode = findRootMotionNode(model, runClip);
+
+    console.info(
+      '[character] nœud de déplacement :',
+      rootMotionNode?.name || 'non détecté'
+    );
+
+    // Toutes les animations sont exécutées séparément.
+    standAction.setLoop(THREE.LoopOnce, 1);
+    standAction.clampWhenFinished = true;
+
+    searchAction.setLoop(THREE.LoopRepeat, Infinity);
+
+    mixer.addEventListener('finished', (event) => {
+      if (event.action === standAction) {
+        finishStanding();
       }
-    } else {
-      console.warn('[character] aucune animation dans le GLB');
-    }
 
-    x = CONFIG.startXPx;
-    runner.position.x = x;
+      if (event.action === runAction) {
+        finishRunning();
+      }
+    });
+
+    // Départ : le personnage est face caméra et se lève.
+    runner.rotation.y = 0;
+
+    state = 'standing';
+    standAction.reset();
+    standAction.play();
+
+    console.info('[character] séquence démarrée : Se lever');
   },
+
   undefined,
-  (err) => console.error('[character] chargement du GLB impossible :', err)
+
+  (error) => {
+    console.error('[character] chargement du GLB impossible :', error);
+  }
 );
 
-// ---------- Boucle ----------
-const clock = new THREE.Clock();
-
+// ---------- Boucle de rendu ----------
 function tick() {
   requestAnimationFrame(tick);
+
   const dt = Math.min(clock.getDelta(), 0.1);
 
   if (mixer) mixer.update(dt);
 
-    if (runner && CONFIG.speedPx > 0) {
-    if (pause > 0) {
-      
-      pause -= dt;
-    } else {
-      x += CONFIG.speedPx * dt;
-      if (x > width + runnerWidth) {
-        x = -runnerWidth;
-        pause = CONFIG.pauseSeconds;
-      }
+  // Pivot progressif vers la caméra après la course.
+  if (state === 'turning' && runner) {
+    turnElapsed += dt;
+
+    const progress = Math.min(
+      turnElapsed / CONFIG.turnDuration,
+      1
+    );
+
+    // Interpolation douce.
+    const eased = progress * progress * (3 - 2 * progress);
+
+    runner.rotation.y = Math.PI / 2 * (1 - eased);
+
+    if (progress >= 1) {
+      startSearching();
     }
-    runner.position.x = x;
   }
 
   renderer.render(scene, camera);
 }
+
 tick();
