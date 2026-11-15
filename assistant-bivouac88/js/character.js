@@ -10,7 +10,7 @@ const CONFIG = {
 
 // --- Canvas pleine page ---
 const container = document.createElement('div');
-container.id = 'character-runner';
+container.id = 'b88-character';
 Object.assign(container.style, {
   position: 'fixed',
   inset: '0',
@@ -140,8 +140,9 @@ window.characterMoveTo = (x, y) => { posX = x; posY = y; };
 window.characterRotate = (deg) => {
   if (runner) runner.rotation.y = deg * (Math.PI / 180);
 };
-// --- Drag & drop ---
+// --- Drag & drop + clic ---
 let dragging = false;
+let dragMoved = false;
 let dragOffsetX = 0;
 let dragOffsetY = 0;
 
@@ -157,8 +158,13 @@ window.addEventListener('mousemove', (e) => {
   const my = rect.height - (e.clientY - rect.top);
 
   if (dragging) {
-    posX = mx - dragOffsetX;
-    posY = my - dragOffsetY;
+    const newX = mx - dragOffsetX;
+    const newY = my - dragOffsetY;
+    if (Math.abs(newX - posX) > 3 || Math.abs(newY - posY) > 3) {
+      dragMoved = true;
+    }
+    posX = newX;
+    posY = newY;
     return;
   }
 
@@ -172,6 +178,7 @@ renderer.domElement.addEventListener('mousedown', (e) => {
 
   if (isOverCharacter(mx, my)) {
     dragging = true;
+    dragMoved = false;
     dragOffsetX = mx - posX;
     dragOffsetY = my - posY;
     e.preventDefault();
@@ -179,5 +186,10 @@ renderer.domElement.addEventListener('mousedown', (e) => {
 });
 
 window.addEventListener('mouseup', () => {
+  if (dragging && !dragMoved) {
+    // Clic simple (sans déplacement) : on prévient le dialogue.
+    document.dispatchEvent(new CustomEvent('b88:character-click'));
+  }
   dragging = false;
+  dragMoved = false;
 });
