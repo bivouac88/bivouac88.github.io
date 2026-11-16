@@ -33,8 +33,8 @@ async function initDialogue(character) {
     </form>
   `;
 
-  character.appendChild(dialogue);
-
+document.body.appendChild(dialogue);
+  
   const bubble = dialogue.querySelector(".b88-dialogue-bubble");
   const text = dialogue.querySelector(".b88-dialogue-text");
   const choices = dialogue.querySelector(".b88-dialogue-choices");
