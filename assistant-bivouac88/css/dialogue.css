@@ -1,5 +1,5 @@
 .b88-dialogue {
-  position: absolute;
+position: fixed;
   left: 125px;
   bottom: 145px;
   width: 210px;
@@ -137,7 +137,7 @@
 
 @media (max-width: 600px) {
   .b88-dialogue {
-    width: min(200px, calc(100vw - 105px));
+width: min(200px, calc(100vw - 20px));
   }
 
   .b88-dialogue-bubble {
