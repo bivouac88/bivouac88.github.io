@@ -352,8 +352,6 @@
   // Sections déroulantes (une seule ouverte à la fois)
   // ---------------------------------------------------------------
 
-  const sections = [];
-
   function makeSection(title, openByDefault) {
     const wrap = document.createElement('div');
     wrap.style.borderTop = '1px solid #38332b';
@@ -392,14 +390,11 @@
     };
 
     head.addEventListener('click', () => {
-      const wasOpen = section.isOpen();
-      sections.forEach((s) => s.close());
-      if (!wasOpen) section.open();
-    });
+  section.isOpen() ? section.close() : section.open();
+});
 
     wrap.append(head, content);
     body.appendChild(wrap);
-    sections.push(section);
 
     if (openByDefault) section.open();
     return section;
@@ -409,40 +404,40 @@
   // Section : animations
   // ---------------------------------------------------------------
 
-  const secAnim = makeSection('ANIMATIONS', true);
+const animLabel = makeLabel('ANIMATIONS', { color: '#e58e26', fontWeight: 'bold', marginBottom: '6px', fontSize: '11px' });
+body.appendChild(animLabel);
 
-  const grid = document.createElement('div');
-  Object.assign(grid.style, {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: '5px',
+const grid = document.createElement('div');
+Object.assign(grid.style, {
+  display: 'grid',
+  gridTemplateColumns: '1fr 1fr',
+  gap: '5px',
+  marginBottom: '10px',
+});
+
+let activeBtn = null;
+
+ANIMATIONS.forEach((name) => {
+  const btn = makeButton(name.replace(/_/g, ' '), {
+    width: 'auto',
+    padding: '5px 4px',
+    fontSize: '10px',
+    textAlign: 'left',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
   });
-
-  let activeBtn = null;
-
-  ANIMATIONS.forEach((name) => {
-    const btn = makeButton(name.replace(/_/g, ' '), {
-      width: 'auto',
-      padding: '5px 4px',
-      fontSize: '10px',
-      textAlign: 'left',
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      whiteSpace: 'nowrap',
-    });
-    btn.title = name;
-
-    btn.addEventListener('click', () => {
-      doPlay(name);
-      if (activeBtn) Object.assign(activeBtn.style, BTN_OFF);
-      Object.assign(btn.style, BTN_ON);
-      activeBtn = btn;
-    });
-
-    grid.appendChild(btn);
+  btn.title = name;
+  btn.addEventListener('click', () => {
+    doPlay(name);
+    if (activeBtn) Object.assign(activeBtn.style, BTN_OFF);
+    Object.assign(btn.style, BTN_ON);
+    activeBtn = btn;
   });
-  secAnim.content.appendChild(grid);
+  grid.appendChild(btn);
+});
 
+body.appendChild(grid);
   // ---------------------------------------------------------------
   // Éléments de la page : détection et sélecteurs CSS
   // ---------------------------------------------------------------
