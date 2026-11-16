@@ -191,7 +191,9 @@ window.characterMoveTo = (x, y) => {
 
 window.characterRotate = (x, y, z) => {
   if (runner) {
-    runner.rotation.y = deg * (Math.PI / 180);
+    runner.rotation.x = x * (Math.PI / 180);
+    runner.rotation.y = y * (Math.PI / 180);
+    runner.rotation.z = z * (Math.PI / 180);
   }
 };
 
