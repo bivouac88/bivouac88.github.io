@@ -251,33 +251,32 @@ const ADMIN_MODE = new URLSearchParams(window.location.search).get('edit') === '
 function isOverCharacter(mx, my) {
   if (!runner) return false;
 
-  runner.updateMatrixWorld(true);
-
-  const bounds = new THREE.Box3().setFromObject(runner);
+  const bounds = window.characterGetScreenBounds();
+  if (!bounds) return false;
 
   return (
-    mx >= bounds.min.x - CLICK_PADDING_PX &&
-    mx <= bounds.max.x + CLICK_PADDING_PX &&
-    my >= bounds.min.y - CLICK_PADDING_PX &&
-    my <= bounds.max.y + CLICK_PADDING_PX
+    mx >= bounds.left - CLICK_PADDING_PX &&
+    mx <= bounds.right + CLICK_PADDING_PX &&
+    my >= bounds.top - CLICK_PADDING_PX &&
+    my <= bounds.bottom + CLICK_PADDING_PX
   );
 }
 
 window.addEventListener('mousemove', (event) => {
-  const rect = renderer.domElement.getBoundingClientRect();
+const rect = renderer.domElement.getBoundingClientRect();
 
   const mx = event.clientX - rect.left;
   const my = rect.height - (event.clientY - rect.top);
 
   container.style.pointerEvents =
-    isOverCharacter(mx, my) ? 'auto' : 'none';
+  isOverCharacter(mx, my) ? 'auto' : 'none';
 });
 
 renderer.domElement.addEventListener('pointerdown', (event) => {
-  const rect = renderer.domElement.getBoundingClientRect();
+const rect = renderer.domElement.getBoundingClientRect();
 
-  const mx = event.clientX - rect.left;
-  const my = rect.height - (event.clientY - rect.top);
+const mx = event.clientX;
+const my = event.clientY;
 
   if (!isOverCharacter(mx, my)) return;
 
