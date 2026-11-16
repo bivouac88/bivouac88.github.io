@@ -151,15 +151,17 @@
       color: var(--accent, #e58e26);
     }
 
-    .test-hero p {
-      max-width: 650px;
-      margin: 25px 0 0;
-      color: #f2ebd9;
-      font-family: var(--serif, Georgia, serif);
-      font-size: clamp(16px, 2vw, 19px);
-      line-height: 1.8;
-      text-shadow: 0 2px 12px rgba(0, 0, 0, .5);
-    }
+    .test-hero > p:not(.test-eyebrow) {
+  width: 100%;
+  max-width: 1100px;
+  margin: 25px auto 0;
+  color: #f2ebd9;
+  font-family: var(--serif, Georgia, serif);
+  font-size: clamp(16px, 2vw, 19px);
+  line-height: 1.8;
+  text-align: center;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, .5);
+}
 
     .test-button {
       display: inline-flex;
@@ -478,11 +480,10 @@
   <p class="test-eyebrow">Lost but Free présente</p>
   <h1>BIVOUAC<span>88</span></h1>
   <p>
-    Un tour d’Europe à vélo, en totale liberté.
-    Des routes, des rencontres, des découvertes et des imprévus.
-    Un voyage indépendant, raconté au fil des kilomètres,
-    sans itinéraire imposé ni programme à suivre.
-  </p>
+  Un tour d’Europe à vélo, en totale liberté.<br>
+  Des routes, des rencontres, des découvertes et des imprévus.<br>
+  Un voyage indépendant, raconté au fil des kilomètres, sans itinéraire imposé ni programme à suivre.
+</p>
   <a class="test-button" href="#projet">Découvrir le projet</a>
 </header>
 
