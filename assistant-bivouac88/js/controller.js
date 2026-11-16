@@ -21,7 +21,7 @@
   let currentAnim = 'Angry';
   let currentX = window.innerWidth - 120;
   let currentY = 6;
-  let currentRot = 0;
+  let currentRot = { x: 0, y: 0, z: 0 }
 
   function doPlay(name) {
     currentAnim = name;
@@ -34,9 +34,11 @@
     if (typeof window.characterMoveTo === 'function') window.characterMoveTo(x, y);
   }
 
-  function doRotate(deg) {
-    currentRot = deg;
-    if (typeof window.characterRotate === 'function') window.characterRotate(deg);
+    function doRotate(axis, deg) {
+    currentRot[axis] = deg;
+    if (typeof window.characterRotate === 'function') {
+      window.characterRotate(currentRot.x, currentRot.y, currentRot.z);
+    }
   }
 
   // --- Styles réutilisables ---
@@ -342,33 +344,43 @@
 
   scanDialogueFields();
 
-  // --- Section orientation ---
+    // --- Section orientation (3 axes) ---
   body.appendChild(makeLabel('ORIENTATION', { marginTop: '14px' }));
 
-  const rotRow = document.createElement('div');
-  Object.assign(rotRow.style, { display: 'flex', alignItems: 'center', gap: '8px' });
+  const rotSliders = {};
 
-  const rotSlider = document.createElement('input');
-  rotSlider.type = 'range';
-  rotSlider.min = '0';
-  rotSlider.max = '360';
-  rotSlider.value = '0';
-  Object.assign(rotSlider.style, { flex: '1', accentColor: '#e58e26', cursor: 'pointer' });
+  ['x', 'y', 'z'].forEach((axis) => {
+    const row = document.createElement('div');
+    Object.assign(row.style, { display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' });
 
-  const rotValue = document.createElement('span');
-  rotValue.textContent = '0°';
-  Object.assign(rotValue.style, { color: '#aaa', fontSize: '11px', minWidth: '30px' });
+    const axisLabel = document.createElement('span');
+    axisLabel.textContent = axis.toUpperCase();
+    Object.assign(axisLabel.style, { color: '#aaa', fontSize: '11px', width: '12px' });
 
-  rotSlider.addEventListener('input', () => {
-    const deg = parseInt(rotSlider.value, 10);
-    rotValue.textContent = deg + '°';
-    doRotate(deg);
+    const slider = document.createElement('input');
+    slider.type = 'range';
+    slider.min = '0';
+    slider.max = '360';
+    slider.value = '0';
+    Object.assign(slider.style, { flex: '1', accentColor: '#e58e26', cursor: 'pointer' });
+
+    const value = document.createElement('span');
+    value.textContent = '0°';
+    Object.assign(value.style, { color: '#aaa', fontSize: '11px', minWidth: '30px' });
+
+    slider.addEventListener('input', () => {
+      const deg = parseInt(slider.value, 10);
+      value.textContent = deg + '°';
+      doRotate(axis, deg);
+    });
+
+    rotSliders[axis] = slider;
+
+    row.appendChild(axisLabel);
+    row.appendChild(slider);
+    row.appendChild(value);
+    body.appendChild(row);
   });
-
-  rotRow.appendChild(rotSlider);
-  rotRow.appendChild(rotValue);
-  body.appendChild(rotRow);
-
   // --- Section scènes ---
   body.appendChild(makeLabel('SCÈNES', { marginTop: '14px' }));
 
@@ -474,12 +486,17 @@
       marginLeft: '6px',
     });
 
-        playBtn.addEventListener('click', () => {
+      playBtn.addEventListener('click', () => {
       const step = scene.steps[0];
       const p = scene.points[step.at].fallback;
       doMove(p.x, p.y);
       doPlay(step.animation);
-      doRotate(step.rotation);
+      doRotate('x', step.rotation.x);
+      doRotate('y', step.rotation.y);
+      doRotate('z', step.rotation.z);
+      rotSliders.x.value = step.rotation.x;
+      rotSliders.y.value = step.rotation.y;
+      rotSliders.z.value = step.rotation.z;
       applyFieldOffsets({ bubble: step.bubble, form: step.form });
     });
 
