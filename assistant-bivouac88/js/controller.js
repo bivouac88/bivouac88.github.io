@@ -286,6 +286,35 @@
     updateFieldsMode();
   }
 
+  // Décalages actuels des deux champs (pour les sauvegarder dans une scène)
+  function getFieldOffsets() {
+    const read = (selector) => {
+      const el = document.querySelector(selector);
+      return {
+        x: el ? Number(el.dataset.dragX || 0) : 0,
+        y: el ? Number(el.dataset.dragY || 0) : 0,
+      };
+    };
+    return {
+      bubble: read('.b88-dialogue-bubble'),
+      form: read('.b88-dialogue-form'),
+    };
+  }
+
+  // Remet les deux champs aux décalages d'une scène sauvegardée
+  function applyFieldOffsets(fields) {
+    if (!fields) return;
+    const apply = (selector, offset) => {
+      const el = document.querySelector(selector);
+      if (!el || !offset) return;
+      el.dataset.dragX = String(offset.x);
+      el.dataset.dragY = String(offset.y);
+      el.style.translate = `${offset.x}px ${offset.y}px`;
+    };
+    apply('.b88-dialogue-bubble', fields.bubble);
+    apply('.b88-dialogue-form', fields.form);
+  }
+
   fieldsMoveBtn.addEventListener('click', () => {
     fieldsMoveMode = !fieldsMoveMode;
     scanDialogueFields();
@@ -353,6 +382,7 @@
       x: currentX,
       y: currentY,
       rotation: currentRot,
+      fields: getFieldOffsets(),
       trigger: 'manuel',
     };
     scenes.push(scene);
@@ -393,6 +423,7 @@
       doMove(scene.x, scene.y);
       doPlay(scene.animation);
       doRotate(scene.rotation);
+      applyFieldOffsets(scene.fields);
     });
 
     item.appendChild(label);
