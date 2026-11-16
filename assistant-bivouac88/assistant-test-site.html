@@ -96,14 +96,58 @@
   filter: brightness(1.2) saturate(1.15) drop-shadow(0 2px 6px rgba(0, 0, 0, .6));
 }
 
+    /* Menu déroulant (ouvert par le burger, à droite) */
     .test-nav-links {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: clamp(18px, 2.3vw, 32px);
-      flex-wrap: wrap;
-      margin-left: auto;
+      position: absolute;
+      top: 100%;
+      right: clamp(20px, 7vw, 110px);
+      display: none;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 4px;
+      min-width: 240px;
+      padding: 14px 18px;
+      background: var(--carte, #1b1612);
+      border: 1px solid var(--trait, #342a22);
+      border-radius: 0 0 6px 6px;
+      box-shadow: 0 14px 30px rgba(0, 0, 0, .5);
     }
+
+    .test-nav-links.open {
+      display: flex;
+    }
+
+    /* Bouton burger */
+    .test-burger {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 6px;
+      width: 44px;
+      height: 44px;
+      padding: 10px;
+      margin-left: auto;
+      align-self: flex-end;
+      background: none;
+      border: 1px solid var(--trait, #342a22);
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .test-burger span {
+      display: block;
+      height: 2px;
+      background: var(--papier, #f2ebd9);
+      transition: transform .2s ease, opacity .2s ease, background .2s ease;
+    }
+
+    .test-burger:hover span {
+      background: var(--accent, #e58e26);
+    }
+
+    .test-burger[aria-expanded="true"] span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+    .test-burger[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+    .test-burger[aria-expanded="true"] span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
 
     /* MODIF : onglets plus grands et plus lisibles */
     .test-nav-links a {
@@ -490,7 +534,10 @@
         <img class="logo-wreath" src="/cadre-feuilles.webp" alt="" aria-hidden="true">
         <img class="logo-photo" src="/lost-but-free.jpg" alt="Lost but Free">
       </a>
-      <div class="test-nav-links">
+      <button class="test-burger" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="menu-principal">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="test-nav-links" id="menu-principal">
         <a href="/index.html">Accueil</a>
         <a href="/etapes.html">Étapes</a>
         <a href="/stats.html">Stats</a>
@@ -611,6 +658,22 @@ Un espace pour raconter l'aventure, suivre le parcours et partager ce qui se pas
       BIVOUAC88 · LOST BUT FREE · PAGE TEST — NON PUBLIÉE SUR LE SITE PRINCIPAL
     </footer>
   </div>
+
+  <!-- Menu burger -->
+  <script>
+    const burger = document.querySelector('.test-burger');
+    const menu = document.getElementById('menu-principal');
+
+    function setMenu(open) {
+      menu.classList.toggle('open', open);
+      burger.setAttribute('aria-expanded', open);
+      burger.setAttribute('aria-label', open ? 'Fermer le menu' : 'Ouvrir le menu');
+    }
+
+    burger.addEventListener('click', () => setMenu(!menu.classList.contains('open')));
+    document.addEventListener('click', (e) => { if (!e.target.closest('.test-nav')) setMenu(false); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setMenu(false); });
+  </script>
 
   <!-- Scripts existants chargés uniquement sur la page TEST -->
   <script type="module" src="./js/widget.js"></script>
