@@ -3,7 +3,7 @@ position: fixed;
   left: 125px;
   bottom: 145px;
   width: 210px;
-  z-index: 5;
+z-index: 10001;
   display: none;
   font-family: Arial, sans-serif;
   color: #29251f;
