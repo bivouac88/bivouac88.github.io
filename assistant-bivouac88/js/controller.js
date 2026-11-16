@@ -69,12 +69,34 @@
   }
 
   // --- Panneau ---
+  const PANEL_POSITION_KEY = 'b88-admin-panel-position';
+
+  function getDefaultPanelPosition() {
+    return { x: window.innerWidth - 190 - 16, y: 80 };
+  }
+
+  function loadPanelPosition() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(PANEL_POSITION_KEY));
+      if (saved && typeof saved.x === 'number' && typeof saved.y === 'number') return saved;
+    } catch (e) {}
+    return getDefaultPanelPosition();
+  }
+
+  function savePanelPosition(x, y) {
+    try {
+      localStorage.setItem(PANEL_POSITION_KEY, JSON.stringify({ x, y }));
+    } catch (e) {}
+  }
+
+  const panelPos = loadPanelPosition();
+
   const panel = document.createElement('div');
   panel.id = 'ctrl-panel';
   Object.assign(panel.style, {
     position: 'fixed',
-    top: '80px',
-    right: '16px',
+    left: panelPos.x + 'px',
+    top: panelPos.y + 'px',
     zIndex: '10000',
     background: '#191713ee',
     border: '1px solid #e58e26',
@@ -103,14 +125,58 @@
   body.id = 'ctrl-body';
   panel.appendChild(body);
 
-  // Toggle collapse
+  // Toggle collapse (clic simple sur le header)
   let collapsed = false;
-  header.addEventListener('click', () => {
+  function toggleCollapsed() {
     collapsed = !collapsed;
     body.style.display = collapsed ? 'none' : 'block';
     document.getElementById('ctrl-toggle').textContent = collapsed ? '▼' : '▲';
-  });
+  }
 
+  // Déplacement du panel (drag sur le header)
+  const DRAG_THRESHOLD_PX = 5;
+
+  header.style.cursor = 'move';
+
+  header.addEventListener('pointerdown', (event) => {
+    if (event.button !== 0) return;
+
+    const startClientX = event.clientX;
+    const startClientY = event.clientY;
+    const startLeft = panel.offsetLeft;
+    const startTop = panel.offsetTop;
+    let dragged = false;
+
+    function movePanel(moveEvent) {
+      const dx = moveEvent.clientX - startClientX;
+      const dy = moveEvent.clientY - startClientY;
+
+      if (!dragged && Math.hypot(dx, dy) > DRAG_THRESHOLD_PX) {
+        dragged = true;
+      }
+      if (!dragged) return;
+
+      panel.style.left = (startLeft + dx) + 'px';
+      panel.style.top = (startTop + dy) + 'px';
+    }
+
+    function stopDragging() {
+      document.removeEventListener('pointermove', movePanel);
+      document.removeEventListener('pointerup', stopDragging);
+      document.removeEventListener('pointercancel', stopDragging);
+
+      if (dragged) {
+        savePanelPosition(panel.offsetLeft, panel.offsetTop);
+      } else {
+        toggleCollapsed();
+      }
+    }
+
+    document.addEventListener('pointermove', movePanel);
+    document.addEventListener('pointerup', stopDragging);
+    document.addEventListener('pointercancel', stopDragging);
+  });
+  
   // --- Section animations ---
   body.appendChild(makeLabel('ANIMATIONS'));
 
