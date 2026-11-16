@@ -1,9 +1,10 @@
+
 // controller.js — panneau de contrôle (accès admin uniquement via ?edit=bivouac88admin)
 
 (function () {
   const params = new URLSearchParams(window.location.search);
   if (params.get('edit') !== 'bivouac88admin') {
-    return; // Visiteur normal : pas de panneau, le script ne fait rien.
+    return;
   }
 
   const ANIMATIONS = [
@@ -50,7 +51,6 @@
   body.id = 'ctrl-body';
   panel.appendChild(body);
 
-  // Toggle collapse
   let collapsed = false;
   header.addEventListener('click', () => {
     collapsed = !collapsed;
@@ -95,8 +95,16 @@
     btn.addEventListener('click', () => {
       if (typeof window.characterPlay === 'function') {
         window.characterPlay(name);
-        if (activeBtn) Object.assign(activeBtn.style, { background: '#2a2520', color: '#ccc', borderColor: '#38332b' });
-        Object.assign(btn.style, { background: '#e58e26', color: '#12100e', borderColor: '#e58e26' });
+        if (activeBtn) Object.assign(activeBtn.style, {
+          background: '#2a2520',
+          color: '#ccc',
+          borderColor: '#38332b'
+        });
+        Object.assign(btn.style, {
+          background: '#e58e26',
+          color: '#12100e',
+          borderColor: '#e58e26'
+        });
         activeBtn = btn;
       }
     });
@@ -105,10 +113,14 @@
   });
   body.appendChild(grid);
 
-  // --- Section position ---
+  // --- Section position du personnage ---
   const posLabel = document.createElement('div');
   posLabel.textContent = 'POSITION (clic sur la page)';
-  Object.assign(posLabel.style, { color: '#888', marginBottom: '6px', fontSize: '11px' });
+  Object.assign(posLabel.style, {
+    color: '#888',
+    marginBottom: '6px',
+    fontSize: '11px'
+  });
   body.appendChild(posLabel);
 
   const coords = document.createElement('div');
@@ -139,17 +151,24 @@
   });
   body.appendChild(modeBtn);
 
-  // Mode placement : clic sur la page pour déplacer le perso
   let placementMode = false;
 
   modeBtn.addEventListener('click', () => {
     placementMode = !placementMode;
     if (placementMode) {
-      Object.assign(modeBtn.style, { background: '#e58e26', color: '#12100e', borderColor: '#e58e26' });
+      Object.assign(modeBtn.style, {
+        background: '#e58e26',
+        color: '#12100e',
+        borderColor: '#e58e26'
+      });
       modeBtn.textContent = '✅ Clic pour placer…';
       document.body.style.cursor = 'crosshair';
     } else {
-      Object.assign(modeBtn.style, { background: '#2a2520', color: '#ccc', borderColor: '#38332b' });
+      Object.assign(modeBtn.style, {
+        background: '#2a2520',
+        color: '#ccc',
+        borderColor: '#38332b'
+      });
       modeBtn.textContent = '📍 Activer placement';
       document.body.style.cursor = '';
     }
@@ -158,9 +177,10 @@
   document.addEventListener('click', (e) => {
     if (!placementMode) return;
     if (panel.contains(e.target)) return;
+    if (e.target.closest('.b88-dialogue')) return;
 
     const x = e.clientX;
-    const y = window.innerHeight - e.clientY; // coordonnées Three.js (Y inversé)
+    const y = window.innerHeight - e.clientY;
 
     if (typeof window.characterMoveTo === 'function') {
       window.characterMoveTo(x, y);
@@ -168,31 +188,242 @@
 
     coords.textContent = `x: ${x}  y: ${y}`;
 
-    // Désactive le mode après placement
     placementMode = false;
-    Object.assign(modeBtn.style, { background: '#2a2520', color: '#ccc', borderColor: '#38332b' });
+    Object.assign(modeBtn.style, {
+      background: '#2a2520',
+      color: '#ccc',
+      borderColor: '#38332b'
+    });
     modeBtn.textContent = '📍 Activer placement';
     document.body.style.cursor = '';
   });
+
+  // --- Déplacement des champs de dialogue (ADMIN UNIQUEMENT) ---
+
+  const fieldsLabel = document.createElement('div');
+  fieldsLabel.textContent = 'POSITION DES CHAMPS';
+  Object.assign(fieldsLabel.style, {
+    color: '#888',
+    marginBottom: '6px',
+    fontSize: '11px',
+    marginTop: '14px',
+  });
+  body.appendChild(fieldsLabel);
+
+  let fieldsMoveMode = false;
+
+  const fieldsMoveBtn = document.createElement('button');
+  fieldsMoveBtn.textContent = '↔ Déplacer les champs';
+  Object.assign(fieldsMoveBtn.style, {
+    width: '100%',
+    background: '#2a2520',
+    border: '1px solid #38332b',
+    borderRadius: '4px',
+    color: '#ccc',
+    padding: '7px',
+    cursor: 'pointer',
+    fontSize: '11px',
+    marginBottom: '6px',
+  });
+  body.appendChild(fieldsMoveBtn);
+
+  const fieldsResetBtn = document.createElement('button');
+  fieldsResetBtn.textContent = '↺ Réinitialiser les champs';
+  Object.assign(fieldsResetBtn.style, {
+    width: '100%',
+    background: '#2a2520',
+    border: '1px solid #38332b',
+    borderRadius: '4px',
+    color: '#ccc',
+    padding: '7px',
+    cursor: 'pointer',
+    fontSize: '11px',
+  });
+  body.appendChild(fieldsResetBtn);
+
+  const dialogueFields = [
+    '.b88-dialogue-bubble',
+    '.b88-dialogue-form',
+  ];
+
+  function getDialogueElements() {
+    return dialogueFields
+      .map(selector => document.querySelector(selector))
+      .filter(Boolean);
+  }
+
+  // Récupérer les décalages des champs pour la scène
+  function getDialoguePositions() {
+    const bubble = document.querySelector('.b88-dialogue-bubble');
+    const form = document.querySelector('.b88-dialogue-form');
+
+    return {
+      bubble: {
+        x: Number(bubble?.dataset.dragX || 0),
+        y: Number(bubble?.dataset.dragY || 0),
+      },
+      form: {
+        x: Number(form?.dataset.dragX || 0),
+        y: Number(form?.dataset.dragY || 0),
+      },
+    };
+  }
+
+  // Restaurer les décalages d'une scène
+  function setDialoguePositions(positions = {}) {
+    const bubble = document.querySelector('.b88-dialogue-bubble');
+    const form = document.querySelector('.b88-dialogue-form');
+
+    if (bubble) {
+      const x = Number(positions.bubble?.x || 0);
+      const y = Number(positions.bubble?.y || 0);
+
+      bubble.dataset.dragX = String(x);
+      bubble.dataset.dragY = String(y);
+      bubble.style.translate = `${x}px ${y}px`;
+    }
+
+    if (form) {
+      const x = Number(positions.form?.x || 0);
+      const y = Number(positions.form?.y || 0);
+
+      form.dataset.dragX = String(x);
+      form.dataset.dragY = String(y);
+      form.style.translate = `${x}px ${y}px`;
+    }
+  }
+
+  function updateFieldsMode() {
+    getDialogueElements().forEach(element => {
+      if (fieldsMoveMode) {
+        element.style.cursor = 'move';
+        element.style.outline = '2px dashed #e58e26';
+        element.style.outlineOffset = '3px';
+      } else {
+        element.style.cursor = '';
+        element.style.outline = '';
+        element.style.outlineOffset = '';
+      }
+    });
+
+    fieldsMoveBtn.textContent = fieldsMoveMode
+      ? '✅ Désactiver déplacement'
+      : '↔ Déplacer les champs';
+
+    Object.assign(fieldsMoveBtn.style, fieldsMoveMode
+      ? {
+          background: '#e58e26',
+          color: '#12100e',
+          borderColor: '#e58e26',
+        }
+      : {
+          background: '#2a2520',
+          color: '#ccc',
+          borderColor: '#38332b',
+        });
+  }
+
+  function attachFieldDragging(element) {
+    if (element.dataset.adminDragBound === 'true') return;
+
+    element.dataset.adminDragBound = 'true';
+    element.dataset.dragX = element.dataset.dragX || '0';
+    element.dataset.dragY = element.dataset.dragY || '0';
+
+    element.addEventListener('pointerdown', event => {
+      if (!fieldsMoveMode || event.button !== 0) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      const startX = event.clientX;
+      const startY = event.clientY;
+
+      const initialX = Number(element.dataset.dragX);
+      const initialY = Number(element.dataset.dragY);
+
+      function moveField(moveEvent) {
+        const x = initialX + moveEvent.clientX - startX;
+        const y = initialY + moveEvent.clientY - startY;
+
+        element.dataset.dragX = String(x);
+        element.dataset.dragY = String(y);
+        element.style.translate = `${x}px ${y}px`;
+      }
+
+      function stopMoving() {
+        document.removeEventListener('pointermove', moveField);
+        document.removeEventListener('pointerup', stopMoving);
+        document.removeEventListener('pointercancel', stopMoving);
+      }
+
+      document.addEventListener('pointermove', moveField);
+      document.addEventListener('pointerup', stopMoving);
+      document.addEventListener('pointercancel', stopMoving);
+    });
+  }
+
+  function scanDialogueFields() {
+    getDialogueElements().forEach(attachFieldDragging);
+    updateFieldsMode();
+  }
+
+  fieldsMoveBtn.addEventListener('click', () => {
+    fieldsMoveMode = !fieldsMoveMode;
+    scanDialogueFields();
+  });
+
+  fieldsResetBtn.addEventListener('click', () => {
+    setDialoguePositions({
+      bubble: { x: 0, y: 0 },
+      form: { x: 0, y: 0 },
+    });
+  });
+
+  const dialogueObserver = new MutationObserver(scanDialogueFields);
+  dialogueObserver.observe(document.body, {
+    childList: true,
+    subtree: true,
+  });
+
+  scanDialogueFields();
+
   // --- Section orientation ---
   const rotLabel = document.createElement('div');
   rotLabel.textContent = 'ORIENTATION';
-  Object.assign(rotLabel.style, { color: '#888', marginBottom: '6px', fontSize: '11px', marginTop: '14px' });
+  Object.assign(rotLabel.style, {
+    color: '#888',
+    marginBottom: '6px',
+    fontSize: '11px',
+    marginTop: '14px'
+  });
   body.appendChild(rotLabel);
 
   const rotRow = document.createElement('div');
-  Object.assign(rotRow.style, { display: 'flex', alignItems: 'center', gap: '8px' });
+  Object.assign(rotRow.style, {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px'
+  });
 
   const rotSlider = document.createElement('input');
   rotSlider.type = 'range';
   rotSlider.min = '0';
   rotSlider.max = '360';
   rotSlider.value = '0';
-  Object.assign(rotSlider.style, { flex: '1', accentColor: '#e58e26', cursor: 'pointer' });
+  Object.assign(rotSlider.style, {
+    flex: '1',
+    accentColor: '#e58e26',
+    cursor: 'pointer'
+  });
 
   const rotValue = document.createElement('span');
   rotValue.textContent = '0°';
-  Object.assign(rotValue.style, { color: '#aaa', fontSize: '11px', minWidth: '30px' });
+  Object.assign(rotValue.style, {
+    color: '#aaa',
+    fontSize: '11px',
+    minWidth: '30px'
+  });
 
   rotSlider.addEventListener('input', () => {
     const deg = parseInt(rotSlider.value);
@@ -209,7 +440,12 @@
   // --- Section scènes ---
   const scenesLabel = document.createElement('div');
   scenesLabel.textContent = 'SCÈNES';
-  Object.assign(scenesLabel.style, { color: '#888', marginBottom: '6px', fontSize: '11px', marginTop: '14px' });
+  Object.assign(scenesLabel.style, {
+    color: '#888',
+    marginBottom: '6px',
+    fontSize: '11px',
+    marginTop: '14px'
+  });
   body.appendChild(scenesLabel);
 
   const scenes = [];
@@ -220,22 +456,43 @@
 
   // Mise à jour de l'état courant
   const origPlay = window.characterPlay;
-  window.characterPlay = (name) => { currentAnim = name; origPlay(name); };
+  window.characterPlay = (name) => {
+    currentAnim = name;
+    origPlay(name);
+  };
+
   const origMove = window.characterMoveTo;
-  window.characterMoveTo = (x, y) => { currentX = x; currentY = y; origMove(x, y); };
+  window.characterMoveTo = (x, y) => {
+    currentX = x;
+    currentY = y;
+    origMove(x, y);
+  };
+
   const origRotate = window.characterRotate;
-  window.characterRotate = (deg) => { currentRot = deg; origRotate(deg); };
+  window.characterRotate = (deg) => {
+    currentRot = deg;
+    origRotate(deg);
+  };
 
   const saveBtn = document.createElement('button');
   saveBtn.textContent = '💾 Sauvegarder cette scène';
   Object.assign(saveBtn.style, {
-    width: '100%', background: '#2a2520', border: '1px solid #38332b',
-    borderRadius: '4px', color: '#ccc', padding: '7px',
-    cursor: 'pointer', fontSize: '11px', marginBottom: '8px'
+    width: '100%',
+    background: '#2a2520',
+    border: '1px solid #38332b',
+    borderRadius: '4px',
+    color: '#ccc',
+    padding: '7px',
+    cursor: 'pointer',
+    fontSize: '11px',
+    marginBottom: '8px'
   });
 
   const sceneList = document.createElement('div');
-  Object.assign(sceneList.style, { fontSize: '10px', color: '#aaa' });
+  Object.assign(sceneList.style, {
+    fontSize: '10px',
+    color: '#aaa'
+  });
 
   saveBtn.addEventListener('click', () => {
     const scene = {
@@ -244,16 +501,22 @@
       x: currentX,
       y: currentY,
       rotation: currentRot,
+      dialoguePositions: getDialoguePositions(),
       trigger: 'manuel'
     };
+
     scenes.push(scene);
 
     const item = document.createElement('div');
     Object.assign(item.style, {
-      padding: '4px 6px', marginBottom: '3px',
-      background: '#2a2520', borderRadius: '3px',
+      padding: '4px 6px',
+      marginBottom: '3px',
+      background: '#2a2520',
+      borderRadius: '3px',
       border: '1px solid #38332b',
-      display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center'
     });
 
     const label = document.createElement('span');
@@ -265,15 +528,22 @@
     const playBtn = document.createElement('button');
     playBtn.textContent = '▶';
     Object.assign(playBtn.style, {
-      background: '#e58e26', border: 'none', borderRadius: '3px',
-      color: '#12100e', cursor: 'pointer', padding: '2px 6px',
-      fontSize: '10px', flexShrink: '0', marginLeft: '6px'
+      background: '#e58e26',
+      border: 'none',
+      borderRadius: '3px',
+      color: '#12100e',
+      cursor: 'pointer',
+      padding: '2px 6px',
+      fontSize: '10px',
+      flexShrink: '0',
+      marginLeft: '6px'
     });
 
     playBtn.addEventListener('click', () => {
       window.characterMoveTo(scene.x, scene.y);
       window.characterPlay(scene.animation);
       window.characterRotate(scene.rotation);
+      setDialoguePositions(scene.dialoguePositions);
     });
 
     item.appendChild(label);
@@ -284,12 +554,19 @@
   });
 
   body.appendChild(saveBtn);
+
   const exportBtn = document.createElement('button');
   exportBtn.textContent = '📤 Exporter JSON';
   Object.assign(exportBtn.style, {
-    width: '100%', background: '#2a2520', border: '1px solid #38332b',
-    borderRadius: '4px', color: '#ccc', padding: '7px',
-    cursor: 'pointer', fontSize: '11px', marginBottom: '8px'
+    width: '100%',
+    background: '#2a2520',
+    border: '1px solid #38332b',
+    borderRadius: '4px',
+    color: '#ccc',
+    padding: '7px',
+    cursor: 'pointer',
+    fontSize: '11px',
+    marginBottom: '8px'
   });
 
   exportBtn.addEventListener('click', () => {
@@ -297,16 +574,21 @@
       alert('Aucune scène à exporter.');
       return;
     }
+
     const json = JSON.stringify({ scenes }, null, 2);
     const blob = new Blob([json], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
+
     a.href = url;
+
     const animNames = scenes.map(s => s.animation).join('-');
     const now = new Date();
     const stamp = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}h${String(now.getMinutes()).padStart(2,'0')}`;
+
     a.download = `${animNames}_${stamp}.json`;
     a.click();
+
     URL.revokeObjectURL(url);
   });
 
