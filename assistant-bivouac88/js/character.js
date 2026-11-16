@@ -243,6 +243,7 @@ window.characterGetScreenBounds = () => {
 };
 
 // --- Détection des clics sur le personnage ---
+const CLICK_PADDING_PX = 30; // marge ajoutée autour du perso pour la zone cliquable
 
 function isOverCharacter(mx, my) {
   if (!runner) return false;
@@ -252,10 +253,10 @@ function isOverCharacter(mx, my) {
   const bounds = new THREE.Box3().setFromObject(runner);
 
   return (
-    mx >= bounds.min.x &&
-    mx <= bounds.max.x &&
-    my >= bounds.min.y &&
-    my <= bounds.max.y
+    mx >= bounds.min.x - CLICK_PADDING_PX &&
+    mx <= bounds.max.x + CLICK_PADDING_PX &&
+    my >= bounds.min.y - CLICK_PADDING_PX &&
+    my <= bounds.max.y + CLICK_PADDING_PX
   );
 }
 
