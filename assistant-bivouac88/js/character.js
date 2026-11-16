@@ -146,45 +146,33 @@ window.characterGetPosition = () => ({
   width: window.__charWidth || 40,
   height: window.__charHeight || 45,
 });
-
-// --- Détection du personnage et gestion des clics ---
-
-// Le mode administrateur est identifié par le paramètre existant
-const isAdmin =
-  new URLSearchParams(window.location.search).get('edit') === 'bivouac88admin';
-
-// Détection précise sur la géométrie du personnage
-const raycaster = new THREE.Raycaster();
-const pointer = new THREE.Vector2();
+// --- Détection et clic sur le personnage ---
 
 function isOverCharacter(mx, my) {
   if (!runner) return false;
 
-  pointer.set(
-    (mx / width) * 2 - 1,
-    (my / height) * 2 - 1
+  runner.updateMatrixWorld(true);
+
+  const bounds = new THREE.Box3().setFromObject(runner);
+
+  return (
+    mx >= bounds.min.x &&
+    mx <= bounds.max.x &&
+    my >= bounds.min.y &&
+    my <= bounds.max.y
   );
-
-  raycaster.setFromCamera(pointer, camera);
-
-  return raycaster.intersectObject(runner, true).length > 0;
 }
 
-// Détection au déplacement de la souris
 window.addEventListener('mousemove', (e) => {
   const rect = renderer.domElement.getBoundingClientRect();
 
   const mx = e.clientX - rect.left;
   const my = rect.height - (e.clientY - rect.top);
 
-  // Le canvas ne reçoit les clics que lorsque la souris
-  // se trouve réellement sur le personnage.
   container.style.pointerEvents =
     isOverCharacter(mx, my) ? 'auto' : 'none';
 });
 
-// Clic sur le personnage : ouverture du dialogue.
-// Aucun déplacement direct du personnage ici.
 renderer.domElement.addEventListener('click', (e) => {
   const rect = renderer.domElement.getBoundingClientRect();
 
