@@ -2,9 +2,11 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <link rel="stylesheet" href="./css/dialogue.css">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./css/dialogue.css">
 
   <title>Bivouac88 – Page de test</title>
 
@@ -14,22 +16,22 @@
     }
 
     body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: #12100e;
-      color: #eee;
-    }
+  margin: 0;
+  font-family: var(--serif);
+  background: var(--fond);
+  color: var(--papier);
+}
 
     /* Navigation */
 
     .test-nav {
-      padding: 18px 7%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #191713;
-      border-bottom: 1px solid #38332b;
-    }
+  padding: 18px 7%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--carte);
+  border-bottom: 1px solid var(--trait);
+}
 
     .test-logo {
       color: #e58e26;
@@ -45,14 +47,16 @@
     }
 
     .test-nav-links a {
-      color: #ddd;
-      text-decoration: none;
-      font-size: 13px;
-    }
+  color: var(--papier-doux);
+  text-decoration: none;
+  font-family: var(--mono);
+  font-size: 12px;
+  transition: color .2s ease;
+}
 
-    .test-nav-links a:hover {
-      color: #e58e26;
-    }
+.test-nav-links a:hover {
+  color: var(--accent);
+}
 
     /* Bannière */
 
