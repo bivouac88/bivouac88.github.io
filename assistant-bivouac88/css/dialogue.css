@@ -1,21 +1,23 @@
 .b88-dialogue {
-position: fixed;
-  left: 125px;
-  bottom: 145px;
+  position: fixed;
+  left: 0;
+  top: 0;
   width: 210px;
-z-index: 10001;
-  display: none;
+  z-index: 10001;
+  display: block;
+  visibility: hidden;
   font-family: Arial, sans-serif;
   color: #29251f;
-  pointer-events: auto;
+  pointer-events: none;
 }
 
 .b88-dialogue.active {
-  display: block;
+  visibility: visible;
 }
 
 .b88-dialogue-bubble {
-  position: relative;
+  position: fixed;
+  box-sizing: border-box;
   display: none;
   padding: 13px 14px;
   background: #fffdf7;
@@ -30,7 +32,8 @@ z-index: 10001;
 .b88-dialogue-bubble::after {
   content: "";
   position: absolute;
-  left: 20px;
+left: 50%;
+transform: translateX(-50%) rotate(45deg);
   bottom: -11px;
   width: 16px;
   height: 16px;
@@ -64,7 +67,9 @@ z-index: 10001;
 .b88-dialogue-form {
   display: none;
   gap: 5px;
-  margin-top: 12px;
+  position: fixed;
+  box-sizing: border-box;
+  margin-top: 0;
   padding: 5px;
   background: #fffdf7;
   border: 1px solid #e58e26;
