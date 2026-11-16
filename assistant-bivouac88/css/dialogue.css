@@ -32,15 +32,14 @@
 .b88-dialogue-bubble::after {
   content: "";
   position: absolute;
-left: 50%;
-transform: translateX(-50%) rotate(45deg);
+  left: 50%;
   bottom: -11px;
   width: 16px;
   height: 16px;
   background: #fffdf7;
   border-right: 2px solid #e58e26;
   border-bottom: 2px solid #e58e26;
-  transform: rotate(45deg);
+  transform: translateX(-50%) rotate(45deg);
 }
 
 .b88-dialogue-bubble.visible {
