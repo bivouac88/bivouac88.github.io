@@ -263,13 +263,11 @@ function isOverCharacter(mx, my) {
 }
 
 window.addEventListener('mousemove', (event) => {
-const rect = renderer.domElement.getBoundingClientRect();
-
-  const mx = event.clientX - rect.left;
-  const my = rect.height - (event.clientY - rect.top);
+  const mx = event.clientX;
+  const my = event.clientY;
 
   container.style.pointerEvents =
-  isOverCharacter(mx, my) ? 'auto' : 'none';
+    isOverCharacter(mx, my) ? 'auto' : 'none';
 });
 
 renderer.domElement.addEventListener('pointerdown', (event) => {
