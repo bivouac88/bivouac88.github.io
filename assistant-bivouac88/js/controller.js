@@ -329,8 +329,12 @@
   });
 
   // Le dialogue peut être créé après le chargement du contrôleur.
-  const dialogueObserver = new MutationObserver(scanDialogueFields);
-
+  const dialogueObserver = new MutationObserver(() => {
+    const pending = getDialogueElements().filter(
+      (el) => el.dataset.adminDragBound !== 'true'
+    );
+    if (pending.length) scanDialogueFields();
+  });
   dialogueObserver.observe(document.body, {
     childList: true,
     subtree: true,
