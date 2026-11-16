@@ -149,3 +149,7 @@ width: min(200px, calc(100vw - 20px));
     font-size: 12px;
   }
 }
+.b88-dialogue-bubble,
+.b88-dialogue-form {
+  pointer-events: auto;
+}
