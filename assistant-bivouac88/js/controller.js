@@ -15,6 +15,57 @@
     'Swimming', 'Wall_Crash'
   ];
 
+  // --- État courant (utilisé pour sauvegarder les scènes) ---
+  // On appelle les fonctions du personnage au moment du clic : ça marche même
+  // si character.js se charge après ce fichier.
+  let currentAnim = 'Angry';
+  let currentX = window.innerWidth - 120;
+  let currentY = 6;
+  let currentRot = 0;
+
+  function doPlay(name) {
+    currentAnim = name;
+    if (typeof window.characterPlay === 'function') window.characterPlay(name);
+  }
+
+  function doMove(x, y) {
+    currentX = x;
+    currentY = y;
+    if (typeof window.characterMoveTo === 'function') window.characterMoveTo(x, y);
+  }
+
+  function doRotate(deg) {
+    currentRot = deg;
+    if (typeof window.characterRotate === 'function') window.characterRotate(deg);
+  }
+
+  // --- Styles réutilisables ---
+  const BTN_OFF = { background: '#2a2520', color: '#ccc', borderColor: '#38332b' };
+  const BTN_ON = { background: '#e58e26', color: '#12100e', borderColor: '#e58e26' };
+
+  function makeLabel(text, extra) {
+    const el = document.createElement('div');
+    el.textContent = text;
+    Object.assign(el.style, { color: '#888', marginBottom: '6px', fontSize: '11px' }, extra || {});
+    return el;
+  }
+
+  function makeButton(text, extra) {
+    const btn = document.createElement('button');
+    btn.textContent = text;
+    Object.assign(btn.style, {
+      width: '100%',
+      background: '#2a2520',
+      border: '1px solid #38332b',
+      borderRadius: '4px',
+      color: '#ccc',
+      padding: '7px',
+      cursor: 'pointer',
+      fontSize: '11px',
+    }, extra || {});
+    return btn;
+  }
+
   // --- Panneau ---
   const panel = document.createElement('div');
   panel.id = 'ctrl-panel';
@@ -43,7 +94,7 @@
     marginBottom: '10px',
     cursor: 'pointer',
   });
-  header.innerHTML = <strong style="color:#e58e26">🎮 Contrôleur</strong><span id="ctrl-toggle">▲</span>;
+  header.innerHTML = `<strong style="color:#e58e26">🎮 Contrôleur</strong><span id="ctrl-toggle">▲</span>`;
   panel.appendChild(header);
 
   const body = document.createElement('div');
@@ -59,10 +110,7 @@
   });
 
   // --- Section animations ---
-  const animLabel = document.createElement('div');
-  animLabel.textContent = 'ANIMATIONS';
-  Object.assign(animLabel.style, { color: '#888', marginBottom: '6px', fontSize: '11px' });
-  body.appendChild(animLabel);
+  body.appendChild(makeLabel('ANIMATIONS'));
 
   const grid = document.createElement('div');
   Object.assign(grid.style, {
@@ -74,31 +122,23 @@
 
   let activeBtn = null;
 
-  ANIMATIONS.forEach(name => {
-    const btn = document.createElement('button');
-    btn.textContent = name.replace(/_/g, ' ');
-    btn.title = name;
-    Object.assign(btn.style, {
-      background: '#2a2520',
-      border: '1px solid #38332b',
-      borderRadius: '4px',
-      color: '#ccc',
+  ANIMATIONS.forEach((name) => {
+    const btn = makeButton(name.replace(/_/g, ' '), {
+      width: 'auto',
       padding: '5px 4px',
-      cursor: 'pointer',
       fontSize: '10px',
       textAlign: 'left',
       overflow: 'hidden',
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap',
     });
+    btn.title = name;
 
     btn.addEventListener('click', () => {
-      if (typeof window.characterPlay === 'function') {
-        window.characterPlay(name);
-        if (activeBtn) Object.assign(activeBtn.style, { background: '#2a2520', color: '#ccc', borderColor: '#38332b' });
-        Object.assign(btn.style, { background: '#e58e26', color: '#12100e', borderColor: '#e58e26' });
-        activeBtn = btn;
-      }
+      doPlay(name);
+      if (activeBtn) Object.assign(activeBtn.style, BTN_OFF);
+      Object.assign(btn.style, BTN_ON);
+      activeBtn = btn;
     });
 
     grid.appendChild(btn);
@@ -106,10 +146,7 @@
   body.appendChild(grid);
 
   // --- Section position ---
-  const posLabel = document.createElement('div');
-  posLabel.textContent = 'POSITION (clic sur la page)';
-  Object.assign(posLabel.style, { color: '#888', marginBottom: '6px', fontSize: '11px' });
-  body.appendChild(posLabel);
+  body.appendChild(makeLabel('POSITION (clic sur la page)'));
 
   const coords = document.createElement('div');
   coords.id = 'ctrl-coords';
@@ -125,35 +162,26 @@
   });
   body.appendChild(coords);
 
-  const modeBtn = document.createElement('button');
-  modeBtn.textContent = '📍 Activer placement';
-  Object.assign(modeBtn.style, {
-    width: '100%',
-    background: '#2a2520',
-    border: '1px solid #38332b',
-    borderRadius: '4px',
-    color: '#ccc',
-    padding: '7px',
-    cursor: 'pointer',
-    fontSize: '11px',
-  });
+  const modeBtn = makeButton('📍 Activer placement');
   body.appendChild(modeBtn);
 
   // Mode placement : clic sur la page pour déplacer le perso
   let placementMode = false;
 
-  modeBtn.addEventListener('click', () => {
-    placementMode = !placementMode;
-    if (placementMode) {
-      Object.assign(modeBtn.style, { background: '#e58e26', color: '#12100e', borderColor: '#e58e26' });
+  function setPlacementMode(on) {
+    placementMode = on;
+    if (on) {
+      Object.assign(modeBtn.style, BTN_ON);
       modeBtn.textContent = '✅ Clic pour placer…';
       document.body.style.cursor = 'crosshair';
     } else {
-      Object.assign(modeBtn.style, { background: '#2a2520', color: '#ccc', borderColor: '#38332b' });
+      Object.assign(modeBtn.style, BTN_OFF);
       modeBtn.textContent = '📍 Activer placement';
       document.body.style.cursor = '';
     }
-  });
+  }
+
+  modeBtn.addEventListener('click', () => setPlacementMode(!placementMode));
 
   document.addEventListener('click', (e) => {
     if (!placementMode) return;
@@ -162,60 +190,22 @@
     const x = e.clientX;
     const y = window.innerHeight - e.clientY; // coordonnées Three.js (Y inversé)
 
-    if (typeof window.characterMoveTo === 'function') {
-      window.characterMoveTo(x, y);
-    }
-
-    coords.textContent = x: ${x}  y: ${y};
+    doMove(x, y);
+    coords.textContent = `x: ${x}  y: ${y}`;
 
     // Désactive le mode après placement
-    placementMode = false;
-    Object.assign(modeBtn.style, { background: '#2a2520', color: '#ccc', borderColor: '#38332b' });
-    modeBtn.textContent = '📍 Activer placement';
-    document.body.style.cursor = '';
+    setPlacementMode(false);
   });
-  
-  // --- Déplacement des champs de dialogue (ADMIN UNIQUEMENT) ---
 
-  const fieldsLabel = document.createElement('div');
-  fieldsLabel.textContent = 'POSITION DES CHAMPS';
-  Object.assign(fieldsLabel.style, {
-    color: '#888',
-    marginBottom: '6px',
-    fontSize: '11px',
-    marginTop: '14px',
-  });
-  body.appendChild(fieldsLabel);
+  // --- Déplacement des champs de dialogue (ADMIN UNIQUEMENT) ---
+  body.appendChild(makeLabel('POSITION DES CHAMPS', { marginTop: '14px' }));
 
   let fieldsMoveMode = false;
 
-  const fieldsMoveBtn = document.createElement('button');
-  fieldsMoveBtn.textContent = '↔ Déplacer les champs';
-  Object.assign(fieldsMoveBtn.style, {
-    width: '100%',
-    background: '#2a2520',
-    border: '1px solid #38332b',
-    borderRadius: '4px',
-    color: '#ccc',
-    padding: '7px',
-    cursor: 'pointer',
-    fontSize: '11px',
-    marginBottom: '6px',
-  });
+  const fieldsMoveBtn = makeButton('↔ Déplacer les champs', { marginBottom: '6px' });
   body.appendChild(fieldsMoveBtn);
 
-  const fieldsResetBtn = document.createElement('button');
-  fieldsResetBtn.textContent = '↺ Réinitialiser les champs';
-  Object.assign(fieldsResetBtn.style, {
-    width: '100%',
-    background: '#2a2520',
-    border: '1px solid #38332b',
-    borderRadius: '4px',
-    color: '#ccc',
-    padding: '7px',
-    cursor: 'pointer',
-    fontSize: '11px',
-  });
+  const fieldsResetBtn = makeButton('↺ Réinitialiser les champs');
   body.appendChild(fieldsResetBtn);
 
   const dialogueFields = [
@@ -225,12 +215,12 @@
 
   function getDialogueElements() {
     return dialogueFields
-      .map(selector => document.querySelector(selector))
+      .map((selector) => document.querySelector(selector))
       .filter(Boolean);
   }
 
   function updateFieldsMode() {
-    getDialogueElements().forEach(element => {
+    getDialogueElements().forEach((element) => {
       if (fieldsMoveMode) {
         element.style.cursor = 'move';
         element.style.outline = '2px dashed #e58e26';
@@ -246,17 +236,7 @@
       ? '✅ Désactiver déplacement'
       : '↔ Déplacer les champs';
 
-    Object.assign(fieldsMoveBtn.style, fieldsMoveMode
-      ? {
-          background: '#e58e26',
-          color: '#12100e',
-          borderColor: '#e58e26',
-        }
-      : {
-          background: '#2a2520',
-          color: '#ccc',
-          borderColor: '#38332b',
-        });
+    Object.assign(fieldsMoveBtn.style, fieldsMoveMode ? BTN_ON : BTN_OFF);
   }
 
   function attachFieldDragging(element) {
@@ -266,7 +246,7 @@
     element.dataset.dragX = '0';
     element.dataset.dragY = '0';
 
-    element.addEventListener('pointerdown', event => {
+    element.addEventListener('pointerdown', (event) => {
       if (!fieldsMoveMode || event.button !== 0) return;
 
       event.preventDefault();
@@ -286,7 +266,7 @@
         element.dataset.dragY = String(y);
 
         // Translate indépendant du positionnement calculé par dialogue.js
-        element.style.translate = ${x}px ${y}px;
+        element.style.translate = `${x}px ${y}px`;
       }
 
       function stopMoving() {
@@ -312,7 +292,7 @@
   });
 
   fieldsResetBtn.addEventListener('click', () => {
-    getDialogueElements().forEach(element => {
+    getDialogueElements().forEach((element) => {
       element.dataset.dragX = '0';
       element.dataset.dragY = '0';
       element.style.translate = '0px 0px';
@@ -330,10 +310,7 @@
   scanDialogueFields();
 
   // --- Section orientation ---
-  const rotLabel = document.createElement('div');
-  rotLabel.textContent = 'ORIENTATION';
-  Object.assign(rotLabel.style, { color: '#888', marginBottom: '6px', fontSize: '11px', marginTop: '14px' });
-  body.appendChild(rotLabel);
+  body.appendChild(makeLabel('ORIENTATION', { marginTop: '14px' }));
 
   const rotRow = document.createElement('div');
   Object.assign(rotRow.style, { display: 'flex', alignItems: 'center', gap: '8px' });
@@ -350,11 +327,9 @@
   Object.assign(rotValue.style, { color: '#aaa', fontSize: '11px', minWidth: '30px' });
 
   rotSlider.addEventListener('input', () => {
-    const deg = parseInt(rotSlider.value);
+    const deg = parseInt(rotSlider.value, 10);
     rotValue.textContent = deg + '°';
-    if (typeof window.characterRotate === 'function') {
-      window.characterRotate(deg);
-    }
+    doRotate(deg);
   });
 
   rotRow.appendChild(rotSlider);
@@ -362,32 +337,11 @@
   body.appendChild(rotRow);
 
   // --- Section scènes ---
-  const scenesLabel = document.createElement('div');
-  scenesLabel.textContent = 'SCÈNES';
-  Object.assign(scenesLabel.style, { color: '#888', marginBottom: '6px', fontSize: '11px', marginTop: '14px' });
-  body.appendChild(scenesLabel);
+  body.appendChild(makeLabel('SCÈNES', { marginTop: '14px' }));
 
   const scenes = [];
-  let currentAnim = 'Angry';
-  let currentX = window.innerWidth - 120;
-  let currentY = 6;
-  let currentRot = 0;
 
-  // Mise à jour de l'état courant
-  const origPlay = window.characterPlay;
-  window.characterPlay = (name) => { currentAnim = name; origPlay(name); };
-  const origMove = window.characterMoveTo;
-  window.characterMoveTo = (x, y) => { currentX = x; currentY = y; origMove(x, y); };
-  const origRotate = window.characterRotate;
-  window.characterRotate = (deg) => { currentRot = deg; origRotate(deg); };
-
-  const saveBtn = document.createElement('button');
-  saveBtn.textContent = '💾 Sauvegarder cette scène';
-  Object.assign(saveBtn.style, {
-    width: '100%', background: '#2a2520', border: '1px solid #38332b',
-    borderRadius: '4px', color: '#ccc', padding: '7px',
-    cursor: 'pointer', fontSize: '11px', marginBottom: '8px'
-  });
+  const saveBtn = makeButton('💾 Sauvegarder cette scène', { marginBottom: '8px' });
 
   const sceneList = document.createElement('div');
   Object.assign(sceneList.style, { fontSize: '10px', color: '#aaa' });
@@ -399,20 +353,24 @@
       x: currentX,
       y: currentY,
       rotation: currentRot,
-      trigger: 'manuel'
+      trigger: 'manuel',
     };
     scenes.push(scene);
 
     const item = document.createElement('div');
     Object.assign(item.style, {
-      padding: '4px 6px', marginBottom: '3px',
-      background: '#2a2520', borderRadius: '3px',
+      padding: '4px 6px',
+      marginBottom: '3px',
+      background: '#2a2520',
+      borderRadius: '3px',
       border: '1px solid #38332b',
-      display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
     });
 
     const label = document.createElement('span');
-    label.textContent = #${scene.id} — ${scene.animation};
+    label.textContent = `#${scene.id} — ${scene.animation}`;
     label.style.overflow = 'hidden';
     label.style.textOverflow = 'ellipsis';
     label.style.whiteSpace = 'nowrap';
@@ -420,15 +378,21 @@
     const playBtn = document.createElement('button');
     playBtn.textContent = '▶';
     Object.assign(playBtn.style, {
-      background: '#e58e26', border: 'none', borderRadius: '3px',
-      color: '#12100e', cursor: 'pointer', padding: '2px 6px',
-      fontSize: '10px', flexShrink: '0', marginLeft: '6px'
+      background: '#e58e26',
+      border: 'none',
+      borderRadius: '3px',
+      color: '#12100e',
+      cursor: 'pointer',
+      padding: '2px 6px',
+      fontSize: '10px',
+      flexShrink: '0',
+      marginLeft: '6px',
     });
 
     playBtn.addEventListener('click', () => {
-      window.characterMoveTo(scene.x, scene.y);
-      window.characterPlay(scene.animation);
-      window.characterRotate(scene.rotation);
+      doMove(scene.x, scene.y);
+      doPlay(scene.animation);
+      doRotate(scene.rotation);
     });
 
     item.appendChild(label);
@@ -439,28 +403,28 @@
   });
 
   body.appendChild(saveBtn);
-  const exportBtn = document.createElement('button');
-  exportBtn.textContent = '📤 Exporter JSON';
-  Object.assign(exportBtn.style, {
-    width: '100%', background: '#2a2520', border: '1px solid #38332b',
-    borderRadius: '4px', color: '#ccc', padding: '7px',
-    cursor: 'pointer', fontSize: '11px', marginBottom: '8px'
-  });
+
+  const exportBtn = makeButton('📤 Exporter JSON', { marginBottom: '8px' });
 
   exportBtn.addEventListener('click', () => {
     if (!scenes.length) {
       alert('Aucune scène à exporter.');
       return;
     }
+
     const json = JSON.stringify({ scenes }, null, 2);
     const blob = new Blob([json], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
+
     const a = document.createElement('a');
     a.href = url;
-    const animNames = scenes.map(s => s.animation).join('-');
+
+    const animNames = scenes.map((s) => s.animation).join('-');
     const now = new Date();
-    const stamp = ${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}h${String(now.getMinutes()).padStart(2,'0')};
-    a.download = ${animNames}_${stamp}.json;
+    const pad = (n) => String(n).padStart(2, '0');
+    const stamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}h${pad(now.getMinutes())}`;
+
+    a.download = `${animNames}_${stamp}.json`;
     a.click();
     URL.revokeObjectURL(url);
   });
