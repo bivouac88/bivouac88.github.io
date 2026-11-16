@@ -22,13 +22,14 @@
   ];
 
   const PAGES = [
-    ['accueil', 'Accueil'],
-    ['stats', 'Stats'],
-    ['etapes', 'Étapes'],
-    ['journal', 'Journal de bord'],
-    ['meteo-peche', 'Météo & pêche'],
-    ['poi', 'POI'],
-  ];
+  ['test', 'Test'],
+  ['accueil', 'Accueil'],
+  ['stats', 'Stats'],
+  ['etapes', 'Étapes'],
+  ['journal', 'Journal de bord'],
+  ['meteo-peche', 'Météo & pêche'],
+  ['poi', 'POI'],
+];
 
   const DEVICES = [
     ['mobile', 'Mobile (< 768 px)'],
@@ -798,7 +799,7 @@ body.appendChild(grid);
   secScene.content.appendChild(makeLabel('Pages concernées', { marginBottom: '3px', fontSize: '10px' }));
   const pageChecks = {};
   PAGES.forEach(([value, text]) => {
-    const { label, input } = makeCheck(text, value === 'accueil');
+const { label, input } = makeCheck(text, value === 'test');
     pageChecks[value] = input;
     secScene.content.appendChild(label);
   });
