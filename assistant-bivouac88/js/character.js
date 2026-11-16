@@ -152,6 +152,11 @@ new GLTFLoader().load(
     }
 
     playAnimation('Angry');
+
+    window.characterAnimations = gltf.animations.map(a => a.name);
+    document.dispatchEvent(new CustomEvent('b88:animations-ready', {
+      detail: { animations: window.characterAnimations }
+    }));
   },
 
   undefined,
