@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -42,7 +43,7 @@
       overflow: hidden;
     }
 
-    /* En-tête et navigation — indépendants de la navigation publique */
+    /* En-tête et navigation */
     .test-nav {
       position: relative;
       z-index: 5;
@@ -448,15 +449,15 @@
 
 <body>
   <div class="test-page">
-    <!-- Navigation locale à la page TEST : aucun lien vers les pages publiques -->
-    <nav class="test-nav" aria-label="Navigation de la page de présentation">
-      <a class="test-logo" href="#accueil" aria-label="Bivouac88, accueil">BIVOUAC88</a>
+    <!-- Navigation du site : les liens pointent vers les pages publiques existantes -->
+    <nav class="test-nav" aria-label="Navigation principale">
+      <a class="test-logo" href="index.html" aria-label="Lost but Free — Accueil">LOST BUT FREE</a>
       <div class="test-nav-links">
-        <a href="#projet">Le projet</a>
-        <a href="#voyage">Le voyage</a>
-        <a href="#suivi">Le suivi</a>
-        <a href="#outils">Les outils</a>
-        <a href="#photos">Les images</a>
+        <a href="index.html">Accueil</a>
+        <a href="etapes.html">Étapes</a>
+        <a href="stats.html">Stats</a>
+        <a href="peche/meteo.html">Météo &amp; pêche</a>
+        <a href="journal.html">Journal de bord</a>
       </div>
     </nav>
 
