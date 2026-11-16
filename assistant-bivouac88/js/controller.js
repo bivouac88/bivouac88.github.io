@@ -445,7 +445,8 @@
           animation: currentAnim,
           at: 'A',
           duration: null,
-          rotation: currentRot,
+          rotation: { ...currentRot },
+          
           bubble: { visible: true, x: offsets.bubble.x, y: offsets.bubble.y, tail: 'bottom' },
           form: { visible: true, x: offsets.form.x, y: offsets.form.y },
         },
