@@ -146,55 +146,54 @@ window.characterGetPosition = () => ({
   width: window.__charWidth || 40,
   height: window.__charHeight || 45,
 });
-// --- Drag & drop + clic ---
-let dragging = false;
-let dragMoved = false;
-let dragOffsetX = 0;
-let dragOffsetY = 0;
+
+// --- Détection du personnage et gestion des clics ---
+
+// Le mode administrateur est identifié par le paramètre existant
+const isAdmin =
+  new URLSearchParams(window.location.search).get('edit') === 'bivouac88admin';
+
+// Détection précise sur la géométrie du personnage
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
 
 function isOverCharacter(mx, my) {
-  const w = (window.__charWidth || 40) / 2 + 15; // marge de confort
-  const h = (window.__charHeight || 45) + 15;
-  return mx > posX - w && mx < posX + w && my > posY - 10 && my < posY + h;
+  if (!runner) return false;
+
+  pointer.set(
+    (mx / width) * 2 - 1,
+    (my / height) * 2 - 1
+  );
+
+  raycaster.setFromCamera(pointer, camera);
+
+  return raycaster.intersectObject(runner, true).length > 0;
 }
 
+// Détection au déplacement de la souris
 window.addEventListener('mousemove', (e) => {
   const rect = renderer.domElement.getBoundingClientRect();
+
   const mx = e.clientX - rect.left;
   const my = rect.height - (e.clientY - rect.top);
 
-  if (dragging) {
-    const newX = mx - dragOffsetX;
-    const newY = my - dragOffsetY;
-    if (Math.abs(newX - posX) > 3 || Math.abs(newY - posY) > 3) {
-      dragMoved = true;
-    }
-    posX = newX;
-    posY = newY;
-    return;
-  }
-
-  container.style.pointerEvents = isOverCharacter(mx, my) ? 'auto' : 'none';
+  // Le canvas ne reçoit les clics que lorsque la souris
+  // se trouve réellement sur le personnage.
+  container.style.pointerEvents =
+    isOverCharacter(mx, my) ? 'auto' : 'none';
 });
 
-renderer.domElement.addEventListener('mousedown', (e) => {
+// Clic sur le personnage : ouverture du dialogue.
+// Aucun déplacement direct du personnage ici.
+renderer.domElement.addEventListener('click', (e) => {
   const rect = renderer.domElement.getBoundingClientRect();
+
   const mx = e.clientX - rect.left;
   const my = rect.height - (e.clientY - rect.top);
 
-  if (isOverCharacter(mx, my)) {
-    dragging = true;
-    dragMoved = false;
-    dragOffsetX = mx - posX;
-    dragOffsetY = my - posY;
-    e.preventDefault();
-  }
-});
+  if (!isOverCharacter(mx, my)) return;
 
-window.addEventListener('mouseup', () => {
-  if (dragging && !dragMoved) {
-    document.dispatchEvent(new CustomEvent('b88:character-click'));
-  }
-  dragging = false;
-  dragMoved = false;
+  document.dispatchEvent(
+    new CustomEvent('b88:character-click')
+  );
 });
