@@ -243,7 +243,7 @@ window.characterGetScreenBounds = () => {
 };
 
 // --- Détection des clics sur le personnage ---
-const CLICK_PADDING_PX = 30; // marge ajoutée autour du perso pour la zone cliquable
+const CLICK_PADDING_PX = 50; // marge ajoutée autour du perso pour la zone cliquable
 
 function isOverCharacter(mx, my) {
   if (!runner) return false;
