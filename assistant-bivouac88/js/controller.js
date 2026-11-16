@@ -399,7 +399,6 @@
   body.appendChild(pageSelect);
 
   const scenes = [];
-  const scenes = [];
 
   const saveBtn = makeButton('💾 Sauvegarder cette scène', { marginBottom: '8px' });
 
