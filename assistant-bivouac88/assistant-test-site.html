@@ -59,10 +59,10 @@
     .test-logo {
       position: absolute;
       z-index: 10;
-      top: 4px;
-      left: clamp(4px, 5vw, 80px);
-      width: 240px;
-      height: 240px;
+      top: 24px;
+      left: clamp(24px, calc(5vw + 20px), 100px);
+      width: 200px;
+      height: 200px;
       display: block;
       overflow: visible;
     }
@@ -71,8 +71,8 @@
     .test-logo img.logo-photo {
       position: absolute;
       z-index: 2;
-      top: 70px;
-      left: 70px;
+      top: 50px;
+      left: 50px;
       display: block;
       width: 100px;
       height: 100px;
@@ -437,11 +437,6 @@
       .test-nav-links {
         justify-content: flex-start;
         gap: 12px 20px;
-      }
-
-      .test-logo {
-        transform: scale(.75);
-        transform-origin: top left;
       }
 
       .test-hero {
