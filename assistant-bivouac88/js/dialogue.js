@@ -46,45 +46,46 @@ async function initDialogue(character) {
 
   let opened = false;
 
-  dialogue.addEventListener("click", event => event.stopPropagation());
+  dialogue.addEventListener("click", event => {
+    event.stopPropagation();
+  });
 
-  // --- Positionnement indépendant de la bulle et du champ ---
+  // --- Positionnement dynamique sur le personnage ---
 
   function updateDialoguePosition() {
-    if (typeof window.characterGetPosition === "function") {
-      const pos = window.characterGetPosition();
+    const bounds = window.characterGetScreenBounds?.();
 
+    if (bounds) {
       const gap = 14;
       const margin = 10;
-      const dialogueWidth = dialogue.offsetWidth || 210;
+      const dialogueWidth = dialogue.offsetWidth;
 
-      // Centrage horizontal sur le personnage
-      let left = pos.x - dialogueWidth / 2;
+      // Centrage horizontal
+      let left =
+        (bounds.left + bounds.right) / 2 - dialogueWidth / 2;
 
       left = Math.max(
         margin,
         Math.min(left, window.innerWidth - dialogueWidth - margin)
       );
 
-      // Coordonnées écran du personnage
-      const characterTop = window.innerHeight - (pos.y + pos.height);
-      const characterBottom = window.innerHeight - pos.y;
-
-      // Bulle juste au-dessus de la tête
-      bubble.style.left = `${left}px`;
-      bubble.style.top = `${characterTop - bubble.offsetHeight - gap}px`;
+      // Bulle au-dessus de la tête
       bubble.style.width = `${dialogueWidth}px`;
+      bubble.style.left = `${left}px`;
+      bubble.style.top = `${bounds.top - bubble.offsetHeight - gap}px`;
 
-      // Champ juste sous les pieds
-      form.style.left = `${left}px`;
-      form.style.top = `${characterBottom + gap}px`;
+      // Champ de saisie sous les pieds
       form.style.width = `${dialogueWidth}px`;
+      form.style.left = `${left}px`;
+      form.style.top = `${bounds.bottom + gap}px`;
     }
 
     requestAnimationFrame(updateDialoguePosition);
   }
 
   updateDialoguePosition();
+
+  // --- Affichage des messages ---
 
   function showBubble(message) {
     text.textContent = message;
@@ -113,6 +114,8 @@ async function initDialogue(character) {
     input.focus();
   }
 
+  // --- Boutons de choix ---
+
   function addChoice(label, callback) {
     const button = document.createElement("button");
     button.type = "button";
@@ -126,6 +129,8 @@ async function initDialogue(character) {
 
     choices.appendChild(button);
   }
+
+  // --- Traitement des réponses ---
 
   function displayResult(result) {
     if (!result) return;
@@ -175,6 +180,8 @@ async function initDialogue(character) {
     }
   }
 
+  // --- Envoi du message ---
+
   form.addEventListener("submit", event => {
     event.preventDefault();
 
@@ -190,6 +197,8 @@ async function initDialogue(character) {
 
     displayResult(engine.ask(question));
   });
+
+  // --- Fermeture et ouverture ---
 
   closeButton.addEventListener("click", hideDialogue);
 
