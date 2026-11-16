@@ -372,6 +372,33 @@
   // --- Section scènes ---
   body.appendChild(makeLabel('SCÈNES', { marginTop: '14px' }));
 
+  body.appendChild(makeLabel('Page concernée'));
+  const pageSelect = document.createElement('select');
+  Object.assign(pageSelect.style, {
+    width: '100%',
+    background: '#2a2520',
+    border: '1px solid #38332b',
+    borderRadius: '4px',
+    color: '#ccc',
+    padding: '6px',
+    fontSize: '11px',
+    marginBottom: '8px',
+  });
+  [
+    ['accueil', 'Accueil'],
+    ['stats', 'Stats'],
+    ['etapes', 'Étapes'],
+    ['journal', 'Journal de bord'],
+    ['meteo-peche', 'Météo & pêche'],
+  ].forEach(([value, text]) => {
+    const opt = document.createElement('option');
+    opt.value = value;
+    opt.textContent = text;
+    pageSelect.appendChild(opt);
+  });
+  body.appendChild(pageSelect);
+
+  const scenes = [];
   const scenes = [];
 
   const saveBtn = makeButton('💾 Sauvegarder cette scène', { marginBottom: '8px' });
@@ -385,7 +412,7 @@
       id: scenes.length + 1,
       name: `Scène ${scenes.length + 1} : ${currentAnim}`,
       enabled: true,
-      page: window.location.pathname,
+      page: pageSelect.value,
       device: {
         type: window.innerWidth < 768 ? 'mobile' : 'pc',
         minWidth: window.innerWidth < 768 ? 0 : 1024,
