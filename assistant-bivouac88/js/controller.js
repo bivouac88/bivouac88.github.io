@@ -12,14 +12,28 @@
   // Données de référence
   // ---------------------------------------------------------------
 
-  const ANIMATIONS = [
-    'Angry', 'Blow_a_Kiss', 'Clapping', 'Classique_Pose',
-    'Cycle_Crunch', 'Fall_to_Roll', 'Fast_Run', 'Happy',
-    'Jump', 'Jump.001', 'Laying_Position', 'Pointe_Doigt_Gauche',
-    'Robot_Hip_Hop', 'Run_Lock_Back', 'Running', 'Sitting_Pose',
-    'Sleeping', 'Standing', 'Standing_Pied_Droit', 'Styling_Flip',
-    'Swimming', 'Wall_Crash'
-  ];
+  let ANIMATIONS = window.characterAnimations || [];
+
+  document.addEventListener('b88:animations-ready', (e) => {
+    ANIMATIONS = e.detail.animations;
+    grid.replaceChildren();
+    activeBtn = null;
+    ANIMATIONS.forEach((name) => {
+      const btn = makeButton(name.replace(/_/g, ' '), {
+        width: 'auto', padding: '5px 4px', fontSize: '10px',
+        textAlign: 'left', overflow: 'hidden',
+        textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+      });
+      btn.title = name;
+      btn.addEventListener('click', () => {
+        doPlay(name);
+        if (activeBtn) Object.assign(activeBtn.style, BTN_OFF);
+        Object.assign(btn.style, BTN_ON);
+        activeBtn = btn;
+      });
+      grid.appendChild(btn);
+    });
+  });
 
   const PAGES = [
   ['test', 'Test'],
