@@ -6,7 +6,7 @@ const CONFIG = {
   modelUrl: new URL('../Assets/Nouvelle_IA.glb', import.meta.url).href,
   heightPx: 45,
   canvasHeightPx: 220,
-  bottomOffsetPx: 55,
+  bottomOffsetPx: 6,
 };
 
 // --- Canvas pleine page ---
@@ -122,18 +122,15 @@ new GLTFLoader().load(
       gltf.animations.map(animation => animation.name)
     );
 
-    // Mise à l'échelle
     const box = new THREE.Box3().setFromObject(model);
     const size = box.getSize(new THREE.Vector3());
 
     const scale = CONFIG.heightPx / size.y;
-
     model.scale.setScalar(scale);
 
     window.__charWidth = size.x * scale;
     window.__charHeight = CONFIG.heightPx;
 
-    // Centrage du modèle et alignement des pieds
     const scaledBox = new THREE.Box3().setFromObject(model);
     const center = scaledBox.getCenter(new THREE.Vector3());
 
@@ -141,18 +138,15 @@ new GLTFLoader().load(
     model.position.z -= center.z;
     model.position.y -= scaledBox.min.y;
 
-    // Groupe du personnage
     runner = new THREE.Group();
     runner.position.set(posX, posY, 0);
     runner.add(model);
     scene.add(runner);
 
-    // Mixer et animations
     mixer = new THREE.AnimationMixer(model);
 
     for (const clip of gltf.animations) {
       const action = mixer.clipAction(clip);
-
       action.setLoop(THREE.LoopRepeat, Infinity);
       actions[clip.name] = action;
     }
@@ -176,13 +170,8 @@ function tick() {
 
   const dt = Math.min(clock.getDelta(), 0.1);
 
-  if (mixer) {
-    mixer.update(dt);
-  }
-
-  if (runner) {
-    runner.position.set(posX, posY, 0);
-  }
+  if (mixer) mixer.update(dt);
+  if (runner) runner.position.set(posX, posY, 0);
 
   renderer.render(scene, camera);
 }
@@ -213,7 +202,7 @@ window.characterGetPosition = () => ({
   height: window.__charHeight || 45,
 });
 
-// --- Limites réelles du personnage à l'écran ---
+// --- Limites du personnage à l'écran ---
 
 window.characterGetScreenBounds = () => {
   if (!runner) return null;
