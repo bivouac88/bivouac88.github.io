@@ -189,7 +189,7 @@ window.characterMoveTo = (x, y) => {
   posY = y;
 };
 
-window.characterRotate = (deg) => {
+window.characterRotate = (x, y, z) => {
   if (runner) {
     runner.rotation.y = deg * (Math.PI / 180);
   }
