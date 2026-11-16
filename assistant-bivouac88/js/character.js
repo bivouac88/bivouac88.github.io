@@ -140,6 +140,12 @@ window.characterMoveTo = (x, y) => { posX = x; posY = y; };
 window.characterRotate = (deg) => {
   if (runner) runner.rotation.y = deg * (Math.PI / 180);
 };
+window.characterGetPosition = () => ({
+  x: posX,
+  y: posY,
+  width: window.__charWidth || 40,
+  height: window.__charHeight || 45,
+});
 // --- Drag & drop + clic ---
 let dragging = false;
 let dragMoved = false;
@@ -187,7 +193,6 @@ renderer.domElement.addEventListener('mousedown', (e) => {
 
 window.addEventListener('mouseup', () => {
   if (dragging && !dragMoved) {
-    // Clic simple (sans déplacement) : on prévient le dialogue.
     document.dispatchEvent(new CustomEvent('b88:character-click'));
   }
   dragging = false;
