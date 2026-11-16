@@ -47,6 +47,27 @@ async function initDialogue(character) {
 
   dialogue.addEventListener("click", event => event.stopPropagation());
 
+  // --- Suivi de la position du personnage ---
+  function updateDialoguePosition() {
+    if (typeof window.characterGetPosition === "function") {
+      const pos = window.characterGetPosition();
+      const bubbleWidth = dialogue.offsetWidth || 210;
+      const gap = 14; // espace entre la tête du perso et la bulle
+
+      let left = pos.x - bubbleWidth / 2;
+      const bottom = pos.y + pos.height + gap;
+
+      const margin = 10;
+      left = Math.max(margin, Math.min(left, window.innerWidth - bubbleWidth - margin));
+
+      dialogue.style.left = `${left}px`;
+      dialogue.style.bottom = `${bottom}px`;
+    }
+
+    requestAnimationFrame(updateDialoguePosition);
+  }
+  updateDialoguePosition();
+
   function showBubble(message) {
     text.textContent = message;
     dialogue.classList.add("active");
@@ -170,7 +191,7 @@ async function initDialogue(character) {
       showBubble("Oh, salut ! Bienvenue sur les chemins de Bivouac88.");
       setTimeout(() => {
         if (!opened) bubble.classList.remove("visible");
-      }, 5000);
+      }, 9000);
     }
   }, 2500);
 }
