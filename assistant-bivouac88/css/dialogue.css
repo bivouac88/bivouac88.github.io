@@ -1,176 +1,115 @@
-import { loadKnowledge } from "./knowledge.js";
-import { createEngine } from "./engine.js";
-
-const character = document.getElementById("b88-character");
-
-if (!character) {
-  console.warn("Le Bivouaciste est introuvable.");
-} else {
-  initDialogue(character);
+.b88-dialogue {
+  position: absolute;
+  left: 125px;
+  bottom: 145px;
+  width: 260px;
+  z-index: 5;
+  display: none;
+  font-family: Arial, sans-serif;
+  color: #29251f;
 }
 
-async function initDialogue(character) {
-  let engine;
-
-  try {
-    const knowledge = await loadKnowledge();
-    engine = createEngine(knowledge);
-  } catch (error) {
-    console.error("Erreur de chargement du dialogue :", error);
-  }
-
-  const dialogue = document.createElement("div");
-  dialogue.className = "b88-dialogue";
-  dialogue.innerHTML = `
-    <div class="b88-dialogue-bubble" aria-live="polite">
-      <button class="b88-dialogue-close" type="button" aria-label="Fermer">×</button>
-      <div class="b88-dialogue-text"></div>
-      <div class="b88-dialogue-choices"></div>
-    </div>
-    <form class="b88-dialogue-form">
-      <input type="text" placeholder="Écris-moi quelque chose..." maxlength="300" aria-label="Ton message">
-      <button type="submit" aria-label="Envoyer">➤</button>
-    </form>
-  `;
-
-  character.appendChild(dialogue);
-
-  const bubble = dialogue.querySelector(".b88-dialogue-bubble");
-  const text = dialogue.querySelector(".b88-dialogue-text");
-  const choices = dialogue.querySelector(".b88-dialogue-choices");
-  const form = dialogue.querySelector(".b88-dialogue-form");
-  const input = form.querySelector("input");
-  const closeButton = dialogue.querySelector(".b88-dialogue-close");
-
-  let opened = false;
-  let greetingTimer;
-
-  dialogue.addEventListener("click", event => event.stopPropagation());
-
-  function showBubble(message) {
-    text.textContent = message;
-    dialogue.classList.add("active");
-    bubble.classList.add("visible");
-  }
-
-  function hideDialogue() {
-    opened = false;
-    dialogue.classList.remove("active");
-    bubble.classList.remove("visible");
-    choices.replaceChildren();
-  }
-
-  function openDialogue() {
-    opened = true;
-    dialogue.classList.add("active");
-    choices.replaceChildren();
-
-    if (!engine) {
-      showBubble("Oups... Mon cerveau est encore dans mes sacoches. Réessaie dans un instant !");
-    } else {
-      showBubble("Salut voyageur ! Qu'est-ce que tu aimerais savoir ?");
-    }
-
-    input.focus();
-  }
-
-  function addChoice(label, callback) {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "b88-dialogue-choice";
-    button.textContent = label;
-
-    button.addEventListener("click", () => {
-      choices.replaceChildren();
-      callback();
-    });
-
-    choices.appendChild(button);
-  }
-
-  function displayResult(result) {
-    if (!result) return;
-
-    showBubble(result.text || "Je n'ai pas de réponse pour le moment.");
-    choices.replaceChildren();
-
-    if (result.type === "clarification" && Array.isArray(result.choices)) {
-      result.choices.forEach(choice => {
-        addChoice(choice.label || choice.id, () => {
-          displayResult(engine.askIntent(choice.id));
-        });
-      });
-    }
-
-    if (Array.isArray(result.related)) {
-      result.related.forEach(id => {
-        const intent = engine.getIntent(id);
-
-        if (intent) {
-          addChoice(intent.label, () => {
-            displayResult(engine.askIntent(id));
-          });
-        }
-      });
-    }
-
-    if (Array.isArray(result.links)) {
-      result.links.forEach(link => {
-        if (!link.url) return;
-
-        const anchor = document.createElement("a");
-        anchor.className = "b88-dialogue-link";
-        anchor.href = link.url;
-        anchor.textContent = link.label || "En savoir plus";
-        anchor.target = "_blank";
-        anchor.rel = "noopener noreferrer";
-
-        choices.appendChild(anchor);
-      });
-    }
-
-    if (result.action === "tour") {
-      addChoice("Découvrir le site", () => {
-        document.dispatchEvent(new CustomEvent("b88:start-tour"));
-      });
-    }
-  }
-
-  form.addEventListener("submit", event => {
-    event.preventDefault();
-
-    const question = input.value.trim();
-    if (!question) return;
-
-    input.value = "";
-
-    if (!engine) {
-      showBubble("Je n'arrive pas encore à réfléchir. Réessaie un peu plus tard !");
-      return;
-    }
-
-    displayResult(engine.ask(question));
-  });
-
-  closeButton.addEventListener("click", hideDialogue);
-
-  document.addEventListener("b88:character-click", () => {
-    clearTimeout(greetingTimer);
-
-    if (opened) {
-      hideDialogue();
-    } else {
-      openDialogue();
-    }
-  });
-
-  // Première apparition : petit message d'accueil
-  greetingTimer = setTimeout(() => {
-    if (!opened) {
-      showBubble("Oh, salut ! Bienvenue sur les chemins de Bivouac88.");
-      setTimeout(() => {
-        if (!opened) bubble.classList.remove("visible");
-      }, 5000);
-    }
-  }, 2500);
+.b88-dialogue.active {
+  display: block;
 }
+
+.b88-dialogue-bubble {
+  position: relative;
+  display: none;
+  padding: 17px 18px;
+  background: #fffdf7;
+  border: 2px solid #e58e26;
+  border-radius: 17px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+  font-size: 14px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.b88-dialogue-bubble::after {
+  content: "";
+  position: absolute;
+  left: 20px;
+  bottom: -11px;
+  width: 18px;
+  height: 18px;
+  background: #fffdf7;
+  border-right: 2px solid #e58e26;
+  border-bottom: 2px solid #e58e26;
+  transform: rotate(45deg);
+}
+
+.b88-dialogue-bubble.visible {
+  display: block;
+  animation: b88-bubble-in 0.25s ease-out;
+}
+
+.b88-dialogue-text {
+  padding-right: 12px;
+  white-space: pre-wrap;
+}
+
+.b88-dialogue-close {
+  position: absolute;
+  top: 5px;
+  right: 9px;
+  border: 0;
+  background: transparent;
+  color: #777;
+  font-size: 21px;
+  cursor: pointer;
+}
+
+.b88-dialogue-form {
+  display: none;
+  gap: 6px;
+  margin-top: 15px;
+  padding: 6px;
+  background: #fffdf7;
+  border: 1px solid #e58e26;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16);
+}
+
+.b88-dialogue.active .b88-dialogue-form {
+  display: flex;
+}
+
+.b88-dialogue-form input {
+  min-width: 0;
+  flex: 1;
+  padding: 9px;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: #29251f;
+  font-size: 13px;
+}
+
+.b88-dialogue-form button {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 9px;
+  background: #e58e26;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.b88-dialogue-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.b88-dialogue-choice,
+.b88-dialogue-link {
+  display: inline-block;
+  padding: 6px 10px;
+  border: 1px solid #d9a15d;
+  border-radius: 20px;
+  background: #fff7e9;
+  color:
