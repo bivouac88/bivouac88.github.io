@@ -83,15 +83,17 @@
 
     /* Couronne de feuilles (aquarelle, fond transparent) */
     .test-logo img.logo-wreath {
-      position: absolute;
-      z-index: 3;
-      inset: 25;
-      display: block;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      filter: brightness(1.2) saturate(1.15) drop-shadow(0 2px 6px rgba(0, 0, 0, .6));
-    }
+  position: absolute;
+  z-index: 3;
+  top: 50%;
+  left: 50%;
+  width: 175px;
+  height: 175px;
+  transform: translate(-50%, -50%);
+  display: block;
+  pointer-events: none;
+  filter: brightness(1.2) saturate(1.15) drop-shadow(0 2px 6px rgba(0, 0, 0, .6));
+}
 
     .test-nav-links {
       display: flex;
