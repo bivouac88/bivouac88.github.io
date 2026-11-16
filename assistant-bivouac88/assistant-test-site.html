@@ -59,69 +59,38 @@
     .test-logo {
       position: absolute;
       z-index: 10;
-      top: 8px;
-      left: clamp(20px, 7vw, 110px);
-      width: 170px;
-      height: 170px;
+      top: 4px;
+      left: clamp(4px, 5vw, 80px);
+      width: 240px;
+      height: 240px;
       display: block;
       overflow: visible;
     }
 
-    /* MODIF : logo rond, sans coins noirs, avec liseré doré et ombre */
-    .test-logo img {
+    /* Logo rond, centré dans la couronne de feuilles */
+    .test-logo img.logo-photo {
       position: absolute;
       z-index: 2;
-      top: 25px;
-      left: 25px;
+      top: 70px;
+      left: 70px;
       display: block;
-      width: 120px;
-      height: 120px;
+      width: 100px;
+      height: 100px;
       object-fit: contain;
       border-radius: 50%;
-      box-shadow: 0 0 0 2px rgba(212, 154, 75, .55), 0 6px 22px rgba(0, 0, 0, .6);
+      box-shadow: 0 6px 22px rgba(0, 0, 0, .6);
     }
 
-    /* MODIF : ombre portée pour détacher l'ornement du décor */
-    .logo-ornament {
+    /* Couronne de feuilles (aquarelle, fond transparent) */
+    .test-logo img.logo-wreath {
       position: absolute;
+      z-index: 3;
       inset: 0;
+      display: block;
       width: 100%;
       height: 100%;
-      overflow: visible;
-      fill: none;
-      filter: drop-shadow(0 2px 6px rgba(0, 0, 0, .7));
-    }
-
-    .compass-ring {
-      stroke: #d49a4b;
-      stroke-width: 1.5;
-      opacity: .9;
-    }
-
-    .compass-ring-inner {
-      stroke: #d49a4b;
-      stroke-width: .6;
-      opacity: .5;
-    }
-
-    .compass-marks {
-      stroke: #e58e26;
-      stroke-width: 1.5;
-      opacity: .85;
-    }
-
-    /* MODIF : feuillages plus clairs, visibles sur la forêt */
-    .foliage {
-      fill: #5f8a3e;
-      stroke: #b7c97a;
-      stroke-width: 1.3;
-      stroke-linejoin: round;
-    }
-
-    .foliage-detail {
-      fill: #86a84d;
-      stroke: #d2dc96;
-      stroke-width: 1;
+      pointer-events: none;
+      filter: brightness(1.2) saturate(1.15) drop-shadow(0 2px 6px rgba(0, 0, 0, .6));
     }
 
     .test-nav-links {
@@ -470,6 +439,11 @@
         gap: 12px 20px;
       }
 
+      .test-logo {
+        transform: scale(.75);
+        transform-origin: top left;
+      }
+
       .test-hero {
         min-height: 520px;
         padding: 80px 22px 95px;
@@ -515,14 +489,8 @@
     <!-- Navigation du site : les liens pointent vers les pages publiques existantes -->
     <nav class="test-nav" aria-label="Navigation principale">
       <a class="test-logo" href="/index.html" aria-label="Lost but Free — Accueil">
-        <svg class="logo-ornament" viewBox="0 0 180 180" aria-hidden="true">
-          <circle cx="90" cy="90" r="65" class="compass-ring"/>
-          <circle cx="90" cy="90" r="69" class="compass-ring-inner"/>
-          <path class="compass-marks" d="M90 5 V19 M90 161 V175 M5 90 H19 M161 90 H175 M30 30 L41 41 M139 139 L150 150 M150 30 L139 41 M41 139 L30 150"/>
-          <path class="foliage" d="M22 112 Q35 75 53 27 M29 91 Q12 78 9 61 Q26 65 32 82 M38 68 Q22 54 25 38 Q42 47 43 63 M47 47 Q40 29 49 16 Q61 32 53 45 M28 97 Q43 87 54 97 Q42 111 28 97 M158 112 Q145 75 127 27 M151 91 Q168 78 171 61 Q154 65 148 82 M142 68 Q158 54 155 38 Q138 47 137 63 M133 47 Q140 29 131 16 Q119 32 127 45 M152 97 Q137 87 126 97 Q138 111 152 97"/>
-          <path class="foliage-detail" d="M35 145 Q50 153 64 160 M145 145 Q130 153 116 160 M48 151 Q40 137 49 128 Q61 141 48 151 M62 159 Q60 144 72 139 Q78 153 62 159 M132 151 Q140 137 131 128 Q119 141 132 151 M118 159 Q120 144 108 139 Q102 153 118 159"/>
-        </svg>
-        <img src="/lost-but-free.jpg" alt="Lost but Free">
+        <img class="logo-wreath" src="/cadre-feuilles.webp" alt="" aria-hidden="true">
+        <img class="logo-photo" src="/lost-but-free.jpg" alt="Lost but Free">
       </a>
       <div class="test-nav-links">
         <a href="/index.html">Accueil</a>
@@ -551,8 +519,8 @@
           <p class="test-kicker">L'esprit du projet</p>
           <h2>La route comme elle vient.</h2>
           <p>
-            Bivouac88 est le carnet de route numérique d'un voyage à vélo à travers l'Europe
-            Un espace pour raconter l'aventure, suivre le parcours et partager ce qui se passe en chemin
+            Bivouac88 est le carnet de route numérique d'un voyage à vélo à travers l'Europe.
+            Un espace pour raconter l'aventure, suivre le parcours et partager ce qui se passe en chemin.
           </p>
         </div>
 
@@ -562,7 +530,7 @@
             <h3>Le voyage</h3>
             <p>
               Un itinéraire qui se construit au fil des kilomètres, des découvertes,
-              des rencontres et des détours. Pas besoin que tout soit prévu à l'avance
+              des rencontres et des détours. Pas besoin que tout soit prévu à l'avance.
             </p>
           </article>
 
@@ -571,7 +539,7 @@
             <h3>Les étapes</h3>
             <p>
               Les journées de route, les distances, le dénivelé et la progression :
-              garder une trace concrète du chemin parcouru
+              garder une trace concrète du chemin parcouru.
             </p>
           </article>
 
@@ -580,7 +548,7 @@
             <h3>La carte et les POI</h3>
             <p>
               Retrouver les points utiles repérés en chemin : eau, sanitaires,
-              réparateurs vélo, lieux de bivouac et autres services
+              réparateurs vélo, lieux de bivouac et autres services.
             </p>
           </article>
         </div>
@@ -590,18 +558,18 @@
         <div class="test-story-inner">
           <div class="test-story-copy">
             <p class="test-kicker">Lost but Free</p>
-            <h2>Avancer librement, garder une trace</h2>
+            <h2>Avancer librement, garder une trace.</h2>
             <p>
-              Bivouac88 n'est pas seulement une carte ou un compteur de kilomètres
+              Bivouac88 n'est pas seulement une carte ou un compteur de kilomètres.
               C'est le point de rencontre entre le voyage vécu sur la route et les traces
-              qu'il laisse : étapes, lieux, images, anecdotes et souvenirs
+              qu'il laisse : étapes, lieux, images, anecdotes et souvenirs.
             </p>
             <p>
-              Le site évoluera avec l'aventure et les contenus rapportés du terrain
+              Le site évoluera avec l'aventure et les contenus rapportés du terrain.
             </p>
           </div>
           <aside class="test-story-note">
-            <p>Un voyage à vélo, sans scénario imposé. La route décide aussi</p>
+            <p>Un voyage à vélo, sans scénario imposé. La route décide aussi.</p>
           </aside>
         </div>
       </section>
@@ -609,25 +577,25 @@
       <section class="test-content" aria-labelledby="test-explorer-title">
         <div class="test-section-heading">
           <p class="test-kicker">Explorer Bivouac88</p>
-          <h2 id="test-explorer-title">Un aperçu de ce que l'on pourra suivre</h2>
+          <h2 id="test-explorer-title">Un aperçu de ce que l'on pourra suivre.</h2>
           <p>
             Le projet rassemble plusieurs façons de parcourir l'aventure,
-            de la vue d'ensemble aux détails pratiques du quotidien
+            de la vue d'ensemble aux détails pratiques du quotidien.
           </p>
         </div>
 
         <div class="test-previews">
           <article class="test-preview" data-index="01">
             <h3>Le parcours</h3>
-            <p>Visualiser la route et retrouver les grandes étapes du voyage</p>
+            <p>Visualiser la route et retrouver les grandes étapes du voyage.</p>
           </article>
           <article class="test-preview" data-index="02">
             <h3>Les découvertes</h3>
-            <p>Retrouver les lieux, les points d'intérêt et les haltes en chemin</p>
+            <p>Retrouver les lieux, les points d'intérêt et les haltes en chemin.</p>
           </article>
           <article class="test-preview" data-index="03">
             <h3>Le carnet de route</h3>
-            <p>Suivre les photos, les moments vécus et les anecdotes du voyage</p>
+            <p>Suivre les photos, les moments vécus et les anecdotes du voyage.</p>
           </article>
         </div>
       </section>
