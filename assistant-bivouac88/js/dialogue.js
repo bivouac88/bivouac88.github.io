@@ -43,7 +43,6 @@ async function initDialogue(character) {
   const closeButton = dialogue.querySelector(".b88-dialogue-close");
 
   let opened = false;
-  let greetingTimer;
 
   dialogue.addEventListener("click", event => event.stopPropagation());
 
@@ -52,7 +51,7 @@ async function initDialogue(character) {
     if (typeof window.characterGetPosition === "function") {
       const pos = window.characterGetPosition();
       const bubbleWidth = dialogue.offsetWidth || 210;
-      const gap = 14; // espace entre la tête du perso et la bulle
+      const gap = 14;
 
       let left = pos.x - bubbleWidth / 2;
       const bottom = pos.y + pos.height + gap;
@@ -176,22 +175,10 @@ async function initDialogue(character) {
   closeButton.addEventListener("click", hideDialogue);
 
   document.addEventListener("b88:character-click", () => {
-    clearTimeout(greetingTimer);
-
     if (opened) {
       hideDialogue();
     } else {
       openDialogue();
     }
   });
-
-  // Première apparition : petit message d'accueil
-  greetingTimer = setTimeout(() => {
-    if (!opened) {
-      showBubble("Oh, salut ! Bienvenue sur les chemins de Bivouac88.");
-      setTimeout(() => {
-        if (!opened) bubble.classList.remove("visible");
-      }, 9000);
-    }
-  }, 2500);
 }
