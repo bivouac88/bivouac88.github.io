@@ -57,11 +57,17 @@
       border-bottom: 1px solid var(--trait, #342a22);
     }
 
-    .test-logo {
+  .test-logo {
+  position: absolute;
+  z-index: 10;
+  top: 50%;
+  left: clamp(20px, 7vw, 110px);
+  width: 100px;
+  height: 100px;
+  transform: translateY(-50%);
   display: block;
-  flex: 0 0 auto;
-  width: 65px;
-  height: 65px;
+  background: #12100e;
+  overflow: hidden;
 }
 
 .test-logo img {
