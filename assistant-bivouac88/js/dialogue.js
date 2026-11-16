@@ -1,3 +1,4 @@
+
 import { loadKnowledge } from "./knowledge.js";
 import { createEngine } from "./engine.js";
 
@@ -21,6 +22,7 @@ async function initDialogue(character) {
 
   const dialogue = document.createElement("div");
   dialogue.className = "b88-dialogue";
+
   dialogue.innerHTML = `
     <div class="b88-dialogue-bubble" aria-live="polite">
       <button class="b88-dialogue-close" type="button" aria-label="Fermer">×</button>
@@ -33,8 +35,8 @@ async function initDialogue(character) {
     </form>
   `;
 
-document.body.appendChild(dialogue);
-  
+  document.body.appendChild(dialogue);
+
   const bubble = dialogue.querySelector(".b88-dialogue-bubble");
   const text = dialogue.querySelector(".b88-dialogue-text");
   const choices = dialogue.querySelector(".b88-dialogue-choices");
@@ -46,68 +48,42 @@ document.body.appendChild(dialogue);
 
   dialogue.addEventListener("click", event => event.stopPropagation());
 
-  // --- Suivi de la position du personnage ---
+  // --- Positionnement indépendant de la bulle et du champ ---
 
-function updateDialoguePosition() {
-  if (typeof window.characterGetPosition === "function") {
-    const pos = window.characterGetPosition();
-    const gap = 14;
-    const margin = 10;
+  function updateDialoguePosition() {
+    if (typeof window.characterGetPosition === "function") {
+      const pos = window.characterGetPosition();
 
-    const dialogueWidth = dialogue.offsetWidth || 210;
+      const gap = 14;
+      const margin = 10;
+      const dialogueWidth = dialogue.offsetWidth || 210;
 
-    // Position horizontale commune, centrée sur le personnage
-    let left = pos.x - dialogueWidth / 2;
+      // Centrage horizontal sur le personnage
+      let left = pos.x - dialogueWidth / 2;
 
-    left = Math.max(
-      margin,
-      Math.min(left, window.innerWidth - dialogueWidth - margin)
-    );
+      left = Math.max(
+        margin,
+        Math.min(left, window.innerWidth - dialogueWidth - margin)
+      );
 
-    // Coordonnées verticales du personnage dans la fenêtre
-    const characterTop = window.innerHeight - (pos.y + pos.height);
-    const characterBottom = window.innerHeight - pos.y;
+      // Coordonnées écran du personnage
+      const characterTop = window.innerHeight - (pos.y + pos.height);
+      const characterBottom = window.innerHeight - pos.y;
 
-    // Bulle au-dessus de la tête
-    const bubbleHeight = bubble.offsetHeight;
-    bubble.style.left = `${left}px`;
-    bubble.style.top = `${characterTop - bubbleHeight - gap}px`;
+      // Bulle juste au-dessus de la tête
+      bubble.style.left = `${left}px`;
+      bubble.style.top = `${characterTop - bubble.offsetHeight - gap}px`;
+      bubble.style.width = `${dialogueWidth}px`;
 
-    // Champ de saisie sous les pieds
-    form.style.left = `${left}px`;
-    form.style.top = `${characterBottom + gap}px`;
+      // Champ juste sous les pieds
+      form.style.left = `${left}px`;
+      form.style.top = `${characterBottom + gap}px`;
+      form.style.width = `${dialogueWidth}px`;
+    }
 
-    // Même largeur pour les deux éléments
-    bubble.style.width = `${dialogueWidth}px`;
-    form.style.width = `${dialogueWidth}px`;
+    requestAnimationFrame(updateDialoguePosition);
   }
 
-  requestAnimationFrame(updateDialoguePosition);
-}
-
-    // Largeur réelle du dialogue
-    const dialogueWidth =
-      dialogue.getBoundingClientRect().width ||
-      Math.min(210, window.innerWidth - margin * 2);
-
-    // Centrage horizontal au-dessus du personnage
-    let left = pos.x - dialogueWidth / 2;
-
-    // Empêcher le dialogue de sortir de l'écran
-    left = Math.max(
-      margin,
-      Math.min(left, window.innerWidth - dialogueWidth - margin)
-    );
-
-    // Position verticale : juste au-dessus de la tête
-    const bottom = pos.y + pos.height + gap;
-
-    dialogue.style.left = `${left}px`;
-    dialogue.style.bottom = `${bottom}px`;
-  }
-
-  requestAnimationFrame(updateDialoguePosition);
-}
   updateDialoguePosition();
 
   function showBubble(message) {
