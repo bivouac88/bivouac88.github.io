@@ -146,6 +146,45 @@ window.characterGetPosition = () => ({
   width: window.__charWidth || 40,
   height: window.__charHeight || 45,
 });
+
+window.characterGetScreenBounds = () => {
+  if (!runner) return null;
+
+  runner.updateWorldMatrix(true, true);
+  camera.updateMatrixWorld(true);
+
+  const bounds = new THREE.Box3().setFromObject(runner);
+  if (bounds.isEmpty()) return null;
+
+  const rect = renderer.domElement.getBoundingClientRect();
+
+  const corners = [
+    new THREE.Vector3(bounds.min.x, bounds.min.y, bounds.min.z),
+    new THREE.Vector3(bounds.min.x, bounds.min.y, bounds.max.z),
+    new THREE.Vector3(bounds.min.x, bounds.max.y, bounds.min.z),
+    new THREE.Vector3(bounds.min.x, bounds.max.y, bounds.max.z),
+    new THREE.Vector3(bounds.max.x, bounds.min.y, bounds.min.z),
+    new THREE.Vector3(bounds.max.x, bounds.min.y, bounds.max.z),
+    new THREE.Vector3(bounds.max.x, bounds.max.y, bounds.min.z),
+    new THREE.Vector3(bounds.max.x, bounds.max.y, bounds.max.z),
+  ];
+
+  const projected = corners.map(point => {
+    point.project(camera);
+
+    return {
+      x: rect.left + (point.x + 1) * rect.width / 2,
+      y: rect.top + (1 - point.y) * rect.height / 2,
+    };
+  });
+
+  return {
+    left: Math.min(...projected.map(p => p.x)),
+    right: Math.max(...projected.map(p => p.x)),
+    top: Math.min(...projected.map(p => p.y)),
+    bottom: Math.max(...projected.map(p => p.y)),
+  };
+};
 // --- Détection et clic sur le personnage ---
 
 function isOverCharacter(mx, my) {
