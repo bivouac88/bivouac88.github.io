@@ -78,8 +78,6 @@ function updateDialoguePosition() {
 
   requestAnimationFrame(updateDialoguePosition);
 }
-
-  }
   updateDialoguePosition();
 
   function showBubble(message) {
