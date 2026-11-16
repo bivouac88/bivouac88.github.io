@@ -379,15 +379,40 @@
   const sceneList = document.createElement('div');
   Object.assign(sceneList.style, { fontSize: '10px', color: '#aaa' });
 
-  saveBtn.addEventListener('click', () => {
+    saveBtn.addEventListener('click', () => {
+    const offsets = getFieldOffsets();
     const scene = {
       id: scenes.length + 1,
-      animation: currentAnim,
-      x: currentX,
-      y: currentY,
-      rotation: currentRot,
-      fields: getFieldOffsets(),
-      trigger: 'manuel',
+      name: `Scène ${scenes.length + 1} : ${currentAnim}`,
+      enabled: true,
+      page: window.location.pathname,
+      device: {
+        type: window.innerWidth < 768 ? 'mobile' : 'pc',
+        minWidth: window.innerWidth < 768 ? 0 : 1024,
+        maxWidth: window.innerWidth < 768 ? 767 : 2560,
+      },
+      trigger: { type: 'load', threshold: 0.5 },
+      delay: 0,
+      once: false,
+      points: {
+        A: {
+          selector: null,
+          offsetX: null,
+          offsetY: null,
+          fallback: { x: currentX, y: currentY },
+        },
+      },
+      steps: [
+        {
+          animation: currentAnim,
+          at: 'A',
+          duration: null,
+          rotation: currentRot,
+          bubble: { visible: true, x: offsets.bubble.x, y: offsets.bubble.y, tail: 'bottom' },
+          form: { visible: true, x: offsets.form.x, y: offsets.form.y },
+        },
+      ],
+      end: 'hold',
     };
     scenes.push(scene);
 
@@ -404,7 +429,7 @@
     });
 
     const label = document.createElement('span');
-    label.textContent = `#${scene.id} — ${scene.animation}`;
+    label.textContent = `#${scene.id} — ${scene.steps[0].animation}`;
     label.style.overflow = 'hidden';
     label.style.textOverflow = 'ellipsis';
     label.style.whiteSpace = 'nowrap';
@@ -423,11 +448,13 @@
       marginLeft: '6px',
     });
 
-    playBtn.addEventListener('click', () => {
-      doMove(scene.x, scene.y);
-      doPlay(scene.animation);
-      doRotate(scene.rotation);
-      applyFieldOffsets(scene.fields);
+        playBtn.addEventListener('click', () => {
+      const step = scene.steps[0];
+      const p = scene.points[step.at].fallback;
+      doMove(p.x, p.y);
+      doPlay(step.animation);
+      doRotate(step.rotation);
+      applyFieldOffsets({ bubble: step.bubble, form: step.form });
     });
 
     item.appendChild(label);
@@ -447,14 +474,14 @@
       return;
     }
 
-    const json = JSON.stringify({ scenes }, null, 2);
+    const json = JSON.stringify({ version: 1, scenes }, null, 2);
     const blob = new Blob([json], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
 
     const a = document.createElement('a');
     a.href = url;
 
-    const animNames = scenes.map((s) => s.animation).join('-');
+    const animNames = scenes.map((s) => s.steps[0].animation).join('-');
     const now = new Date();
     const pad = (n) => String(n).padStart(2, '0');
     const stamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}h${pad(now.getMinutes())}`;
