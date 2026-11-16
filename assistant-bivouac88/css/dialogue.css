@@ -1,11 +1,12 @@
+
 .b88-dialogue {
   position: fixed;
-  left: 0;
   top: 0;
+  left: 0;
   width: 210px;
-  z-index: 10001;
   display: block;
   visibility: hidden;
+  z-index: 10001;
   font-family: Arial, sans-serif;
   color: #29251f;
   pointer-events: none;
@@ -15,10 +16,12 @@
   visibility: visible;
 }
 
+/* --- Bulle de dialogue --- */
+
 .b88-dialogue-bubble {
   position: fixed;
-  box-sizing: border-box;
   display: none;
+  box-sizing: border-box;
   padding: 13px 14px;
   background: #fffdf7;
   border: 2px solid #e58e26;
@@ -27,6 +30,12 @@
   font-size: 13px;
   line-height: 1.4;
   overflow-wrap: anywhere;
+  pointer-events: auto;
+}
+
+.b88-dialogue-bubble.visible {
+  display: block;
+  animation: b88-bubble-in 0.25s ease-out;
 }
 
 .b88-dialogue-bubble::after {
@@ -40,11 +49,6 @@
   border-right: 2px solid #e58e26;
   border-bottom: 2px solid #e58e26;
   transform: translateX(-50%) rotate(45deg);
-}
-
-.b88-dialogue-bubble.visible {
-  display: block;
-  animation: b88-bubble-in 0.25s ease-out;
 }
 
 .b88-dialogue-text {
@@ -63,17 +67,20 @@
   cursor: pointer;
 }
 
+/* --- Champ de réponse --- */
+
 .b88-dialogue-form {
-  display: none;
-  gap: 5px;
   position: fixed;
+  display: none;
   box-sizing: border-box;
+  gap: 5px;
   margin-top: 0;
   padding: 5px;
   background: #fffdf7;
   border: 1px solid #e58e26;
   border-radius: 10px;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16);
+  pointer-events: auto;
 }
 
 .b88-dialogue.active .b88-dialogue-form {
@@ -103,6 +110,8 @@
   cursor: pointer;
 }
 
+/* --- Choix et liens --- */
+
 .b88-dialogue-choices {
   display: flex;
   flex-wrap: wrap;
@@ -128,28 +137,29 @@
   background: #f7e4c8;
 }
 
+/* --- Animation --- */
+
 @keyframes b88-bubble-in {
   from {
     opacity: 0;
     transform: translateY(8px) scale(0.96);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
   }
 }
 
+/* --- Adaptation mobile --- */
+
 @media (max-width: 600px) {
   .b88-dialogue {
-width: min(200px, calc(100vw - 20px));
+    width: min(200px, calc(100vw - 20px));
   }
 
   .b88-dialogue-bubble {
     padding: 11px;
     font-size: 12px;
   }
-}
-.b88-dialogue-bubble,
-.b88-dialogue-form {
-  pointer-events: auto;
 }
