@@ -47,13 +47,43 @@ document.body.appendChild(dialogue);
   dialogue.addEventListener("click", event => event.stopPropagation());
 
   // --- Suivi de la position du personnage ---
-  
+
 function updateDialoguePosition() {
   if (typeof window.characterGetPosition === "function") {
     const pos = window.characterGetPosition();
-
-    const margin = 10;
     const gap = 14;
+    const margin = 10;
+
+    const dialogueWidth = dialogue.offsetWidth || 210;
+
+    // Position horizontale commune, centrée sur le personnage
+    let left = pos.x - dialogueWidth / 2;
+
+    left = Math.max(
+      margin,
+      Math.min(left, window.innerWidth - dialogueWidth - margin)
+    );
+
+    // Coordonnées verticales du personnage dans la fenêtre
+    const characterTop = window.innerHeight - (pos.y + pos.height);
+    const characterBottom = window.innerHeight - pos.y;
+
+    // Bulle au-dessus de la tête
+    const bubbleHeight = bubble.offsetHeight;
+    bubble.style.left = `${left}px`;
+    bubble.style.top = `${characterTop - bubbleHeight - gap}px`;
+
+    // Champ de saisie sous les pieds
+    form.style.left = `${left}px`;
+    form.style.top = `${characterBottom + gap}px`;
+
+    // Même largeur pour les deux éléments
+    bubble.style.width = `${dialogueWidth}px`;
+    form.style.width = `${dialogueWidth}px`;
+  }
+
+  requestAnimationFrame(updateDialoguePosition);
+}
 
     // Largeur réelle du dialogue
     const dialogueWidth =
