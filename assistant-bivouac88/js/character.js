@@ -242,8 +242,11 @@ window.characterGetScreenBounds = () => {
   };
 };
 
-// --- Détection des clics sur le personnage ---
+// --- Détection des clics et du drag (admin) sur le personnage ---
 const CLICK_PADDING_PX = 50; // marge ajoutée autour du perso pour la zone cliquable
+const DRAG_THRESHOLD_PX = 5; // distance avant de considérer que c'est un drag, pas un clic
+
+const ADMIN_MODE = new URLSearchParams(window.location.search).get('edit') === 'bivouac88admin';
 
 function isOverCharacter(mx, my) {
   if (!runner) return false;
@@ -270,7 +273,7 @@ window.addEventListener('mousemove', (event) => {
     isOverCharacter(mx, my) ? 'auto' : 'none';
 });
 
-renderer.domElement.addEventListener('click', (event) => {
+renderer.domElement.addEventListener('pointerdown', (event) => {
   const rect = renderer.domElement.getBoundingClientRect();
 
   const mx = event.clientX - rect.left;
@@ -278,7 +281,37 @@ renderer.domElement.addEventListener('click', (event) => {
 
   if (!isOverCharacter(mx, my)) return;
 
-  document.dispatchEvent(
-    new CustomEvent('b88:character-click')
-  );
+  const startClientX = event.clientX;
+  const startClientY = event.clientY;
+  const startPosX = posX;
+  const startPosY = posY;
+  let dragged = false;
+
+  function movePointer(moveEvent) {
+    const dx = moveEvent.clientX - startClientX;
+    const dy = moveEvent.clientY - startClientY;
+
+    if (!dragged && Math.hypot(dx, dy) > DRAG_THRESHOLD_PX) {
+      if (!ADMIN_MODE) return; // le drag n'est autorisé qu'en mode admin
+      dragged = true;
+    }
+    if (!dragged) return;
+
+    posX = startPosX + dx;
+    posY = startPosY - dy; // axe Y inversé (coordonnées Three.js)
+  }
+
+  function stopPointer() {
+    document.removeEventListener('pointermove', movePointer);
+    document.removeEventListener('pointerup', stopPointer);
+    document.removeEventListener('pointercancel', stopPointer);
+
+    if (!dragged) {
+      document.dispatchEvent(new CustomEvent('b88:character-click'));
+    }
+  }
+
+  document.addEventListener('pointermove', movePointer);
+  document.addEventListener('pointerup', stopPointer);
+  document.addEventListener('pointercancel', stopPointer);
 });
