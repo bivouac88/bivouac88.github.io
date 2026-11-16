@@ -402,6 +402,7 @@
     ['etapes', 'Étapes'],
     ['journal', 'Journal de bord'],
     ['meteo-peche', 'Météo & pêche'],
+    ['poi', 'POI'],
   ].forEach(([value, text]) => {
     const opt = document.createElement('option');
     opt.value = value;
