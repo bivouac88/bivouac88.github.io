@@ -388,56 +388,10 @@
       line-height: 1.6;
     }
 
-    /* Aperçu des contenus */
-    .test-previews {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 18px;
-    }
-
-    .test-preview {
-      position: relative;
-      display: flex;
-      min-height: 190px;
-      padding: 24px;
-      flex-direction: column;
-      justify-content: flex-end;
-      overflow: hidden;
-      border: 1px solid var(--trait, #342a22);
-      border-radius: 4px;
-      background: linear-gradient(145deg, var(--carte-hover, #231d17), var(--fond, #12100e));
-    }
-
-    .test-preview::before {
-      position: absolute;
-      top: 18px;
-      right: 20px;
-      color: var(--accent, #e58e26);
-      font-family: var(--mono, monospace);
-      font-size: 10px;
-      letter-spacing: .12em;
-      content: attr(data-index);
-      opacity: .85;
-    }
-
-    .test-preview h3 {
-      margin: 0 0 8px;
-      color: var(--papier, #f2ebd9);
-      font-family: var(--serif, Georgia, serif);
-      font-size: 22px;
-    }
-
-    .test-preview p {
-      margin: 0;
-      color: var(--discret, #9c907b);
-      font-size: 13px;
-      line-height: 1.7;
-    }
-
+    /* Galerie photos (fond plus sombre que le bandeau au-dessus) */
     .test-photo-section {
-      padding: 75px 22px;
-      border-top: 1px solid var(--trait-subtil, #251e18);
-      background: var(--carte, #1b1612);
+      padding: 88px 22px;
+      background: var(--fond, #12100e);
       text-align: center;
     }
 
@@ -455,6 +409,32 @@
       color: var(--discret, #9c907b);
       font-size: 14px;
       line-height: 1.8;
+    }
+
+    /* Emplacement de la galerie : Coming soon */
+    .test-coming {
+      display: flex;
+      max-width: 760px;
+      min-height: 260px;
+      margin: 46px auto 0;
+      padding: 56px 24px;
+      align-items: center;
+      justify-content: center;
+      border: 2px dashed rgba(229, 142, 38, .45);
+      border-radius: 6px;
+      background: var(--carte, #1b1612);
+    }
+
+    .test-photo-section .test-coming-title {
+      max-width: none;
+      margin: 0;
+      color: var(--papier, #f2ebd9);
+      font-family: var(--serif, Georgia, serif);
+      font-size: clamp(36px, 6vw, 58px);
+      font-weight: 700;
+      font-style: italic;
+      letter-spacing: .03em;
+      line-height: 1.1;
     }
 
     .test-footer {
@@ -495,8 +475,7 @@
         padding: 65px 0;
       }
 
-      .test-cards,
-      .test-previews {
+      .test-cards {
         grid-template-columns: 1fr;
       }
 
@@ -512,6 +491,11 @@
 
       .test-photo-section {
         padding: 60px 22px;
+      }
+
+      .test-coming {
+        min-height: 200px;
+        padding: 40px 18px;
       }
     }
 
@@ -613,34 +597,9 @@ Un espace pour raconter l'aventure, suivre le parcours et partager ce qui se pas
             </p>
           </div>
           <aside class="test-story-note">
-            <p>Un voyage à vélo, sans scénario imposé. La route décide aussi</p>
+            <p>Un voyage à vélo, sans scénario imposé<br>
+              La route décide aussi</p>
           </aside>
-        </div>
-      </section>
-
-      <section class="test-content" aria-labelledby="test-explorer-title">
-        <div class="test-section-heading">
-          <p class="test-kicker">Explorer Bivouac88</p>
-          <h2 id="test-explorer-title">Un aperçu de ce que l'on pourra suivre</h2>
-          <p>
-            Le projet rassemble plusieurs façons de parcourir l'aventure,
-            de la vue d'ensemble aux détails pratiques du quotidien
-          </p>
-        </div>
-
-        <div class="test-previews">
-          <article class="test-preview" data-index="01">
-            <h3>Le parcours</h3>
-            <p>Visualiser la route et retrouver les grandes étapes du voyage</p>
-          </article>
-          <article class="test-preview" data-index="02">
-            <h3>Les découvertes</h3>
-            <p>Retrouver les lieux, les points d'intérêt et les haltes en chemin</p>
-          </article>
-          <article class="test-preview" data-index="03">
-            <h3>Le carnet de route</h3>
-            <p>Suivre les photos, les moments vécus et les anecdotes du voyage</p>
-          </article>
         </div>
       </section>
 
@@ -651,6 +610,9 @@ Un espace pour raconter l'aventure, suivre le parcours et partager ce qui se pas
           Paysages, bivouacs, rencontres, découvertes et imprévus :
           les images viendront compléter le carnet de route au fil de l'aventure
         </p>
+        <div class="test-coming">
+          <p class="test-coming-title">Coming soon</p>
+        </div>
       </section>
     </main>
 
