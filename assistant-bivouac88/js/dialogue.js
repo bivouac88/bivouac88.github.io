@@ -47,23 +47,38 @@ async function initDialogue(character) {
   dialogue.addEventListener("click", event => event.stopPropagation());
 
   // --- Suivi de la position du personnage ---
-  function updateDialoguePosition() {
-    if (typeof window.characterGetPosition === "function") {
-      const pos = window.characterGetPosition();
-      const bubbleWidth = dialogue.offsetWidth || 210;
-      const gap = 14;
+  
+function updateDialoguePosition() {
+  if (typeof window.characterGetPosition === "function") {
+    const pos = window.characterGetPosition();
 
-      let left = pos.x - bubbleWidth / 2;
-      const bottom = pos.y + pos.height + gap;
+    const margin = 10;
+    const gap = 14;
 
-      const margin = 10;
-      left = Math.max(margin, Math.min(left, window.innerWidth - bubbleWidth - margin));
+    // Largeur réelle du dialogue
+    const dialogueWidth =
+      dialogue.getBoundingClientRect().width ||
+      Math.min(210, window.innerWidth - margin * 2);
 
-      dialogue.style.left = `${left}px`;
-      dialogue.style.bottom = `${bottom}px`;
-    }
+    // Centrage horizontal au-dessus du personnage
+    let left = pos.x - dialogueWidth / 2;
 
-    requestAnimationFrame(updateDialoguePosition);
+    // Empêcher le dialogue de sortir de l'écran
+    left = Math.max(
+      margin,
+      Math.min(left, window.innerWidth - dialogueWidth - margin)
+    );
+
+    // Position verticale : juste au-dessus de la tête
+    const bottom = pos.y + pos.height + gap;
+
+    dialogue.style.left = `${left}px`;
+    dialogue.style.bottom = `${bottom}px`;
+  }
+
+  requestAnimationFrame(updateDialoguePosition);
+}
+
   }
   updateDialoguePosition();
 
