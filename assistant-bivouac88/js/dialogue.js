@@ -1,4 +1,3 @@
-
 import { loadKnowledge } from "./knowledge.js";
 import { createEngine } from "./engine.js";
 
@@ -50,6 +49,7 @@ async function initDialogue(character) {
 
   function showBubble(message) {
     text.textContent = message;
+    dialogue.classList.add("active");
     bubble.classList.add("visible");
   }
 
