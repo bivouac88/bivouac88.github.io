@@ -82,12 +82,24 @@
         border-radius: 5px;
         box-shadow: 0 0 25px rgba(229,142,38,.45) !important;
       }
-      .b88-tour-overlay {
-        position: fixed;
-        inset: 0;
-        z-index: 10000;
-        background: rgba(0,0,0,.78);
-      }
+.b88-tour-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(0,0,0,.78);
+  pointer-events: none;
+}
+
+.b88-tour-highlight {
+  position: relative !important;
+  z-index: 10002 !important;
+  outline: 3px solid #e58e26 !important;
+  outline-offset: 5px;
+  border-radius: 5px;
+  box-shadow:
+    0 0 0 9999px rgba(0,0,0,.78),
+    0 0 25px rgba(229,142,38,.45) !important;
+}
       .b88-tour-card {
         position: fixed;
         z-index: 10003;
