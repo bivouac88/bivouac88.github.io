@@ -77,6 +77,7 @@
 
   function doPlay(name) {
     currentAnim = name;
+    if (typeof updateAnimSelection === 'function') updateAnimSelection();
     if (typeof window.characterPlay === 'function') window.characterPlay(name);
   }
 
@@ -406,40 +407,90 @@
   // Section : animations (en premier, un seul onglet dépliable)
   // ---------------------------------------------------------------
 
-  const secAnim = makeSection('ANIMATIONS'); // makeSection('ANIMATIONS', true) pour l'ouvrir par défaut
+  const secAnim = makeSection('ANIMATIONS', true);
 
-  const grid = document.createElement('div');
-  Object.assign(grid.style, {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: '5px',
+  // Menu déroulant : une seule ligne visible (l'animation actuelle),
+  // un clic dessus déroule la liste, un clic sur un choix la joue et referme.
+  const animSelect = document.createElement('div');
+  animSelect.style.position = 'relative';
+
+  const animCurrent = makeButton('', {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    textAlign: 'left',
+    padding: '7px 8px',
   });
-  secAnim.content.appendChild(grid);
+  const animCurrentText = document.createElement('span');
+  Object.assign(animCurrentText.style, {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  });
+  const animCurrentArrow = document.createElement('span');
+  animCurrentArrow.textContent = '▾';
+  animCurrentArrow.style.flexShrink = '0';
+  animCurrent.append(animCurrentText, animCurrentArrow);
 
-  let activeBtn = null;
+  const animList = document.createElement('div');
+  Object.assign(animList.style, {
+    display: 'none',
+    maxHeight: '220px',
+    overflowY: 'auto',
+    marginTop: '3px',
+    background: '#2a2520',
+    border: '1px solid #38332b',
+    borderRadius: '4px',
+  });
+
+  animSelect.append(animCurrent, animList);
+  secAnim.content.appendChild(animSelect);
+
+  function setAnimListOpen(open) {
+    animList.style.display = open ? 'block' : 'none';
+    animCurrentArrow.textContent = open ? '▴' : '▾';
+  }
+
+  animCurrent.addEventListener('click', () => {
+    setAnimListOpen(animList.style.display === 'none');
+  });
+
+  // Met à jour la ligne visible et la mise en évidence dans la liste
+  function updateAnimSelection() {
+    animCurrentText.textContent = currentAnim.replace(/_/g, ' ');
+    [...animList.children].forEach((item) => {
+      Object.assign(item.style, item.dataset.name === currentAnim ? BTN_ON : { background: 'transparent', color: '#ccc' });
+    });
+  }
 
   function buildAnimationButtons() {
-    grid.replaceChildren();
-    activeBtn = null;
+    animList.replaceChildren();
     ANIMATIONS.forEach((name) => {
-      const btn = makeButton(name.replace(/_/g, ' '), {
-        width: 'auto',
-        padding: '5px 4px',
-        fontSize: '10px',
-        textAlign: 'left',
+      const item = document.createElement('div');
+      item.textContent = name.replace(/_/g, ' ');
+      item.title = name;
+      item.dataset.name = name;
+      Object.assign(item.style, {
+        padding: '5px 8px',
+        fontSize: '11px',
+        cursor: 'pointer',
+        whiteSpace: 'nowrap',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap',
       });
-      btn.title = name;
-      btn.addEventListener('click', () => {
+      item.addEventListener('mouseenter', () => {
+        if (item.dataset.name !== currentAnim) item.style.background = '#38332b';
+      });
+      item.addEventListener('mouseleave', () => {
+        if (item.dataset.name !== currentAnim) item.style.background = 'transparent';
+      });
+      item.addEventListener('click', () => {
         doPlay(name);
-        if (activeBtn) Object.assign(activeBtn.style, BTN_OFF);
-        Object.assign(btn.style, BTN_ON);
-        activeBtn = btn;
+        setAnimListOpen(false);
       });
-      grid.appendChild(btn);
+      animList.appendChild(item);
     });
+    updateAnimSelection();
   }
 
   buildAnimationButtons();
