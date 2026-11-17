@@ -144,8 +144,8 @@ if (/Instagram/.test(navigator.userAgent)) document.documentElement.classList.ad
     // ---- Menu commun ----
    if (!document.querySelector('.menu-site') && document.body.dataset.page !== 'test') {
    var PAGES = [
-        { id: 'index',     nom: 'Accueil',         url: 'index.html' },
-        { id: 'etapes',    nom: 'Étapes',          url: 'etapes.html' },
+      { id: 'resume',    nom: 'Résumé',          url: 'resume.html' },
+      { id: 'etapes',    nom: 'Étapes',          url: 'etapes.html' },
         { id: 'stats',     nom: 'Stats',           url: 'stats.html' },
         { id: 'journal',   nom: 'Journal de bord', url: 'journal.html' },
         { id: 'meteo',     nom: 'Météo & pêche',   url: 'peche/meteo.html' },
