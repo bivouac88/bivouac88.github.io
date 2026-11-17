@@ -14,36 +14,22 @@
 
   let ANIMATIONS = window.characterAnimations || [];
 
+  // Un seul écouteur : reconstruit la grille d'animations et le menu de marche
   document.addEventListener('b88:animations-ready', (e) => {
     ANIMATIONS = e.detail.animations;
-    grid.replaceChildren();
-    activeBtn = null;
-    ANIMATIONS.forEach((name) => {
-      const btn = makeButton(name.replace(/_/g, ' '), {
-        width: 'auto', padding: '5px 4px', fontSize: '10px',
-        textAlign: 'left', overflow: 'hidden',
-        textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-      });
-      btn.title = name;
-      btn.addEventListener('click', () => {
-        doPlay(name);
-        if (activeBtn) Object.assign(activeBtn.style, BTN_OFF);
-        Object.assign(btn.style, BTN_ON);
-        activeBtn = btn;
-      });
-      grid.appendChild(btn);
-    });
+    buildAnimationButtons();
+    refreshWalkAnimSelect();
   });
 
   const PAGES = [
-  ['test', 'Test'],
-  ['accueil', 'Accueil'],
-  ['stats', 'Stats'],
-  ['etapes', 'Étapes'],
-  ['journal', 'Journal de bord'],
-  ['meteo-peche', 'Météo & pêche'],
-  ['poi', 'POI'],
-];
+    ['test', 'Test'],
+    ['accueil', 'Accueil'],
+    ['stats', 'Stats'],
+    ['etapes', 'Étapes'],
+    ['journal', 'Journal de bord'],
+    ['meteo-peche', 'Météo & pêche'],
+    ['poi', 'POI'],
+  ];
 
   const DEVICES = [
     ['mobile', 'Mobile (< 768 px)'],
@@ -299,7 +285,7 @@
     marginBottom: '6px',
     cursor: 'pointer',
   });
-  header.innerHTML = `<strong style="color:#e58e26">🎮 Contrôleur</strong><span id="ctrl-toggle">▲</span>`;
+  header.innerHTML = `<strong style="color:#e58e26">🎮 Contrôleur</strong><span id="ctrl-toggle">▼</span>`;
   panel.appendChild(header);
 
   const body = document.createElement('div');
@@ -308,11 +294,12 @@
     maxHeight: 'calc(100vh - 150px)',
     overflowY: 'auto',
     paddingRight: '2px',
+    display: 'none', // replié au chargement
   });
   panel.appendChild(body);
 
   // Toggle collapse (clic simple sur le header)
-  let collapsed = false;
+  let collapsed = true;
   function toggleCollapsed() {
     collapsed = !collapsed;
     body.style.display = collapsed ? 'none' : 'block';
@@ -364,7 +351,7 @@
   });
 
   // ---------------------------------------------------------------
-  // Sections déroulantes (une seule ouverte à la fois)
+  // Sections déroulantes
   // ---------------------------------------------------------------
 
   function makeSection(title, openByDefault) {
@@ -405,8 +392,8 @@
     };
 
     head.addEventListener('click', () => {
-  section.isOpen() ? section.close() : section.open();
-});
+      section.isOpen() ? section.close() : section.open();
+    });
 
     wrap.append(head, content);
     body.appendChild(wrap);
@@ -416,43 +403,47 @@
   }
 
   // ---------------------------------------------------------------
-  // Section : animations
+  // Section : animations (en premier, un seul onglet dépliable)
   // ---------------------------------------------------------------
 
-const animLabel = makeLabel('ANIMATIONS', { color: '#e58e26', fontWeight: 'bold', marginBottom: '6px', fontSize: '11px' });
-body.appendChild(animLabel);
+  const secAnim = makeSection('ANIMATIONS'); // makeSection('ANIMATIONS', true) pour l'ouvrir par défaut
 
-const grid = document.createElement('div');
-Object.assign(grid.style, {
-  display: 'grid',
-  gridTemplateColumns: '1fr 1fr',
-  gap: '5px',
-  marginBottom: '10px',
-});
-
-let activeBtn = null;
-
-ANIMATIONS.forEach((name) => {
-  const btn = makeButton(name.replace(/_/g, ' '), {
-    width: 'auto',
-    padding: '5px 4px',
-    fontSize: '10px',
-    textAlign: 'left',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
+  const grid = document.createElement('div');
+  Object.assign(grid.style, {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: '5px',
   });
-  btn.title = name;
-  btn.addEventListener('click', () => {
-    doPlay(name);
-    if (activeBtn) Object.assign(activeBtn.style, BTN_OFF);
-    Object.assign(btn.style, BTN_ON);
-    activeBtn = btn;
-  });
-  grid.appendChild(btn);
-});
+  secAnim.content.appendChild(grid);
 
-body.appendChild(grid);
+  let activeBtn = null;
+
+  function buildAnimationButtons() {
+    grid.replaceChildren();
+    activeBtn = null;
+    ANIMATIONS.forEach((name) => {
+      const btn = makeButton(name.replace(/_/g, ' '), {
+        width: 'auto',
+        padding: '5px 4px',
+        fontSize: '10px',
+        textAlign: 'left',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+      });
+      btn.title = name;
+      btn.addEventListener('click', () => {
+        doPlay(name);
+        if (activeBtn) Object.assign(activeBtn.style, BTN_OFF);
+        Object.assign(btn.style, BTN_ON);
+        activeBtn = btn;
+      });
+      grid.appendChild(btn);
+    });
+  }
+
+  buildAnimationButtons();
+
   // ---------------------------------------------------------------
   // Éléments de la page : détection et sélecteurs CSS
   // ---------------------------------------------------------------
@@ -813,7 +804,7 @@ body.appendChild(grid);
   secScene.content.appendChild(makeLabel('Pages concernées', { marginBottom: '3px', fontSize: '10px' }));
   const pageChecks = {};
   PAGES.forEach(([value, text]) => {
-const { label, input } = makeCheck(text, value === 'test');
+    const { label, input } = makeCheck(text, value === 'test');
     pageChecks[value] = input;
     secScene.content.appendChild(label);
   });
@@ -1138,6 +1129,22 @@ const { label, input } = makeCheck(text, value === 'test');
   );
   const stepWalkAnimRow = makeRow('Animation de marche', stepWalkAnim);
   secSteps.content.appendChild(stepWalkAnimRow);
+
+  // Reconstruit le menu d'animation de marche (appelé quand les animations arrivent)
+  function refreshWalkAnimSelect() {
+    if (!ANIMATIONS.length) return;
+    const current = stepWalkAnim.value;
+    stepWalkAnim.replaceChildren();
+    ANIMATIONS.forEach((a) => {
+      const opt = document.createElement('option');
+      opt.value = a;
+      opt.textContent = a.replace(/_/g, ' ');
+      stepWalkAnim.appendChild(opt);
+    });
+    stepWalkAnim.value = ANIMATIONS.includes(current)
+      ? current
+      : (ANIMATIONS.includes('Running') ? 'Running' : ANIMATIONS[0]);
+  }
 
   const { label: autoFaceLabel, input: stepAutoFace } = makeCheck('Tourner dans le sens de la marche', true);
   secSteps.content.appendChild(autoFaceLabel);
@@ -1475,6 +1482,7 @@ const { label, input } = makeCheck(text, value === 'test');
   // Démarrage
   // ---------------------------------------------------------------
 
+  refreshWalkAnimSelect();
   loadPersistedScenes();
   renderSceneList();
   refreshPointsUI();
