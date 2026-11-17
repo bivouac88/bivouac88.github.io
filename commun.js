@@ -75,7 +75,7 @@ var LUNE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-wi
 var insta = /Instagram/.test(navigator.userAgent);
 var marque = el('div', insta ? 'marque marque--insta' : 'marque');
      var logo = el('a', 'logo');
-    logo.href = dossier + 'index.html';
+    logo.href = dossier + 'resume.html';
     logo.setAttribute('aria-label', 'Bivouac88 · accueil');
     var img = document.createElement('img');
     img.src = dossier + 'images/apple-touch-icon.png';
