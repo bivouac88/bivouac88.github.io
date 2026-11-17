@@ -10,7 +10,7 @@
 
   if (window.B88Tour) return;
 
-  var PAGE = location.pathname.split('/').pop();
+  var PAGE = location.pathname.split('/').pop() || 'index.html';
   var CLE = 'b88-visite-resume-v1';
   var PARAM_RELANCE = new URLSearchParams(location.search).get('visite');
 
@@ -115,6 +115,7 @@
         color: #eee;
         box-shadow: 0 10px 40px rgba(0,0,0,.5);
         font-family: Arial, Helvetica, sans-serif;
+        pointer-events: auto;
       }
       .b88-tour-top {
         display: flex;
@@ -182,6 +183,25 @@
       }
       .b88-tour-controls button:hover:not(:disabled) {
         filter: brightness(1.15);
+      }
+        .b88-tour-launch {
+        position: fixed;
+        left: 20px;
+        bottom: 20px;
+        z-index: 9999;
+        padding: 11px 16px;
+        border: 1px solid #e58e26;
+        border-radius: 8px;
+        background: #201d18;
+        color: #e58e26;
+        font-size: 13px;
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(0,0,0,.35);
+      }
+      .b88-tour-launch:hover {
+        background: #e58e26;
+        color: #12100e;
       }
       @media (max-width: 480px) {
         .b88-tour-card {
@@ -387,38 +407,27 @@
   }
 
   function initialiser() {
-    if (PAGE !== 'resume.html') return;
+    if (PAGE === 'index.html') return;
 
-    var dejaVu = false;
+    injecterStyle();
 
-    try {
-      dejaVu = localStorage.getItem(CLE) === '1';
-    } catch (e) {}
+    if (document.getElementById('b88-tour-launch')) return;
 
-    if (dejaVu && PARAM_RELANCE !== '1') return;
+    var bouton = document.createElement('button');
+    bouton.id = 'b88-tour-launch';
+    bouton.className = 'b88-tour-launch';
+    bouton.type = 'button';
+    bouton.textContent = '▶ Visite guidée';
 
-    // Attend que la page et ses données dynamiques soient présentes.
-    var essais = 0;
-
-    function verifier() {
-      if (PAGE !== 'resume.html') return;
-
-      var stats = document.querySelector('#s-etapes');
-      var donneesPretes = stats &&
-        stats.textContent.trim() !== '' &&
-        stats.textContent.trim() !== '–';
-
-      essais++;
-
-      if (donneesPretes || essais >= 40) {
+    bouton.addEventListener('click', function () {
+      if (PAGE === 'resume.html') {
         demarrer();
-        return;
+      } else {
+        alert('La visite guidée de cette page est en préparation.');
       }
+    });
 
-      attente = setTimeout(verifier, 500);
-    }
-
-    verifier();
+    document.body.appendChild(bouton);
   }
 
   window.B88Tour = {
