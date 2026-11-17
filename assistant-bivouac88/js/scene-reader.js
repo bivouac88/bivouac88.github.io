@@ -406,8 +406,7 @@
 
     _scenes.sort((a, b) => (b.priority || 0) - (a.priority || 0));
 
-    // Si l'avatar est déjà prêt, on attache les déclencheurs tout de suite.
-    // Sinon on attend l'événement b88:animations-ready.
+    // Attendre que l'avatar soit prêt avant d'attacher les déclencheurs.
     if (window.characterAnimations && window.characterAnimations.length) {
       _scenes.forEach(attachTrigger);
       console.info(`[scene-reader] ${_scenes.length} scène(s) chargée(s) pour "${page}" / "${device}".`);
@@ -417,13 +416,6 @@
         console.info(`[scene-reader] ${_scenes.length} scène(s) chargée(s) pour "${page}" / "${device}".`);
       }, { once: true });
     }
-  }
-    // Tri par priorité décroissante
-    _scenes.sort((a, b) => (b.priority || 0) - (a.priority || 0));
-
-    _scenes.forEach(attachTrigger);
-
-    console.info(`[scene-reader] ${_scenes.length} scène(s) chargée(s) pour "${page}" / "${device}".`);
   }
 
   // ---------------------------------------------------------------
