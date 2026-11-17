@@ -1,6 +1,7 @@
 
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/+esm';
 import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js/+esm';
+import { DRACOLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/DRACOLoader.js/+esm';
 
 const CONFIG = {
   modelUrl: new URL('../Assets/Nouvelle_IA.glb', import.meta.url).href,
@@ -111,7 +112,13 @@ function playAnimation(name) {
 
 // --- Chargement du modèle GLB ---
 
-new GLTFLoader().load(
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
+
+const loader = new GLTFLoader();
+loader.setDRACOLoader(dracoLoader);
+
+loader.load(
   CONFIG.modelUrl,
 
   (gltf) => {
