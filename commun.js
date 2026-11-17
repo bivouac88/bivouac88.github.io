@@ -212,33 +212,46 @@ if (/Instagram/.test(navigator.userAgent)) document.documentElement.classList.ad
     // Pied de page commun (ajouté seulement s'il n'y en a pas déjà un dans la page)
     if (!document.querySelector('.pied')) {
       var f = el('footer', 'pied');
-      var home = el('a', null, 'Bivouac88');
-      home.href = dossier + 'index.html';
-      var logo = document.createElement('img');
-      logo.src = dossier + 'images/lost-but-free.jpg';
-      logo.alt = 'Lost-but-Free';
-      logo.height = 20;
-      logo.loading = 'lazy';
-      logo.decoding = 'async';
-      logo.style.height = '20px';
-      logo.style.width = 'auto';
-      logo.style.verticalAlign = 'middle';
-      var don = el('a', null, 'Soutenir');
-      don.setAttribute('data-don', '');
-      lienDon(don);
-      f.appendChild(home);
-      f.appendChild(document.createTextNode(' · '));
-      f.appendChild(logo);
-      f.appendChild(document.createTextNode(' Lost but Free · '));
-      f.appendChild(don);
-      // Mention propre à une page : <main data-credit="Données : Open-Meteo · OpenStreetMap">
-      var credit = (document.querySelector('main') || document.body).getAttribute('data-credit');
-      if (credit) {
-        f.appendChild(document.createElement('br'));
-        f.appendChild(document.createTextNode(credit));
-      }
-      f.appendChild(document.createElement('br'));
-      f.appendChild(document.createTextNode('Made with ♥ by Tito'));
+      
+var home = el('a', null, 'Bivouac88');
+home.href = 'https://bivouac88.github.io/resume.html';
+
+var marque = el('a');
+marque.href = 'https://bivouac88.github.io/index.html';
+
+var logo = document.createElement('img');
+logo.src = dossier + 'images/lost-but-free.jpg';
+logo.alt = '';
+logo.height = 20;
+logo.loading = 'lazy';
+logo.decoding = 'async';
+logo.style.height = '20px';
+logo.style.width = 'auto';
+logo.style.verticalAlign = 'middle';
+
+marque.appendChild(logo);
+marque.appendChild(document.createTextNode(' Lost but Free'));
+
+var don = el('a', null, 'Soutenir');
+don.setAttribute('data-don', '');
+lienDon(don);
+
+f.appendChild(home);
+f.appendChild(document.createTextNode(' · '));
+f.appendChild(marque);
+f.appendChild(document.createTextNode(' · '));
+f.appendChild(don);
+
+// Mention propre à une page
+var credit = (document.querySelector('main') || document.body).getAttribute('data-credit');
+if (credit) {
+  f.appendChild(document.createElement('br'));
+  f.appendChild(document.createTextNode(credit));
+}
+
+f.appendChild(document.createElement('br'));
+f.appendChild(document.createTextNode('Made with ♥ by Tito'));
+
       (document.querySelector('main') || document.body).appendChild(f);
     }
   });
