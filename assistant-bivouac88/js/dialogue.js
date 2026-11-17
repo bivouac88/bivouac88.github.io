@@ -93,12 +93,16 @@ async function initDialogue(character) {
     bubble.classList.add("visible");
   }
 
-  function hideDialogue() {
-    opened = false;
-    dialogue.classList.remove("active");
-    bubble.classList.remove("visible");
-    choices.replaceChildren();
-  }
+function hideDialogue() {
+  opened = false;
+  dialogue.classList.remove("active");
+  bubble.classList.remove("visible");
+  choices.replaceChildren();
+
+  setTimeout(() => {
+    document.dispatchEvent(new CustomEvent("b88:dialogue-close"));
+  }, 0);
+}
 
   function openDialogue() {
     opened = true;
