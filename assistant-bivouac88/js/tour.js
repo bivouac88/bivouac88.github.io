@@ -279,7 +279,7 @@
     `;
 
     overlay.appendChild(carte);
-    document.body.appendChild(overlay);
+    document.querySelector('main').appendChild(overlay);
 
     carte.querySelector('.b88-tour-close')
       .addEventListener('click', function () {
