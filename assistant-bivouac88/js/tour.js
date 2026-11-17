@@ -238,10 +238,15 @@
 
     nettoyerCibles();
 
-    if (overlay) {
-      overlay.remove();
-      overlay = null;
-    }
+if (overlay) {
+  overlay.remove();
+  overlay = null;
+}
+
+if (carte) {
+  carte.remove();
+  carte = null;
+}
 
     if (memoriser) {
       try {
@@ -278,8 +283,9 @@
       </div>
     `;
 
-    overlay.appendChild(carte);
-    document.querySelector('main').appendChild(overlay);
+var main = document.querySelector('main');
+main.appendChild(overlay);
+main.appendChild(carte);
 
     carte.querySelector('.b88-tour-close')
       .addEventListener('click', function () {
