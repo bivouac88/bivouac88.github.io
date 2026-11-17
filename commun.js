@@ -78,7 +78,7 @@ var marque = el('div', insta ? 'marque marque--insta' : 'marque');
     logo.href = dossier + 'index.html';
     logo.setAttribute('aria-label', 'Bivouac88 · accueil');
     var img = document.createElement('img');
-    img.src = dossier + 'apple-touch-icon.png';
+    img.src = dossier + 'images/apple-touch-icon.png';
     img.alt = '';
     img.width = 90;
     img.height = 90;
@@ -142,8 +142,8 @@ if (/Instagram/.test(navigator.userAgent)) document.documentElement.classList.ad
     // ---- Liens de don ----    
      document.querySelectorAll('a[data-don]').forEach(lienDon);
     // ---- Menu commun ----
-    if (!document.querySelector('.menu-site')) {
-      var PAGES = [
+   if (!document.querySelector('.menu-site') && document.body.dataset.page !== 'test') {
+   var PAGES = [
         { id: 'index',     nom: 'Accueil',         url: 'index.html' },
         { id: 'etapes',    nom: 'Étapes',          url: 'etapes.html' },
         { id: 'stats',     nom: 'Stats',           url: 'stats.html' },
@@ -215,7 +215,7 @@ if (/Instagram/.test(navigator.userAgent)) document.documentElement.classList.ad
       var home = el('a', null, 'Bivouac88');
       home.href = dossier + 'index.html';
       var logo = document.createElement('img');
-      logo.src = dossier + 'lost-but-free.jpg';
+      logo.src = dossier + 'images/lost-but-free.jpg';
       logo.alt = 'Lost-but-Free';
       logo.height = 20;
       logo.loading = 'lazy';
