@@ -100,6 +100,9 @@
     0 0 0 9999px rgba(0,0,0,.78),
     0 0 25px rgba(229,142,38,.45) !important;
 }
+.menu-site.b88-tour-highlight {
+  box-shadow: 0 0 25px rgba(229,142,38,.45) !important;
+}
       .b88-tour-card {
         position: fixed;
         z-index: 10003;
