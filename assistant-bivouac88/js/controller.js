@@ -1,4 +1,6 @@
 // controller.js — panneau de contrôle (accès admin uniquement via ?edit=bivouac88admin)
+// Version 2 : sections déroulantes + scènes au format JSON v2
+// (points ancrés sur des éléments, déclencheurs, conditions, étapes riches).
 
 (function () {
   const params = new URLSearchParams(window.location.search);
@@ -6,22 +8,86 @@
     return; // Visiteur normal : pas de panneau, le script ne fait rien.
   }
 
-  const ANIMATIONS = [
-    'Angry', 'Blow_a_Kiss', 'Clapping', 'Classique_Pose',
-    'Cycle_Crunch', 'Fall_to_Roll', 'Fast_Run', 'Happy',
-    'Jump', 'Jump.001', 'Laying_Position', 'Pointe_Doigt_Gauche',
-    'Robot_Hip_Hop', 'Run_Lock_Back', 'Running', 'Sitting_Pose',
-    'Sleeping', 'Standing', 'Standing_Pied_Droit', 'Styling_Flip',
-    'Swimming', 'Wall_Crash'
+  // ---------------------------------------------------------------
+  // Données de référence
+  // ---------------------------------------------------------------
+
+  let ANIMATIONS = window.characterAnimations || [];
+
+  document.addEventListener('b88:animations-ready', (e) => {
+    ANIMATIONS = e.detail.animations;
+    grid.replaceChildren();
+    activeBtn = null;
+    ANIMATIONS.forEach((name) => {
+      const btn = makeButton(name.replace(/_/g, ' '), {
+        width: 'auto', padding: '5px 4px', fontSize: '10px',
+        textAlign: 'left', overflow: 'hidden',
+        textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+      });
+      btn.title = name;
+      btn.addEventListener('click', () => {
+        doPlay(name);
+        if (activeBtn) Object.assign(activeBtn.style, BTN_OFF);
+        Object.assign(btn.style, BTN_ON);
+        activeBtn = btn;
+      });
+      grid.appendChild(btn);
+    });
+  });
+
+  const PAGES = [
+  ['test', 'Test'],
+  ['accueil', 'Accueil'],
+  ['stats', 'Stats'],
+  ['etapes', 'Étapes'],
+  ['journal', 'Journal de bord'],
+  ['meteo-peche', 'Météo & pêche'],
+  ['poi', 'POI'],
+];
+
+  const DEVICES = [
+    ['mobile', 'Mobile (< 768 px)'],
+    ['tablet', 'Tablette (768 à 1023 px)'],
+    ['pc', 'PC (≥ 1024 px)'],
   ];
 
-  // --- État courant (utilisé pour sauvegarder les scènes) ---
+  const TRIGGERS = [
+    ['load', 'Au chargement de la page'],
+    ['enter', 'Un élément entre dans l\'écran'],
+    ['scroll', 'Scroll : % de la page'],
+    ['avatar-click', 'Clic sur l\'avatar'],
+    ['element-click', 'Clic sur un élément'],
+    ['hover', 'Survol d\'un élément'],
+    ['idle', 'Inactivité (secondes)'],
+    ['after-scene', 'Fin d\'une autre scène'],
+    ['event', 'Événement personnalisé'],
+  ];
+
+  const STORAGE_SCENES_KEY = 'b88-admin-scenes-v2';
+  const PANEL_POSITION_KEY = 'b88-admin-panel-position';
+  const PANEL_WIDTH = 270;
+
+  // ---------------------------------------------------------------
+  // Petits utilitaires
+  // ---------------------------------------------------------------
+
+  const r2 = (n) => Math.round(n * 100) / 100;
+  const num = (v) => {
+    const n = parseFloat(v);
+    return Number.isFinite(n) ? n : null;
+  };
+  const clone = (o) => JSON.parse(JSON.stringify(o));
+
+  // ---------------------------------------------------------------
+  // État courant de l'avatar (utilisé pour sauvegarder les scènes)
   // On appelle les fonctions du personnage au moment du clic : ça marche même
   // si character.js se charge après ce fichier.
+  // ---------------------------------------------------------------
+
   let currentAnim = 'Angry';
   let currentX = window.innerWidth - 120;
   let currentY = 6;
-  let currentRot = { x: 0, y: 0, z: 0 }
+  let currentRot = { x: 0, y: 0, z: 0 };
 
   function doPlay(name) {
     currentAnim = name;
@@ -34,16 +100,40 @@
     if (typeof window.characterMoveTo === 'function') window.characterMoveTo(x, y);
   }
 
-    function doRotate(axis, deg) {
+  function doRotate(axis, deg) {
     currentRot[axis] = deg;
     if (typeof window.characterRotate === 'function') {
       window.characterRotate(currentRot.x, currentRot.y, currentRot.z);
     }
   }
 
-  // --- Styles réutilisables ---
+  // Position réelle de l'avatar (fonctionne aussi s'il a été déplacé à la souris)
+  function getAvatarPos() {
+    if (typeof window.characterGetPosition === 'function') {
+      const p = window.characterGetPosition();
+      if (p && Number.isFinite(p.x) && Number.isFinite(p.y)) return { x: p.x, y: p.y };
+    }
+    return { x: currentX, y: currentY };
+  }
+
+  // ---------------------------------------------------------------
+  // Styles et fabriques d'éléments
+  // ---------------------------------------------------------------
+
   const BTN_OFF = { background: '#2a2520', color: '#ccc', borderColor: '#38332b' };
   const BTN_ON = { background: '#e58e26', color: '#12100e', borderColor: '#e58e26' };
+
+  const FIELD_STYLE = {
+    width: '100%',
+    background: '#2a2520',
+    border: '1px solid #38332b',
+    borderRadius: '4px',
+    color: '#ccc',
+    padding: '5px 6px',
+    fontSize: '11px',
+    boxSizing: 'border-box',
+    userSelect: 'text',
+  };
 
   function makeLabel(text, extra) {
     const el = document.createElement('div');
@@ -54,6 +144,7 @@
 
   function makeButton(text, extra) {
     const btn = document.createElement('button');
+    btn.type = 'button';
     btn.textContent = text;
     Object.assign(btn.style, {
       width: '100%',
@@ -68,11 +159,101 @@
     return btn;
   }
 
-  // --- Panneau ---
-  const PANEL_POSITION_KEY = 'b88-admin-panel-position';
+  function makeInput(type, placeholder, value) {
+    const input = document.createElement('input');
+    input.type = type;
+    if (placeholder) input.placeholder = placeholder;
+    if (value !== undefined) input.value = value;
+    Object.assign(input.style, FIELD_STYLE);
+    return input;
+  }
+
+  function makeSelect(options, value) {
+    const select = document.createElement('select');
+    Object.assign(select.style, FIELD_STYLE);
+    options.forEach(([val, text]) => {
+      const opt = document.createElement('option');
+      opt.value = val;
+      opt.textContent = text;
+      select.appendChild(opt);
+    });
+    if (value !== undefined) select.value = value;
+    return select;
+  }
+
+  // Ligne "étiquette + champ"
+  function makeRow(labelText, control) {
+    const row = document.createElement('div');
+    row.style.marginBottom = '7px';
+    row.appendChild(makeLabel(labelText, { marginBottom: '3px', fontSize: '10px' }));
+    row.appendChild(control);
+    return row;
+  }
+
+  // Case à cocher avec texte
+  function makeCheck(labelText, checked) {
+    const label = document.createElement('label');
+    Object.assign(label.style, {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '6px',
+      marginBottom: '4px',
+      fontSize: '11px',
+      color: '#ccc',
+      cursor: 'pointer',
+    });
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.checked = !!checked;
+    input.style.accentColor = '#e58e26';
+    const span = document.createElement('span');
+    span.textContent = labelText;
+    label.append(input, span);
+    return { label, input };
+  }
+
+  function makeListItem() {
+    const item = document.createElement('div');
+    Object.assign(item.style, {
+      padding: '4px 6px',
+      marginBottom: '3px',
+      background: '#2a2520',
+      borderRadius: '3px',
+      border: '1px solid #38332b',
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      gap: '6px',
+      fontSize: '10px',
+      color: '#aaa',
+    });
+    return item;
+  }
+
+  function makeMiniButton(text, bg, title) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = text;
+    if (title) btn.title = title;
+    Object.assign(btn.style, {
+      background: bg || '#e58e26',
+      border: 'none',
+      borderRadius: '3px',
+      color: '#12100e',
+      cursor: 'pointer',
+      padding: '2px 6px',
+      fontSize: '10px',
+      flexShrink: '0',
+    });
+    return btn;
+  }
+
+  // ---------------------------------------------------------------
+  // Panneau
+  // ---------------------------------------------------------------
 
   function getDefaultPanelPosition() {
-    return { x: window.innerWidth - 190 - 16, y: 80 };
+    return { x: window.innerWidth - PANEL_WIDTH - 16, y: 80 };
   }
 
   function loadPanelPosition() {
@@ -102,7 +283,7 @@
     border: '1px solid #e58e26',
     borderRadius: '8px',
     padding: '12px',
-    width: '190px',
+    width: PANEL_WIDTH + 'px',
     fontFamily: 'Arial, sans-serif',
     fontSize: '12px',
     color: '#eee',
@@ -115,7 +296,7 @@
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '10px',
+    marginBottom: '6px',
     cursor: 'pointer',
   });
   header.innerHTML = `<strong style="color:#e58e26">🎮 Contrôleur</strong><span id="ctrl-toggle">▲</span>`;
@@ -123,6 +304,11 @@
 
   const body = document.createElement('div');
   body.id = 'ctrl-body';
+  Object.assign(body.style, {
+    maxHeight: 'calc(100vh - 150px)',
+    overflowY: 'auto',
+    paddingRight: '2px',
+  });
   panel.appendChild(body);
 
   // Toggle collapse (clic simple sur le header)
@@ -176,45 +362,191 @@
     document.addEventListener('pointerup', stopDragging);
     document.addEventListener('pointercancel', stopDragging);
   });
-  
-  // --- Section animations ---
-  body.appendChild(makeLabel('ANIMATIONS'));
 
-  const grid = document.createElement('div');
-  Object.assign(grid.style, {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: '5px',
-    marginBottom: '14px',
-  });
+  // ---------------------------------------------------------------
+  // Sections déroulantes (une seule ouverte à la fois)
+  // ---------------------------------------------------------------
 
-  let activeBtn = null;
+  function makeSection(title, openByDefault) {
+    const wrap = document.createElement('div');
+    wrap.style.borderTop = '1px solid #38332b';
 
-  ANIMATIONS.forEach((name) => {
-    const btn = makeButton(name.replace(/_/g, ' '), {
-      width: 'auto',
-      padding: '5px 4px',
-      fontSize: '10px',
+    const head = document.createElement('button');
+    head.type = 'button';
+    Object.assign(head.style, {
+      width: '100%',
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      background: 'none',
+      border: 'none',
+      color: '#e58e26',
+      padding: '8px 2px',
+      fontSize: '11px',
+      fontWeight: 'bold',
+      cursor: 'pointer',
       textAlign: 'left',
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      whiteSpace: 'nowrap',
-    });
-    btn.title = name;
-
-    btn.addEventListener('click', () => {
-      doPlay(name);
-      if (activeBtn) Object.assign(activeBtn.style, BTN_OFF);
-      Object.assign(btn.style, BTN_ON);
-      activeBtn = btn;
     });
 
-    grid.appendChild(btn);
+    const label = document.createElement('span');
+    label.textContent = title;
+    const arrow = document.createElement('span');
+    arrow.textContent = '▸';
+    head.append(label, arrow);
+
+    const content = document.createElement('div');
+    Object.assign(content.style, { display: 'none', padding: '2px 0 10px' });
+
+    const section = {
+      content,
+      open() { content.style.display = 'block'; arrow.textContent = '▾'; },
+      close() { content.style.display = 'none'; arrow.textContent = '▸'; },
+      isOpen() { return content.style.display !== 'none'; },
+    };
+
+    head.addEventListener('click', () => {
+  section.isOpen() ? section.close() : section.open();
+});
+
+    wrap.append(head, content);
+    body.appendChild(wrap);
+
+    if (openByDefault) section.open();
+    return section;
+  }
+
+  // ---------------------------------------------------------------
+  // Section : animations
+  // ---------------------------------------------------------------
+
+const animLabel = makeLabel('ANIMATIONS', { color: '#e58e26', fontWeight: 'bold', marginBottom: '6px', fontSize: '11px' });
+body.appendChild(animLabel);
+
+const grid = document.createElement('div');
+Object.assign(grid.style, {
+  display: 'grid',
+  gridTemplateColumns: '1fr 1fr',
+  gap: '5px',
+  marginBottom: '10px',
+});
+
+let activeBtn = null;
+
+ANIMATIONS.forEach((name) => {
+  const btn = makeButton(name.replace(/_/g, ' '), {
+    width: 'auto',
+    padding: '5px 4px',
+    fontSize: '10px',
+    textAlign: 'left',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
   });
-  body.appendChild(grid);
+  btn.title = name;
+  btn.addEventListener('click', () => {
+    doPlay(name);
+    if (activeBtn) Object.assign(activeBtn.style, BTN_OFF);
+    Object.assign(btn.style, BTN_ON);
+    activeBtn = btn;
+  });
+  grid.appendChild(btn);
+});
 
-  // --- Section position ---
-  body.appendChild(makeLabel('POSITION (clic sur la page)'));
+body.appendChild(grid);
+  // ---------------------------------------------------------------
+  // Éléments de la page : détection et sélecteurs CSS
+  // ---------------------------------------------------------------
+
+  function isIgnored(el) {
+    return !!el.closest('#ctrl-panel, #b88-character, .b88-dialogue');
+  }
+
+  // Élément de la page situé sous un point écran (hors avatar, bulles et panneau)
+  function elementAt(x, y) {
+    return document.elementsFromPoint(x, y).find((el) =>
+      !isIgnored(el) && el !== document.documentElement
+    ) || null;
+  }
+
+  // Sélecteur CSS stable pour retrouver un élément
+  function cssPath(el) {
+    if (!el || el === document.body) return null;
+
+    const parts = [];
+    let node = el;
+
+    while (node && node.nodeType === 1 && node !== document.body) {
+      if (node.id) {
+        parts.unshift('#' + CSS.escape(node.id));
+        break;
+      }
+
+      let part = node.tagName.toLowerCase();
+      const classes = [...node.classList].filter((c) => !c.startsWith('b88-')).slice(0, 2);
+      if (classes.length) part += '.' + classes.map((c) => CSS.escape(c)).join('.');
+
+      const parent = node.parentElement;
+      if (parent) {
+        const sameTag = [...parent.children].filter((s) => s.tagName === node.tagName);
+        if (sameTag.length > 1) part += `:nth-of-type(${sameTag.indexOf(node) + 1})`;
+      }
+
+      parts.unshift(part);
+      node = node.parentElement;
+    }
+
+    return parts.join(' > ');
+  }
+
+  // Position réelle d'un point (même formule que le lecteur de scènes)
+  // Retourne des coordonnées avatar : x depuis la gauche, y depuis le bas.
+  function resolvePoint(p) {
+    const el = p.selector ? document.querySelector(p.selector) : null;
+
+    if (el) {
+      const rect = el.getBoundingClientRect();
+      const x = rect.left + (p.ax / 100) * rect.width + (p.offsetX || 0);
+      const yTop = rect.top + (p.ay / 100) * rect.height + (p.offsetY || 0);
+      return { x, y: window.innerHeight - yTop };
+    }
+
+    return {
+      x: (p.fallback.xPct / 100) * window.innerWidth,
+      y: (p.fallback.yPct / 100) * window.innerHeight,
+    };
+  }
+
+  // Mode "choisir un élément" : le prochain clic sur la page désigne un élément
+  let pickCallback = null;
+
+  function pickElement(callback) {
+    setPlacementMode(false);
+    pickCallback = callback;
+    document.body.style.cursor = 'crosshair';
+  }
+
+  document.addEventListener('click', (e) => {
+    if (!pickCallback) return;
+    if (panel.contains(e.target)) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const el = elementAt(e.clientX, e.clientY);
+    const cb = pickCallback;
+    pickCallback = null;
+    document.body.style.cursor = '';
+
+    if (el) cb(el);
+  }, true);
+
+  // ---------------------------------------------------------------
+  // Section : position
+  // ---------------------------------------------------------------
+
+  const secPos = makeSection('POSITION');
+
+  secPos.content.appendChild(makeLabel('Clic sur la page pour placer l\'avatar'));
 
   const coords = document.createElement('div');
   coords.id = 'ctrl-coords';
@@ -228,10 +560,10 @@
     fontSize: '11px',
     color: '#aaa',
   });
-  body.appendChild(coords);
+  secPos.content.appendChild(coords);
 
   const modeBtn = makeButton('📍 Activer placement');
-  body.appendChild(modeBtn);
+  secPos.content.appendChild(modeBtn);
 
   // Mode placement : clic sur la page pour déplacer le perso
   let placementMode = false;
@@ -245,7 +577,7 @@
     } else {
       Object.assign(modeBtn.style, BTN_OFF);
       modeBtn.textContent = '📍 Activer placement';
-      document.body.style.cursor = '';
+      if (!pickCallback) document.body.style.cursor = '';
     }
   }
 
@@ -259,22 +591,78 @@
     const y = window.innerHeight - e.clientY; // coordonnées Three.js (Y inversé)
 
     doMove(x, y);
-    coords.textContent = `x: ${x}  y: ${y}`;
 
     // Désactive le mode après placement
     setPlacementMode(false);
   });
 
-  // --- Déplacement des champs de dialogue (ADMIN UNIQUEMENT) ---
-  body.appendChild(makeLabel('POSITION DES CHAMPS', { marginTop: '14px' }));
+  // Affichage de la position réelle (suit aussi le déplacement à la souris)
+  setInterval(() => {
+    if (!secPos.isOpen()) return;
+    const p = getAvatarPos();
+    coords.textContent = `x: ${Math.round(p.x)}  y: ${Math.round(p.y)}`;
+  }, 250);
+
+  // ---------------------------------------------------------------
+  // Section : orientation (3 axes)
+  // ---------------------------------------------------------------
+
+  const secRot = makeSection('ORIENTATION');
+  const rotSliders = {};
+
+  ['x', 'y', 'z'].forEach((axis) => {
+    const row = document.createElement('div');
+    Object.assign(row.style, { display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' });
+
+    const axisLabel = document.createElement('span');
+    axisLabel.textContent = axis.toUpperCase();
+    Object.assign(axisLabel.style, { color: '#aaa', fontSize: '11px', width: '12px' });
+
+    const slider = document.createElement('input');
+    slider.type = 'range';
+    slider.min = '0';
+    slider.max = '360';
+    slider.value = '0';
+    Object.assign(slider.style, { flex: '1', accentColor: '#e58e26', cursor: 'pointer' });
+
+    const value = document.createElement('span');
+    value.textContent = '0°';
+    Object.assign(value.style, { color: '#aaa', fontSize: '11px', minWidth: '30px' });
+
+    slider.addEventListener('input', () => {
+      const deg = parseInt(slider.value, 10);
+      value.textContent = deg + '°';
+      doRotate(axis, deg);
+    });
+
+    rotSliders[axis] = { slider, value };
+
+    row.appendChild(axisLabel);
+    row.appendChild(slider);
+    row.appendChild(value);
+    secRot.content.appendChild(row);
+  });
+
+  function setSliders(rot) {
+    ['x', 'y', 'z'].forEach((axis) => {
+      rotSliders[axis].slider.value = rot[axis];
+      rotSliders[axis].value.textContent = rot[axis] + '°';
+    });
+  }
+
+  // ---------------------------------------------------------------
+  // Section : champs de dialogue (bulle et champ de saisie)
+  // ---------------------------------------------------------------
+
+  const secFields = makeSection('CHAMPS DE DIALOGUE');
 
   let fieldsMoveMode = false;
 
   const fieldsMoveBtn = makeButton('↔ Déplacer les champs', { marginBottom: '6px' });
-  body.appendChild(fieldsMoveBtn);
+  secFields.content.appendChild(fieldsMoveBtn);
 
   const fieldsResetBtn = makeButton('↺ Réinitialiser les champs');
-  body.appendChild(fieldsResetBtn);
+  secFields.content.appendChild(fieldsResetBtn);
 
   const dialogueFields = [
     '.b88-dialogue-bubble',
@@ -410,174 +798,621 @@
 
   scanDialogueFields();
 
-    // --- Section orientation (3 axes) ---
-  body.appendChild(makeLabel('ORIENTATION', { marginTop: '14px' }));
+  // ---------------------------------------------------------------
+  // Section : scène (identité, pages, appareils)
+  // ---------------------------------------------------------------
 
-  const rotSliders = {};
+  const secScene = makeSection('SCÈNE : OÙ ET POUR QUI');
 
-  ['x', 'y', 'z'].forEach((axis) => {
-    const row = document.createElement('div');
-    Object.assign(row.style, { display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' });
+  const nameInput = makeInput('text', 'Nom (optionnel)');
+  secScene.content.appendChild(makeRow('Nom de la scène', nameInput));
 
-    const axisLabel = document.createElement('span');
-    axisLabel.textContent = axis.toUpperCase();
-    Object.assign(axisLabel.style, { color: '#aaa', fontSize: '11px', width: '12px' });
+  const priorityInput = makeInput('number', '0', '0');
+  secScene.content.appendChild(makeRow('Priorité (la plus haute gagne en cas de conflit)', priorityInput));
 
-    const slider = document.createElement('input');
-    slider.type = 'range';
-    slider.min = '0';
-    slider.max = '360';
-    slider.value = '0';
-    Object.assign(slider.style, { flex: '1', accentColor: '#e58e26', cursor: 'pointer' });
+  secScene.content.appendChild(makeLabel('Pages concernées', { marginBottom: '3px', fontSize: '10px' }));
+  const pageChecks = {};
+  PAGES.forEach(([value, text]) => {
+const { label, input } = makeCheck(text, value === 'test');
+    pageChecks[value] = input;
+    secScene.content.appendChild(label);
+  });
 
-    const value = document.createElement('span');
-    value.textContent = '0°';
-    Object.assign(value.style, { color: '#aaa', fontSize: '11px', minWidth: '30px' });
+  secScene.content.appendChild(makeLabel('Appareils', { marginBottom: '3px', marginTop: '8px', fontSize: '10px' }));
+  const deviceChecks = {};
+  DEVICES.forEach(([value, text]) => {
+    const { label, input } = makeCheck(text, value === 'pc');
+    deviceChecks[value] = input;
+    secScene.content.appendChild(label);
+  });
 
-    slider.addEventListener('input', () => {
-      const deg = parseInt(slider.value, 10);
-      value.textContent = deg + '°';
-      doRotate(axis, deg);
+  // ---------------------------------------------------------------
+  // Section : déclencheur
+  // ---------------------------------------------------------------
+
+  const secTrigger = makeSection('DÉCLENCHEUR');
+
+  const trigType = makeSelect(TRIGGERS, 'load');
+  secTrigger.content.appendChild(makeRow('Quand la scène démarre', trigType));
+
+  const trigSelector = makeInput('text', 'ex : #photos');
+  const trigPickBtn = makeButton('🎯 Choisir l\'élément (clic)', { marginTop: '4px' });
+  const trigSelectorRow = makeRow('Élément concerné', trigSelector);
+  trigSelectorRow.appendChild(trigPickBtn);
+  secTrigger.content.appendChild(trigSelectorRow);
+
+  trigPickBtn.addEventListener('click', () => {
+    pickElement((el) => {
+      trigSelector.value = cssPath(el) || 'body';
+    });
+  });
+
+  const trigValue = makeInput('text', '');
+  const trigValueLabel = makeLabel('', { marginBottom: '3px', fontSize: '10px' });
+  const trigValueRow = document.createElement('div');
+  trigValueRow.style.marginBottom = '7px';
+  trigValueRow.append(trigValueLabel, trigValue);
+  secTrigger.content.appendChild(trigValueRow);
+
+  const trigDelay = makeInput('number', '0', '0');
+  secTrigger.content.appendChild(makeRow('Délai avant de démarrer (secondes)', trigDelay));
+
+  const trigLeave = makeSelect([
+    ['hold', 'Rester en place'],
+    ['stop', 'S\'arrêter'],
+    ['revert', 'Revenir à l\'état d\'avant'],
+  ], 'hold');
+  const trigLeaveRow = makeRow('Quand le déclencheur disparaît (sortie d\'écran, fin de survol)', trigLeave);
+  secTrigger.content.appendChild(trigLeaveRow);
+
+  const TRIGGER_VALUE_INFO = {
+    enter: ['Seuil de visibilité (0 à 1)', '0.5'],
+    scroll: ['Position dans la page (0 à 100 %)', '50'],
+    idle: ['Secondes sans bouger', '10'],
+    'after-scene': ['ID de la scène précédente', ''],
+    event: ['Nom de l\'événement', 'b88:'],
+  };
+
+  function refreshTriggerUI(resetValue) {
+    const type = trigType.value;
+    const info = TRIGGER_VALUE_INFO[type];
+
+    trigSelectorRow.style.display = ['enter', 'element-click', 'hover'].includes(type) ? 'block' : 'none';
+    trigValueRow.style.display = info ? 'block' : 'none';
+    trigLeaveRow.style.display = ['enter', 'scroll', 'hover'].includes(type) ? 'block' : 'none';
+
+    if (info) {
+      trigValueLabel.textContent = info[0];
+      if (resetValue) trigValue.value = info[1];
+    }
+  }
+
+  trigType.addEventListener('change', () => refreshTriggerUI(true));
+  refreshTriggerUI(true);
+
+  function buildTrigger() {
+    const type = trigType.value;
+    const trigger = { type, delay: num(trigDelay.value) || 0 };
+
+    if (['enter', 'element-click', 'hover'].includes(type)) {
+      const selector = trigSelector.value.trim();
+      if (!selector) {
+        alert('Ce déclencheur demande un élément : choisis-le ou saisis un sélecteur.');
+        return null;
+      }
+      trigger.selector = selector;
+    }
+
+    if (type === 'enter') trigger.threshold = num(trigValue.value) ?? 0.5;
+    if (type === 'scroll') trigger.scrollPct = num(trigValue.value) ?? 50;
+    if (type === 'idle') trigger.idleSeconds = num(trigValue.value) ?? 10;
+
+    if (type === 'after-scene') {
+      const id = num(trigValue.value);
+      if (id === null) {
+        alert('Indique l\'ID de la scène qui doit se terminer avant celle-ci.');
+        return null;
+      }
+      trigger.afterScene = id;
+    }
+
+    if (type === 'event') {
+      const eventName = trigValue.value.trim();
+      if (!eventName) {
+        alert('Indique le nom de l\'événement.');
+        return null;
+      }
+      trigger.eventName = eventName;
+    }
+
+    if (['enter', 'scroll', 'hover'].includes(type)) trigger.leave = trigLeave.value;
+
+    return trigger;
+  }
+
+  function applyTriggerToUI(trigger) {
+    trigType.value = trigger.type;
+    refreshTriggerUI(false);
+    trigDelay.value = trigger.delay ?? 0;
+    trigSelector.value = trigger.selector || '';
+    trigLeave.value = trigger.leave || 'hold';
+
+    const valueByType = {
+      enter: trigger.threshold,
+      scroll: trigger.scrollPct,
+      idle: trigger.idleSeconds,
+      'after-scene': trigger.afterScene,
+      event: trigger.eventName,
+    };
+    trigValue.value = valueByType[trigger.type] ?? '';
+  }
+
+  // ---------------------------------------------------------------
+  // Section : conditions et fin de scène
+  // ---------------------------------------------------------------
+
+  const secEnd = makeSection('CONDITIONS ET FIN');
+
+  const condFrequency = makeSelect([
+    ['always', 'À chaque déclenchement'],
+    ['load', 'Une fois par chargement de page'],
+    ['session', 'Une fois par session'],
+    ['visitor', 'Une fois par visiteur'],
+  ], 'always');
+  secEnd.content.appendChild(makeRow('Fréquence', condFrequency));
+
+  const condCooldown = makeInput('number', '0', '0');
+  secEnd.content.appendChild(makeRow('Délai minimum entre deux lancements (secondes)', condCooldown));
+
+  const { label: interruptibleLabel, input: condInterruptible } = makeCheck('Peut être interrompue par une autre scène', true);
+  secEnd.content.appendChild(interruptibleLabel);
+
+  const endAction = makeSelect([
+    ['hold', 'Rester en place à la fin'],
+    ['revert', 'Revenir à l\'état d\'avant'],
+    ['chain', 'Enchaîner sur une autre scène'],
+  ], 'hold');
+  secEnd.content.appendChild(makeRow('Fin de scène', endAction));
+
+  const endNext = makeInput('number', 'ID de la scène suivante');
+  const endNextRow = makeRow('Scène à enchaîner (ID)', endNext);
+  secEnd.content.appendChild(endNextRow);
+
+  const endRepeat = makeInput('number', '1', '1');
+  secEnd.content.appendChild(makeRow('Répétitions (0 = en boucle)', endRepeat));
+
+  function refreshEndUI() {
+    endNextRow.style.display = endAction.value === 'chain' ? 'block' : 'none';
+  }
+  endAction.addEventListener('change', refreshEndUI);
+  refreshEndUI();
+
+  // ---------------------------------------------------------------
+  // Section : points (ancrés sur un élément de la page)
+  // ---------------------------------------------------------------
+
+  const secPoints = makeSection('POINTS');
+
+  let draftPoints = {};
+  let draftSteps = [];
+
+  const pointMode = makeSelect([
+    ['screen', 'Collé à l\'écran (calculé au départ)'],
+    ['follow', 'Suit l\'élément pendant le scroll'],
+  ], 'screen');
+  secPoints.content.appendChild(makeRow('Mode du prochain point', pointMode));
+
+  const addPointBtn = makeButton('📌 Créer un point ici', { marginBottom: '6px' });
+  secPoints.content.appendChild(addPointBtn);
+
+  const addPointOnBtn = makeButton('🎯 Créer un point sur un autre élément', { marginBottom: '8px' });
+  secPoints.content.appendChild(addPointOnBtn);
+
+  const pointsList = document.createElement('div');
+  secPoints.content.appendChild(pointsList);
+
+  function nextPointLetter() {
+    for (let i = 0; i < 26; i++) {
+      const letter = String.fromCharCode(65 + i);
+      if (!draftPoints[letter]) return letter;
+    }
+    return null;
+  }
+
+  // Crée un point à l'endroit où se trouve l'avatar, ancré sur l'élément en dessous
+  function createPoint(forcedElement) {
+    const letter = nextPointLetter();
+    if (!letter) {
+      alert('Maximum 26 points par scène.');
+      return;
+    }
+
+    const pos = getAvatarPos();
+    const clientX = pos.x;
+    const clientY = window.innerHeight - pos.y;
+
+    let el = forcedElement || elementAt(clientX, clientY);
+    if (el === document.body || el === document.documentElement) el = null;
+
+    const point = {
+      selector: null,
+      ax: null,
+      ay: null,
+      offsetX: 0,
+      offsetY: 0,
+      mode: pointMode.value,
+      fallback: {
+        xPct: r2((pos.x / window.innerWidth) * 100),
+        yPct: r2((pos.y / window.innerHeight) * 100),
+      },
+    };
+
+    if (el) {
+      const rect = el.getBoundingClientRect();
+      if (rect.width > 0 && rect.height > 0) {
+        point.selector = cssPath(el);
+        point.ax = r2(((clientX - rect.left) / rect.width) * 100);
+        point.ay = r2(((clientY - rect.top) / rect.height) * 100);
+      }
+    }
+
+    draftPoints[letter] = point;
+    refreshPointsUI();
+    stepPoint.value = letter;
+  }
+
+  addPointBtn.addEventListener('click', () => createPoint(null));
+  addPointOnBtn.addEventListener('click', () => pickElement((el) => createPoint(el)));
+
+  function refreshPointsUI() {
+    pointsList.replaceChildren();
+
+    Object.entries(draftPoints).forEach(([letter, p]) => {
+      const item = makeListItem();
+      const label = document.createElement('span');
+      label.style.overflow = 'hidden';
+      label.style.textOverflow = 'ellipsis';
+      label.style.whiteSpace = 'nowrap';
+      label.textContent = `${letter} — ${p.selector || 'écran'} (${p.mode === 'follow' ? 'suit' : 'écran'})`;
+      label.title = p.selector || 'position écran uniquement';
+
+      const del = makeMiniButton('✕', '#8a3b2e', 'Supprimer ce point');
+      del.addEventListener('click', () => {
+        if (draftSteps.some((s) => s.at === letter)) {
+          alert(`Le point ${letter} est utilisé par une étape : supprime d'abord cette étape.`);
+          return;
+        }
+        delete draftPoints[letter];
+        refreshPointsUI();
+      });
+
+      item.append(label, del);
+      pointsList.appendChild(item);
     });
 
-    rotSliders[axis] = slider;
+    // Met à jour la liste de choix des étapes
+    const previous = stepPoint.value;
+    stepPoint.replaceChildren();
+    Object.keys(draftPoints).forEach((letter) => {
+      const opt = document.createElement('option');
+      opt.value = letter;
+      opt.textContent = `Point ${letter}`;
+      stepPoint.appendChild(opt);
+    });
+    if (draftPoints[previous]) stepPoint.value = previous;
+  }
 
-    row.appendChild(axisLabel);
-    row.appendChild(slider);
-    row.appendChild(value);
-    body.appendChild(row);
+  // ---------------------------------------------------------------
+  // Section : étapes
+  // ---------------------------------------------------------------
+
+  const secSteps = makeSection('ÉTAPES');
+
+  secSteps.content.appendChild(makeLabel(
+    'Réglage de l\'étape = animation, orientation et champs actuels',
+    { fontSize: '10px' }
+  ));
+
+  const stepPoint = makeSelect([]);
+  secSteps.content.appendChild(makeRow('Point où se joue l\'étape', stepPoint));
+
+  const stepDuration = makeInput('number', 'vide = jusqu\'à la suite');
+  secSteps.content.appendChild(makeRow('Durée (secondes)', stepDuration));
+
+  const stepPause = makeInput('number', '0', '0');
+  secSteps.content.appendChild(makeRow('Pause avant l\'étape (secondes)', stepPause));
+
+  const stepMove = makeSelect([
+    ['instant', 'Instantané'],
+    ['walk', 'À pied'],
+  ], 'instant');
+  secSteps.content.appendChild(makeRow('Déplacement vers le point', stepMove));
+
+  const stepSpeed = makeInput('number', '200', '200');
+  const stepSpeedRow = makeRow('Vitesse (pixels par seconde)', stepSpeed);
+  secSteps.content.appendChild(stepSpeedRow);
+
+  const stepWalkAnim = makeSelect(
+    ANIMATIONS.map((a) => [a, a.replace(/_/g, ' ')]),
+    'Running'
+  );
+  const stepWalkAnimRow = makeRow('Animation de marche', stepWalkAnim);
+  secSteps.content.appendChild(stepWalkAnimRow);
+
+  const { label: autoFaceLabel, input: stepAutoFace } = makeCheck('Tourner dans le sens de la marche', true);
+  secSteps.content.appendChild(autoFaceLabel);
+
+  function refreshStepUI() {
+    const walk = stepMove.value === 'walk';
+    stepSpeedRow.style.display = walk ? 'block' : 'none';
+    stepWalkAnimRow.style.display = walk ? 'block' : 'none';
+    autoFaceLabel.style.display = walk ? 'flex' : 'none';
+  }
+  stepMove.addEventListener('change', refreshStepUI);
+  refreshStepUI();
+
+  const addStepBtn = makeButton('➕ Ajouter cette étape', { marginBottom: '8px', marginTop: '4px' });
+  secSteps.content.appendChild(addStepBtn);
+
+  const stepsList = document.createElement('div');
+  secSteps.content.appendChild(stepsList);
+
+  addStepBtn.addEventListener('click', () => {
+    const at = stepPoint.value;
+    if (!at || !draftPoints[at]) {
+      alert('Crée d\'abord un point (section POINTS).');
+      return;
+    }
+
+    const offsets = getFieldOffsets();
+    const step = {
+      animation: currentAnim,
+      at,
+      duration: num(stepDuration.value),
+      pause: num(stepPause.value) || 0,
+      move: { type: stepMove.value },
+      rotation: { ...currentRot },
+      autoFace: false,
+      bubble: { x: offsets.bubble.x, y: offsets.bubble.y },
+      form: { x: offsets.form.x, y: offsets.form.y },
+    };
+
+    if (stepMove.value === 'walk') {
+      step.move.speed = num(stepSpeed.value) || 200;
+      step.move.walkAnimation = stepWalkAnim.value;
+      step.autoFace = stepAutoFace.checked;
+    }
+
+    draftSteps.push(step);
+    refreshStepsUI();
   });
-  // --- Section scènes ---
-  body.appendChild(makeLabel('SCÈNES', { marginTop: '14px' }));
 
-  body.appendChild(makeLabel('Page concernée'));
-  const pageSelect = document.createElement('select');
-  Object.assign(pageSelect.style, {
-    width: '100%',
-    background: '#2a2520',
-    border: '1px solid #38332b',
-    borderRadius: '4px',
-    color: '#ccc',
-    padding: '6px',
-    fontSize: '11px',
-    marginBottom: '8px',
-  });
-  [
-    ['accueil', 'Accueil'],
-    ['stats', 'Stats'],
-    ['etapes', 'Étapes'],
-    ['journal', 'Journal de bord'],
-    ['meteo-peche', 'Météo & pêche'],
-    ['poi', 'POI'],
-  ].forEach(([value, text]) => {
-    const opt = document.createElement('option');
-    opt.value = value;
-    opt.textContent = text;
-    pageSelect.appendChild(opt);
-  });
-  body.appendChild(pageSelect);
+  function refreshStepsUI() {
+    stepsList.replaceChildren();
 
-  const scenes = [];
+    draftSteps.forEach((step, index) => {
+      const item = makeListItem();
+      const label = document.createElement('span');
+      label.style.overflow = 'hidden';
+      label.style.textOverflow = 'ellipsis';
+      label.style.whiteSpace = 'nowrap';
+      label.textContent = `${index + 1}. ${step.animation.replace(/_/g, ' ')} @${step.at}${step.move.type === 'walk' ? ' (marche)' : ''}`;
 
-  const saveBtn = makeButton('💾 Sauvegarder cette scène', { marginBottom: '8px' });
+      const del = makeMiniButton('✕', '#8a3b2e', 'Supprimer cette étape');
+      del.addEventListener('click', () => {
+        draftSteps.splice(index, 1);
+        refreshStepsUI();
+      });
+
+      item.append(label, del);
+      stepsList.appendChild(item);
+    });
+  }
+
+  // ---------------------------------------------------------------
+  // Section : scènes enregistrées (sauvegarde, export, import)
+  // ---------------------------------------------------------------
+
+  const secSaved = makeSection('SCÈNES ENREGISTRÉES');
+
+  let scenes = [];
+  let editingId = null;
+
+  function persistScenes() {
+    try {
+      localStorage.setItem(STORAGE_SCENES_KEY, JSON.stringify(scenes));
+    } catch (e) {}
+  }
+
+  function loadPersistedScenes() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_SCENES_KEY));
+      if (Array.isArray(saved)) scenes = saved;
+    } catch (e) {}
+  }
+
+  function nextSceneId() {
+    return scenes.reduce((max, s) => Math.max(max, s.id), 0) + 1;
+  }
+
+  const saveBtn = makeButton('💾 Sauvegarder cette scène', { marginBottom: '6px' });
+  secSaved.content.appendChild(saveBtn);
+
+  const exportBtn = makeButton('📤 Exporter JSON', { marginBottom: '6px' });
+  secSaved.content.appendChild(exportBtn);
+
+  const importBtn = makeButton('📥 Importer JSON', { marginBottom: '8px' });
+  secSaved.content.appendChild(importBtn);
+
+  const importInput = document.createElement('input');
+  importInput.type = 'file';
+  importInput.accept = 'application/json,.json';
+  importInput.style.display = 'none';
+  secSaved.content.appendChild(importInput);
 
   const sceneList = document.createElement('div');
-  Object.assign(sceneList.style, { fontSize: '10px', color: '#aaa' });
+  secSaved.content.appendChild(sceneList);
 
-    saveBtn.addEventListener('click', () => {
-    const offsets = getFieldOffsets();
-    const scene = {
-      id: scenes.length + 1,
-      name: `Scène ${scenes.length + 1} : ${currentAnim}`,
+  function buildSceneFromEditor() {
+    const pages = PAGES.map(([v]) => v).filter((v) => pageChecks[v].checked);
+    const devices = DEVICES.map(([v]) => v).filter((v) => deviceChecks[v].checked);
+
+    if (!pages.length) { alert('Choisis au moins une page.'); return null; }
+    if (!devices.length) { alert('Choisis au moins un type d\'appareil.'); return null; }
+    if (!draftSteps.length) { alert('Ajoute au moins une étape.'); return null; }
+
+    const trigger = buildTrigger();
+    if (!trigger) return null;
+
+    const action = endAction.value;
+    let next = null;
+    if (action === 'chain') {
+      next = num(endNext.value);
+      if (next === null) { alert('Indique l\'ID de la scène à enchaîner.'); return null; }
+    }
+
+    const id = editingId ?? nextSceneId();
+
+    // On ne garde que les points réellement utilisés
+    const usedPoints = {};
+    draftSteps.forEach((s) => { usedPoints[s.at] = clone(draftPoints[s.at]); });
+
+    return {
+      id,
+      name: nameInput.value.trim() || `Scène ${id} : ${draftSteps[0].animation}`,
       enabled: true,
-      page: pageSelect.value,
-      device: {
-        type: window.innerWidth < 768 ? 'mobile' : 'pc',
-        minWidth: window.innerWidth < 768 ? 0 : 1024,
-        maxWidth: window.innerWidth < 768 ? 767 : 2560,
+      priority: num(priorityInput.value) || 0,
+      pages,
+      devices,
+      trigger,
+      conditions: {
+        frequency: condFrequency.value,
+        cooldownSeconds: num(condCooldown.value) || 0,
+        interruptible: condInterruptible.checked,
       },
-      trigger: { type: 'load', threshold: 0.5 },
-      delay: 0,
-      once: false,
-      points: {
-        A: {
-          selector: null,
-          offsetX: null,
-          offsetY: null,
-          fallback: { x: currentX, y: currentY },
-        },
+      points: usedPoints,
+      steps: clone(draftSteps),
+      end: {
+        action,
+        next,
+        repeat: num(endRepeat.value) ?? 1,
       },
-      steps: [
-        {
-          animation: currentAnim,
-          at: 'A',
-          duration: null,
-          rotation: { ...currentRot },
-          
-          bubble: { visible: true, x: offsets.bubble.x, y: offsets.bubble.y, tail: 'bottom' },
-          form: { visible: true, x: offsets.form.x, y: offsets.form.y },
-        },
-      ],
-      end: 'hold',
+      recorded: {
+        viewport: { width: window.innerWidth, height: window.innerHeight },
+        scrollY: Math.round(window.scrollY),
+        date: new Date().toISOString(),
+      },
     };
+  }
+
+  function resetDraft() {
+    draftPoints = {};
+    draftSteps = [];
+    editingId = null;
+    nameInput.value = '';
+    refreshPointsUI();
+    refreshStepsUI();
+  }
+
+  saveBtn.addEventListener('click', () => {
+    const scene = buildSceneFromEditor();
+    if (!scene) return;
+
     scenes.push(scene);
-
-    const item = document.createElement('div');
-    Object.assign(item.style, {
-      padding: '4px 6px',
-      marginBottom: '3px',
-      background: '#2a2520',
-      borderRadius: '3px',
-      border: '1px solid #38332b',
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-    });
-
-    const label = document.createElement('span');
-    label.textContent = `#${scene.id} — ${scene.steps[0].animation}`;
-    label.style.overflow = 'hidden';
-    label.style.textOverflow = 'ellipsis';
-    label.style.whiteSpace = 'nowrap';
-
-    const playBtn = document.createElement('button');
-    playBtn.textContent = '▶';
-    Object.assign(playBtn.style, {
-      background: '#e58e26',
-      border: 'none',
-      borderRadius: '3px',
-      color: '#12100e',
-      cursor: 'pointer',
-      padding: '2px 6px',
-      fontSize: '10px',
-      flexShrink: '0',
-      marginLeft: '6px',
-    });
-
-      playBtn.addEventListener('click', () => {
-      const step = scene.steps[0];
-      const p = scene.points[step.at].fallback;
-      doMove(p.x, p.y);
-      doPlay(step.animation);
-      doRotate('x', step.rotation.x);
-      doRotate('y', step.rotation.y);
-      doRotate('z', step.rotation.z);
-      rotSliders.x.value = step.rotation.x;
-      rotSliders.y.value = step.rotation.y;
-      rotSliders.z.value = step.rotation.z;
-      applyFieldOffsets({ bubble: step.bubble, form: step.form });
-    });
-
-    item.appendChild(label);
-    item.appendChild(playBtn);
-    sceneList.appendChild(item);
+    persistScenes();
+    renderSceneList();
+    resetDraft();
 
     console.info('[controller] scène sauvegardée :', scene);
   });
 
-  body.appendChild(saveBtn);
+  // Aperçu d'une scène : utilise le lecteur de scènes s'il est chargé,
+  // sinon applique seulement la première étape.
+  function previewScene(scene) {
+    if (typeof window.b88PlayScene === 'function') {
+      window.b88PlayScene(scene);
+      return;
+    }
 
-  const exportBtn = makeButton('📤 Exporter JSON', { marginBottom: '8px' });
+    const step = scene.steps[0];
+    const pos = resolvePoint(scene.points[step.at]);
+    doMove(pos.x, pos.y);
+    doPlay(step.animation);
+    doRotate('x', step.rotation.x);
+    doRotate('y', step.rotation.y);
+    doRotate('z', step.rotation.z);
+    setSliders(step.rotation);
+    applyFieldOffsets({ bubble: step.bubble, form: step.form });
+  }
+
+  // Recharge une scène dans l'éditeur pour la modifier
+  function loadSceneIntoEditor(scene) {
+    editingId = scene.id;
+    nameInput.value = scene.name;
+    priorityInput.value = scene.priority ?? 0;
+
+    PAGES.forEach(([v]) => { pageChecks[v].checked = scene.pages.includes(v); });
+    DEVICES.forEach(([v]) => { deviceChecks[v].checked = scene.devices.includes(v); });
+
+    applyTriggerToUI(scene.trigger);
+
+    condFrequency.value = scene.conditions?.frequency || 'always';
+    condCooldown.value = scene.conditions?.cooldownSeconds ?? 0;
+    condInterruptible.checked = scene.conditions?.interruptible !== false;
+
+    endAction.value = scene.end?.action || 'hold';
+    endNext.value = scene.end?.next ?? '';
+    endRepeat.value = scene.end?.repeat ?? 1;
+    refreshEndUI();
+
+    draftPoints = clone(scene.points);
+    draftSteps = clone(scene.steps);
+    refreshPointsUI();
+    refreshStepsUI();
+
+    scenes = scenes.filter((s) => s.id !== scene.id);
+    persistScenes();
+    renderSceneList();
+  }
+
+  function renderSceneList() {
+    sceneList.replaceChildren();
+
+    scenes.forEach((scene) => {
+      const item = makeListItem();
+
+      const label = document.createElement('span');
+      label.style.overflow = 'hidden';
+      label.style.textOverflow = 'ellipsis';
+      label.style.whiteSpace = 'nowrap';
+      label.textContent = `#${scene.id} — ${scene.name}`;
+      label.title = label.textContent;
+
+      const buttons = document.createElement('span');
+      Object.assign(buttons.style, { display: 'flex', gap: '3px', flexShrink: '0' });
+
+      const play = makeMiniButton('▶', '#e58e26', 'Aperçu');
+      play.addEventListener('click', () => previewScene(scene));
+
+      const edit = makeMiniButton('✎', '#d9a15d', 'Modifier dans l\'éditeur');
+      edit.addEventListener('click', () => {
+        if (draftSteps.length && !confirm('L\'éditeur contient une scène en cours : la remplacer ?')) return;
+        loadSceneIntoEditor(scene);
+      });
+
+      const del = makeMiniButton('✕', '#8a3b2e', 'Supprimer');
+      del.addEventListener('click', () => {
+        if (!confirm(`Supprimer la scène #${scene.id} ?`)) return;
+        scenes = scenes.filter((s) => s.id !== scene.id);
+        persistScenes();
+        renderSceneList();
+      });
+
+      buttons.append(play, edit, del);
+      item.append(label, buttons);
+      sceneList.appendChild(item);
+    });
+  }
 
   exportBtn.addEventListener('click', () => {
     if (!scenes.length) {
@@ -585,25 +1420,65 @@
       return;
     }
 
-    const json = JSON.stringify({ version: 1, scenes }, null, 2);
+    const data = {
+      version: 2,
+      exportedAt: new Date().toISOString(),
+      scenes,
+    };
+
+    const json = JSON.stringify(data, null, 2);
     const blob = new Blob([json], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
 
     const a = document.createElement('a');
     a.href = url;
 
-    const animNames = scenes.map((s) => s.steps[0].animation).join('-');
     const now = new Date();
     const pad = (n) => String(n).padStart(2, '0');
     const stamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}h${pad(now.getMinutes())}`;
 
-    a.download = `${animNames}_${stamp}.json`;
+    a.download = `scenes-v2_${stamp}.json`;
     a.click();
     URL.revokeObjectURL(url);
   });
 
-  body.appendChild(exportBtn);
-  body.appendChild(sceneList);
+  importBtn.addEventListener('click', () => importInput.click());
+
+  importInput.addEventListener('change', () => {
+    const file = importInput.files && importInput.files[0];
+    importInput.value = '';
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result);
+
+        if (data.version !== 2 || !Array.isArray(data.scenes)) {
+          alert('Format non reconnu : ce panneau lit uniquement les JSON de version 2.');
+          return;
+        }
+
+        if (scenes.length && !confirm('Remplacer les scènes actuelles par celles du fichier ?')) return;
+
+        scenes = data.scenes;
+        persistScenes();
+        renderSceneList();
+      } catch (e) {
+        alert('Fichier illisible : ce n\'est pas un JSON valide.');
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  // ---------------------------------------------------------------
+  // Démarrage
+  // ---------------------------------------------------------------
+
+  loadPersistedScenes();
+  renderSceneList();
+  refreshPointsUI();
+  refreshStepsUI();
 
   document.body.appendChild(panel);
 })();
