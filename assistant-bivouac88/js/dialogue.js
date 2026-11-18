@@ -36,6 +36,7 @@ async function initDialogue(character) {
   `;
 
   document.body.appendChild(dialogue);
+  document.dispatchEvent(new CustomEvent("b88:dialogue-ready"));
 
   const bubble = dialogue.querySelector(".b88-dialogue-bubble");
   const text = dialogue.querySelector(".b88-dialogue-text");
