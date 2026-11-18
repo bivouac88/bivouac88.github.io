@@ -1,5 +1,5 @@
 
- // intent.js — compréhension linguistique globale du Bivouaciste
+// intent.js — compréhension linguistique globale du Bivouaciste
 
 const STOP_WORDS = new Set([
   "a", "au", "aux", "avec", "ce", "ces", "cette",
@@ -14,7 +14,6 @@ const STOP_WORDS = new Set([
 ]);
 
 // Synonymes centralisés.
-// Les variantes sont ramenées vers une forme de référence.
 const SYNONYMS = {
   velo: [
     "bicyclette", "becane", "biclou", "cycle",
@@ -106,17 +105,14 @@ function normalizeWord(word) {
     return word;
   }
 
-  // Pluriels français : chevaux → cheval.
   if (word.length > 4 && word.endsWith("aux")) {
     return word.slice(0, -3) + "al";
   }
 
-  // Pluriels en eaux : bateaux → bateau.
   if (word.length > 4 && word.endsWith("eaux")) {
     return word.slice(0, -1);
   }
 
-  // Pluriels réguliers : photos → photo.
   if (word.length > 4 && word.endsWith("s")) {
     return word.slice(0, -1);
   }
@@ -144,6 +140,47 @@ export function tokenize(value = "") {
     .split(" ")
     .filter(word => word.length > 1 && !STOP_WORDS.has(word))
     .map(normalizeWord);
+}
+
+// Analyse grammaticale complémentaire avec Compromise.
+function getSemanticTokens(value) {
+  if (
+    typeof window === "undefined" ||
+    typeof window.frCompromise !== "function"
+  ) {
+    return new Set();
+  }
+
+  try {
+    const sentences = window.frCompromise(value).json();
+    const semanticTokens = new Set();
+
+    for (const sentence of sentences) {
+      for (const term of sentence.terms || []) {
+        const tags = term.tags || [];
+
+        const isSemantic = tags.some(tag =>
+          ["Noun", "Verb", "Adjective", "Adverb"].includes(tag)
+        );
+
+        if (!isSemantic) continue;
+
+        const word = normalizeWord(
+          normalizeText(term.normal || term.text)
+        );
+
+        if (word && word.length > 1) {
+          semanticTokens.add(word);
+        }
+      }
+    }
+
+    return semanticTokens;
+
+  } catch (error) {
+    console.warn("Analyse linguistique indisponible :", error);
+    return new Set();
+  }
 }
 
 // Distance de Levenshtein.
@@ -199,7 +236,6 @@ function hasAdjacentTransposition(a, b) {
 function wordsMatch(a, b) {
   if (a === b) return true;
 
-  // Pas de rapprochement approximatif sur les mots courts.
   if (a.length < 5 || b.length < 5) return false;
 
   if (hasAdjacentTransposition(a, b)) return true;
@@ -219,10 +255,10 @@ function tokenMatches(token, candidates) {
   );
 }
 
-
 export function detectIntent(question, intents = []) {
   const normalizedQuestion = normalizeText(question);
   const questionTokens = tokenize(question);
+  const semanticTokens = getSemanticTokens(question);
   const scores = [];
 
   for (const intent of intents) {
@@ -252,12 +288,12 @@ export function detectIntent(question, intents = []) {
       processedKeywords.add(keywordKey);
 
       if (keywordTokens.length === 1) {
-        if (
-          questionTokens.some(token =>
-            wordsMatch(token, keywordTokens[0])
-          )
-        ) {
-          score += 2.5;
+        const matchingToken = questionTokens.find(token =>
+          wordsMatch(token, keywordTokens[0])
+        );
+
+        if (matchingToken) {
+          score += semanticTokens.has(matchingToken) ? 3 : 2.5;
           matched.push(rawKeyword);
         }
         continue;
