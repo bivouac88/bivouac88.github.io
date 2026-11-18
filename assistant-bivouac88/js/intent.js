@@ -1,23 +1,24 @@
 
-// intent.js — compréhension linguistique globale du Bivouaciste
+ // intent.js — compréhension linguistique globale du Bivouaciste
 
 const STOP_WORDS = new Set([
-  "a", "au", "aux", "avec", "ce", "ces", "cette", "dans",
-  "de", "des", "du", "elle", "elles", "en", "est", "et",
-  "eux", "il", "ils", "je", "la", "le", "les", "leur",
-  "leurs", "lui", "ma", "mais", "me", "mes", "moi", "mon",
-  "ne", "nos", "notre", "nous", "on", "ou", "par", "pour",
-  "que", "qui", "quoi", "sa", "se", "ses", "son", "sur",
-  "ta", "te", "tes", "toi", "ton", "tu", "un", "une",
-  "vos", "votre", "vous", "y", "dans", "donc", "car"
+  "a", "au", "aux", "avec", "ce", "ces", "cette",
+  "dans", "de", "des", "du", "elle", "elles", "en",
+  "est", "et", "eux", "il", "ils", "je", "la", "le",
+  "les", "leur", "leurs", "lui", "ma", "me", "mes",
+  "moi", "mon", "ne", "nos", "notre", "nous", "on",
+  "ou", "par", "pour", "sa", "se", "ses", "son",
+  "sur", "ta", "te", "tes", "toi", "ton", "tu",
+  "un", "une", "vos", "votre", "vous", "y", "donc",
+  "car"
 ]);
 
-// Synonymes communs à toutes les intentions.
-// Chaque variante est ramenée vers une forme de référence.
+// Synonymes centralisés.
+// Les variantes sont ramenées vers une forme de référence.
 const SYNONYMS = {
   velo: [
-    "bicyclette", "becane", "biclou", "deux roues",
-    "deuxroues", "cycle"
+    "bicyclette", "becane", "biclou", "cycle",
+    "deux roues"
   ],
   voyage: [
     "periple", "vadrouille", "expedition", "aventure"
@@ -41,10 +42,10 @@ const SYNONYMS = {
     "km", "kilometrage"
   ],
   denivele: [
-    "d+", "elevation"
+    "elevation"
   ],
   aide: [
-    "assistance", "support"
+    "assistance"
   ],
   commentaire: [
     "reaction", "message"
@@ -61,17 +62,20 @@ const SYNONYMS = {
 };
 
 const SYNONYM_LOOKUP = new Map();
+const PHRASE_SYNONYMS = [];
 
 for (const [reference, variants] of Object.entries(SYNONYMS)) {
   SYNONYM_LOOKUP.set(reference, reference);
 
   for (const variant of variants) {
-    SYNONYM_LOOKUP.set(variant, reference);
+    if (variant.includes(" ")) {
+      PHRASE_SYNONYMS.push([variant, reference]);
+    } else {
+      SYNONYM_LOOKUP.set(variant, reference);
+    }
   }
 }
 
-// Quelques mots qui ne doivent pas être déformés
-// par la simplification des pluriels.
 const WORD_EXCEPTIONS = new Set([
   "apres", "assez", "avis", "bras", "choix", "corps",
   "cours", "croix", "fois", "frais", "gris", "jamais",
@@ -102,15 +106,17 @@ function normalizeWord(word) {
     return word;
   }
 
-  // Pluriels français réguliers.
+  // Pluriels français : chevaux → cheval.
   if (word.length > 4 && word.endsWith("aux")) {
     return word.slice(0, -3) + "al";
   }
 
+  // Pluriels en eaux : bateaux → bateau.
   if (word.length > 4 && word.endsWith("eaux")) {
     return word.slice(0, -1);
   }
 
+  // Pluriels réguliers : photos → photo.
   if (word.length > 4 && word.endsWith("s")) {
     return word.slice(0, -1);
   }
@@ -118,14 +124,29 @@ function normalizeWord(word) {
   return word;
 }
 
+function normalizePhrases(value) {
+  let text = normalizeText(value);
+
+  for (const [variant, reference] of PHRASE_SYNONYMS) {
+    const escaped = variant.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+    text = text.replace(
+      new RegExp(`\\b${escaped}\\b`, "g"),
+      reference
+    );
+  }
+
+  return text;
+}
+
 export function tokenize(value = "") {
-  return normalizeText(value)
+  return normalizePhrases(value)
     .split(" ")
     .filter(word => word.length > 1 && !STOP_WORDS.has(word))
     .map(normalizeWord);
 }
 
-// Distance de Levenshtein : mesure les différences entre deux mots.
+// Distance de Levenshtein.
 function levenshtein(a, b) {
   if (Math.abs(a.length - b.length) > 2) return 3;
 
@@ -154,12 +175,34 @@ function levenshtein(a, b) {
   return previous[b.length];
 }
 
-// Tolérance aux petites fautes de frappe.
-// Les mots courts sont volontairement exclus.
+// Reconnaissance d'une inversion de deux lettres voisines.
+function hasAdjacentTransposition(a, b) {
+  if (a.length !== b.length) return false;
+
+  const differences = [];
+
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) differences.push(i);
+  }
+
+  if (differences.length !== 2) return false;
+
+  const [first, second] = differences;
+
+  return (
+    second === first + 1 &&
+    a[first] === b[second] &&
+    a[second] === b[first]
+  );
+}
+
 function wordsMatch(a, b) {
   if (a === b) return true;
 
+  // Pas de rapprochement approximatif sur les mots courts.
   if (a.length < 5 || b.length < 5) return false;
+
+  if (hasAdjacentTransposition(a, b)) return true;
 
   const distance = levenshtein(a, b);
 
@@ -185,14 +228,23 @@ export function detectIntent(question, intents = []) {
   for (const intent of intents) {
     let score = 0;
     const matched = [];
+    const processedKeywords = new Set();
 
     for (const rawKeyword of intent.keywords || []) {
       const keyword = normalizeText(rawKeyword);
       if (!keyword) continue;
 
       const keywordTokens = tokenize(keyword);
+      if (!keywordTokens.length) continue;
 
-      // Expression complète reconnue.
+      // Évite de compter plusieurs fois un même mot-clé
+      // après normalisation ou synonymie.
+      const keywordKey = keywordTokens.join(" ");
+
+      if (processedKeywords.has(keywordKey)) continue;
+      processedKeywords.add(keywordKey);
+
+      // Expression complète.
       if (
         keyword.includes(" ") &&
         normalizedQuestion.includes(keyword)
@@ -202,9 +254,7 @@ export function detectIntent(question, intents = []) {
         continue;
       }
 
-      if (!keywordTokens.length) continue;
-
-      // Correspondance d'un mot.
+      // Mot simple.
       if (keywordTokens.length === 1) {
         if (
           questionTokens.some(token =>
