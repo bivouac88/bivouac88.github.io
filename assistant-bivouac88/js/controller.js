@@ -387,12 +387,13 @@
     const content = document.createElement('div');
     Object.assign(content.style, { display: 'none', padding: '2px 0 10px' });
 
-    const section = {
-      content,
-      open() { content.style.display = 'block'; arrow.textContent = '▾'; },
-      close() { content.style.display = 'none'; arrow.textContent = '▸'; },
-      isOpen() { return content.style.display !== 'none'; },
-    };
+const section = {
+  content,
+  head,
+  open() { content.style.display = 'block'; arrow.textContent = '▾'; },
+  close() { content.style.display = 'none'; arrow.textContent = '▸'; },
+  isOpen() { return content.style.display !== 'none'; },
+};
 
     head.addEventListener('click', () => {
       section.isOpen() ? section.close() : section.open();
@@ -721,20 +722,21 @@
   });
   document.body.appendChild(hitboxPreview);
 
-  function updateHitboxPreview() {
-    requestAnimationFrame(updateHitboxPreview);
+let hitboxAnimationFrame = null;
 
-    if (!secHitbox.isOpen() || !window.characterGetScreenBounds) {
-      hitboxPreview.style.display = 'none';
-      return;
-    }
+function updateHitboxPreview() {
+  hitboxAnimationFrame = null;
 
-    const bounds = window.characterGetScreenBounds();
-    if (!bounds) {
-      hitboxPreview.style.display = 'none';
-      return;
-    }
+  if (!secHitbox.isOpen() || !window.characterGetScreenBounds) {
+    hitboxPreview.style.display = 'none';
+    return;
+  }
 
+  const bounds = window.characterGetScreenBounds();
+
+  if (!bounds) {
+    hitboxPreview.style.display = 'none';
+  } else {
     const centerX = (bounds.left + bounds.right) / 2;
     const centerY = (bounds.top + bounds.bottom) / 2;
 
@@ -748,21 +750,30 @@
     hitboxPreview.style.top = (centerY + hitboxSettings.offsetY - height / 2) + 'px';
   }
 
-  hitboxSaveBtn.addEventListener('click', () => {
-    Object.keys(hitboxFields).forEach((key) => {
-      hitboxSettings[key] = parseFloat(hitboxFields[key].value) || 0;
-    });
+  hitboxAnimationFrame = requestAnimationFrame(updateHitboxPreview);
+}
 
-    try {
-      localStorage.setItem(HITBOX_KEY, JSON.stringify(hitboxSettings));
-      hitboxStatus.textContent = 'Réglages enregistrés dans ce navigateur.';
-    } catch (e) {
-      hitboxStatus.textContent = 'Impossible d’enregistrer les réglages.';
-    }
-  });
+function startHitboxPreview() {
+  if (hitboxAnimationFrame !== null) return;
+  hitboxAnimationFrame = requestAnimationFrame(updateHitboxPreview);
+}
 
-  updateHitboxPreview();
-  
+function stopHitboxPreview() {
+  if (hitboxAnimationFrame !== null) {
+    cancelAnimationFrame(hitboxAnimationFrame);
+    hitboxAnimationFrame = null;
+  }
+
+  hitboxPreview.style.display = 'none';
+}
+
+secHitbox.head.addEventListener('click', () => {
+  if (secHitbox.isOpen()) {
+    startHitboxPreview();
+  } else {
+    stopHitboxPreview();
+  }
+});
   // ---------------------------------------------------------------
   // Section : orientation (3 axes)
   // ---------------------------------------------------------------
