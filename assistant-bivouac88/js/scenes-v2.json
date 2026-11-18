@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "exportedAt": "2026-11-18T19:37:56.347Z",
+  "exportedAt": "2026-11-18T20:03:50.443Z",
   "avatar": {
     "hitbox": {
       "width": 76,
@@ -31,7 +31,7 @@
         "interruptible": true
       },
       "points": {
-        "B": {
+        "A": {
           "selector": "#projet > div.test-section-heading:nth-of-type(1) > h2",
           "ax": 69.04,
           "ay": 8.94,
@@ -39,15 +39,15 @@
           "offsetY": 0,
           "mode": "follow",
           "fallback": {
-            "xPct": 56.4,
-            "yPct": 16.4
+            "xPct": 62.84,
+            "yPct": 13.78
           }
         }
       },
       "steps": [
         {
           "animation": "Excited",
-          "at": "B",
+          "at": "A",
           "duration": null,
           "pause": 0,
           "move": {
@@ -60,12 +60,12 @@
           },
           "autoFace": false,
           "bubble": {
-            "x": 162.2222900390625,
-            "y": -183.33331298828125
+            "x": 166.666748046875,
+            "y": -85.55548095703125
           },
           "form": {
             "x": 164.4444580078125,
-            "y": -70
+            "y": -102.22216796875
           }
         }
       ],
@@ -76,11 +76,11 @@
       },
       "recorded": {
         "viewport": {
-          "width": 2133,
-          "height": 1018
+          "width": 1064,
+          "height": 987
         },
         "scrollY": 0,
-        "date": "2026-11-18T14:34:41.514Z"
+        "date": "2026-11-18T20:01:46.723Z"
       }
     },
     {
@@ -104,7 +104,7 @@
         "interruptible": true
       },
       "points": {
-        "B": {
+        "A": {
           "selector": "#projet > div.test-section-heading:nth-of-type(1) > h2",
           "ax": 69.04,
           "ay": 8.94,
@@ -112,15 +112,15 @@
           "offsetY": 0,
           "mode": "follow",
           "fallback": {
-            "xPct": 56.4,
-            "yPct": 16.4
+            "xPct": 62.84,
+            "yPct": 13.78
           }
         }
       },
       "steps": [
         {
           "animation": "Thankfull",
-          "at": "B",
+          "at": "A",
           "duration": null,
           "pause": 0,
           "move": {
@@ -149,11 +149,11 @@
       },
       "recorded": {
         "viewport": {
-          "width": 2133,
-          "height": 1018
+          "width": 1064,
+          "height": 987
         },
         "scrollY": 0,
-        "date": "2026-11-18T19:37:51.851Z"
+        "date": "2026-11-18T20:03:34.195Z"
       }
     }
   ]
