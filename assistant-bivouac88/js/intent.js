@@ -234,8 +234,19 @@ export function detectIntent(question, intents = []) {
       const keyword = normalizeText(rawKeyword);
       if (!keyword) continue;
 
-      const keywordTokens = tokenize(keyword);
-      if (!keywordTokens.length) continue;
+const keywordTokens = tokenize(keyword);
+
+// Les expressions complètes sont vérifiées avant les stop words.
+if (
+  keyword.includes(" ") &&
+  normalizedQuestion.includes(keyword)
+) {
+  score += 5;
+  matched.push(rawKeyword);
+  continue;
+}
+
+if (!keywordTokens.length) continue;
 
       // Évite de compter plusieurs fois un même mot-clé
       // après normalisation ou synonymie.
@@ -243,16 +254,6 @@ export function detectIntent(question, intents = []) {
 
       if (processedKeywords.has(keywordKey)) continue;
       processedKeywords.add(keywordKey);
-
-      // Expression complète.
-      if (
-        keyword.includes(" ") &&
-        normalizedQuestion.includes(keyword)
-      ) {
-        score += 5;
-        matched.push(rawKeyword);
-        continue;
-      }
 
       // Mot simple.
       if (keywordTokens.length === 1) {
