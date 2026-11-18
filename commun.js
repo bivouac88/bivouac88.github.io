@@ -41,23 +41,13 @@ function b88Geo(callback) {
   );
 }
 window.B88 = Object.freeze({ DON_URL: DON_URL, racine: dossier, esc: esc, cache: b88Cache, geo: b88Geo });
-     // ---- Bivouaciste : chargement réservé au panneau admin ----
-  if (new URLSearchParams(window.location.search).get('edit') === 'bivouac88admin') {
-    var cssDialogue = document.createElement('link');
-    cssDialogue.rel = 'stylesheet';
-    cssDialogue.href = dossier + 'assistant-bivouac88/css/dialogue.css';
-    document.head.appendChild(cssDialogue);
-
-    var cssCharacter = document.createElement('link');
-    cssCharacter.rel = 'stylesheet';
-    cssCharacter.href = dossier + 'assistant-bivouac88/css/character.css';
-    document.head.appendChild(cssCharacter);
-
-    var adminScripts = document.createElement('script');
-    adminScripts.type = 'module';
-    adminScripts.src = dossier + 'assistant-bivouac88/js/admin-loader.js';
-    document.head.appendChild(adminScripts);
-  }
+   
+// ---- Bivouaciste : chargement des scènes publiques et admin ----
+var b88Loader = document.createElement('script');
+b88Loader.type = 'module';
+b88Loader.src = dossier + 'assistant-bivouac88/js/admin-loader.js';
+document.head.appendChild(b88Loader);
+   
      // ---- Moteur de visite guidée indépendant ----
   var scriptTour = document.createElement('script');
   scriptTour.type = 'module';
