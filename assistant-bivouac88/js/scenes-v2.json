@@ -151,7 +151,7 @@
     {
       "id": 4,
       "name": "Scène 4 : Excited",
-      "enabled": false,
+      "enabled": true,
       "priority": 0,
       "pages": [
         "test"
@@ -170,19 +170,19 @@
         "interruptible": true
       },
       "points": {
-        "A": {
-          "selector": "#accueil",
-          "ax": 56.84,
-          "ay": 109.84,
-          "offsetX": 0,
-          "offsetY": 0,
-          "mode": "follow",
-          "fallback": {
-            "xPct": 56.4,
-            "yPct": 16.4
-          }
-        }
-      },
+  "A": {
+    "selector": "#projet > div.test-section-heading:nth-of-type(1) > h2",
+    "ax": 69.04,
+    "ay": 8.94,
+    "offsetX": 0,
+    "offsetY": 0,
+    "mode": "follow",
+    "fallback": {
+      "xPct": 56.4,
+      "yPct": 16.4
+    }
+  }
+},
       "steps": [
         {
           "animation": "Excited",
