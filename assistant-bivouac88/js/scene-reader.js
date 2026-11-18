@@ -99,18 +99,35 @@ function clearPositionUpdater() {
     activePositionCleanup = null;
   }
 }
-  function applyFieldOffsets(bubble, form) {
-    const apply = (selector, offset) => {
-      if (!offset) return;
-      const el = document.querySelector(selector);
-      if (!el) return;
-      el.dataset.dragX = String(offset.x);
-      el.dataset.dragY = String(offset.y);
-      el.style.translate = `${offset.x}px ${offset.y}px`;
-    };
-    apply('.b88-dialogue-bubble', bubble);
-    apply('.b88-dialogue-form', form);
-  }
+  let currentFieldOffsets = null;
+
+function applyFieldOffsets(bubble, form) {
+  currentFieldOffsets = { bubble, form };
+
+  const apply = (selector, offset) => {
+    if (!offset) return;
+
+    const el = document.querySelector(selector);
+    if (!el) return;
+
+    el.dataset.dragX = String(offset.x);
+    el.dataset.dragY = String(offset.y);
+    el.style.translate = `${offset.x}px ${offset.y}px`;
+  };
+
+  apply('.b88-dialogue-bubble', bubble);
+  apply('.b88-dialogue-form', form);
+}
+
+// Réappliquer les positions lorsque les champs sont créés
+document.addEventListener('b88:dialogue-ready', () => {
+  if (!currentFieldOffsets) return;
+
+  applyFieldOffsets(
+    currentFieldOffsets.bubble,
+    currentFieldOffsets.form
+  );
+});
 
   function wait(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
