@@ -93,8 +93,15 @@
   // Exécution d'une scène
   // ---------------------------------------------------------------
 
-  let runningScene = null; // { id, cancel }
+let runningScene = null; // { id, cancel }
+let activePositionCleanup = null;
 
+function clearPositionUpdater() {
+  if (activePositionCleanup) {
+    activePositionCleanup();
+    activePositionCleanup = null;
+  }
+}
   function applyFieldOffsets(bubble, form) {
     const apply = (selector, offset) => {
       if (!offset) return;
@@ -175,8 +182,17 @@
 
     markRan(scene);
 
-    const cancelRef = { cancelled: false };
-    runningScene = { id: scene.id, cancel: () => { cancelRef.cancelled = true; runningScene = null; } };
+clearPositionUpdater();
+
+const cancelRef = { cancelled: false };
+runningScene = {
+  id: scene.id,
+  cancel: () => {
+    cancelRef.cancelled = true;
+    clearPositionUpdater();
+    runningScene = null;
+  }
+};
 
     const repeat = scene.end?.repeat ?? 1;
     const loops = repeat === 0 ? Infinity : repeat;
@@ -227,27 +243,59 @@
         // Champs de dialogue
         applyFieldOffsets(step.bubble, step.form);
 
-        // Suivi continu si mode "follow"
-        if (point.mode === 'follow') {
-          const followInterval = setInterval(() => {
-            if (cancelRef.cancelled) { clearInterval(followInterval); return; }
-            const pos = resolvePoint(point);
-            if (typeof window.characterMoveTo === 'function') window.characterMoveTo(pos.x, pos.y);
-          }, 100);
+ // Gestion de la position selon le mode
+clearPositionUpdater();
 
-          // Durée
-          if (step.duration != null) {
-            await wait(step.duration * 1000);
-            clearInterval(followInterval);
-          }
-          // Si pas de durée, on attend indéfiniment (jusqu'à annulation)
-        } else {
-          // Durée
-          if (step.duration != null) await wait(step.duration * 1000);
-        }
+if (point.mode === 'follow') {
+  const followInterval = setInterval(() => {
+    if (cancelRef.cancelled) {
+      clearInterval(followInterval);
+      return;
+    }
+
+    const pos = resolvePoint(point);
+    if (typeof window.characterMoveTo === 'function') {
+      window.characterMoveTo(pos.x, pos.y);
+    }
+  }, 100);
+
+  activePositionCleanup = () => clearInterval(followInterval);
+
+  if (step.duration != null) {
+    await wait(step.duration * 1000);
+    clearPositionUpdater();
+  }
+
+} else {
+  // Position proportionnelle à l'écran
+  const xPct = target.x / window.innerWidth;
+  const yPct = target.y / window.innerHeight;
+
+  const onResize = () => {
+    if (typeof window.characterMoveTo === 'function') {
+      window.characterMoveTo(
+        xPct * window.innerWidth,
+        yPct * window.innerHeight
+      );
+    }
+  };
+
+  window.addEventListener('resize', onResize);
+
+  activePositionCleanup = () => {
+    window.removeEventListener('resize', onResize);
+  };
+  if (step.duration != null) {
+    await wait(step.duration * 1000);
+    clearPositionUpdater();
+  }
+}
+
+// Fin de l'étape
       }
     }
 
+// Fin de la scène
     if (!cancelRef.cancelled) {
       // Fin de scène
       const endAction = scene.end?.action || 'hold';
