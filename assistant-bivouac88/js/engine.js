@@ -119,27 +119,51 @@ export function createEngine(knowledge) {
   // RETROUVER LE SUJET PERTINENT
   // --------------------------------------------------
 
-  function resolveContext(question) {
-    if (!recentTopics.length) return null;
 
-    const text = normalizeText(question);
+function resolveContext(question) {
+  if (!recentTopics.length) return null;
 
-    // Une référence explicite au sujet précédent.
-    if (
-      /\b(sujet precedent|ce dont on parlait avant|revenons a)\b/.test(text)
-    ) {
-      return recentTopics[1]
-        ? getIntent(recentTopics[1].id)
-        : currentIntent;
-    }
+  const text = normalizeText(question);
 
-    // Par défaut, on privilégie le sujet actif.
-    if (currentIntent) {
-      return currentIntent;
-    }
-
-    return getIntent(recentTopics[0].id);
+  // Demande explicite de revenir au sujet précédent.
+  if (
+    /\b(sujet precedent|ce dont on parlait avant|revenons a|retournons a)\b/.test(text)
+  ) {
+    return recentTopics[1]
+      ? getIntent(recentTopics[1].id)
+      : currentIntent;
   }
+
+  // Référence à un autre sujet évoqué précédemment.
+  if (
+    /\b(l autre|un autre sujet|celui d avant|celle d avant|le precedent|la precedente)\b/.test(text)
+  ) {
+    return recentTopics[1]
+      ? getIntent(recentTopics[1].id)
+      : null;
+  }
+
+  // Référence à plusieurs sujets.
+  if (/\b(les deux|tous les deux|comparer|compare)\b/.test(text)) {
+    return null;
+  }
+
+  // Recherche dans les derniers échanges utilisateur.
+  const previousUserMessages = history
+    .filter(message => message.role === "user" && message.intentId)
+    .slice()
+    .reverse();
+
+  for (const message of previousUserMessages) {
+    const intent = getIntent(message.intentId);
+
+    if (intent && !conversationalIntents.has(intent.id)) {
+      return intent;
+    }
+  }
+
+  return currentIntent || getIntent(recentTopics[0].id);
+}
 
   // --------------------------------------------------
   // RÉPONSES CONTEXTUELLES
@@ -247,6 +271,21 @@ function ask(question) {
     );
   }
 
+  saveExchange(response);
+
+  return response;
+}
+  
+function askIntent(intentId) {
+  const intent = getIntent(intentId);
+
+  if (!intent) {
+    return fallback();
+  }
+
+  remember("user", intent.label, intent.id);
+
+  const response = buildAnswer(intent);
   saveExchange(response);
 
   return response;
