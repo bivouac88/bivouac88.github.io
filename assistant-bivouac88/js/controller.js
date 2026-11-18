@@ -648,6 +648,122 @@
   }, 250);
 
   // ---------------------------------------------------------------
+  // Section : hitbox (prévisualisation admin uniquement)
+  // ---------------------------------------------------------------
+
+  const HITBOX_KEY = 'b88-admin-hitbox-settings';
+
+  function loadHitboxSettings() {
+    const defaults = { width: 140, height: 145, offsetX: 0, offsetY: 0 };
+    try {
+      const saved = JSON.parse(localStorage.getItem(HITBOX_KEY));
+      if (saved && typeof saved === 'object') {
+        return {
+          width: Number(saved.width) || defaults.width,
+          height: Number(saved.height) || defaults.height,
+          offsetX: Number(saved.offsetX) || 0,
+          offsetY: Number(saved.offsetY) || 0,
+        };
+      }
+    } catch (e) {}
+    return defaults;
+  }
+
+  const hitboxSettings = loadHitboxSettings();
+  const secHitbox = makeSection('HITBOX');
+
+  secHitbox.content.appendChild(
+    makeLabel('Réglages de la zone cliquable — prévisualisation uniquement')
+  );
+
+  const hitboxFields = {};
+
+  [
+    ['width', 'Largeur (px)', 20, 1000],
+    ['height', 'Hauteur (px)', 20, 1000],
+    ['offsetX', 'Décalage horizontal (px)', -500, 500],
+    ['offsetY', 'Décalage vertical (px)', -500, 500],
+  ].forEach(([key, label, min, max]) => {
+    const input = makeInput('number', '', hitboxSettings[key]);
+    input.min = min;
+    input.max = max;
+    input.step = 1;
+
+    input.addEventListener('input', () => {
+      const value = parseFloat(input.value);
+      if (Number.isFinite(value)) {
+        hitboxSettings[key] = Math.max(min, Math.min(max, value));
+      }
+    });
+
+    hitboxFields[key] = input;
+    secHitbox.content.appendChild(makeRow(label, input));
+  });
+
+  const hitboxSaveBtn = makeButton('💾 Sauvegarder les réglages', {
+    marginTop: '4px',
+  });
+  secHitbox.content.appendChild(hitboxSaveBtn);
+
+  const hitboxStatus = makeLabel('Prévisualisation active lorsque cette section est ouverte.');
+  secHitbox.content.appendChild(hitboxStatus);
+
+  const hitboxPreview = document.createElement('div');
+  Object.assign(hitboxPreview.style, {
+    position: 'fixed',
+    display: 'none',
+    pointerEvents: 'none',
+    zIndex: '9998',
+    boxSizing: 'border-box',
+    border: '2px dashed #ff3333',
+    background: 'rgba(255, 50, 50, 0.12)',
+    borderRadius: '3px',
+  });
+  document.body.appendChild(hitboxPreview);
+
+  function updateHitboxPreview() {
+    requestAnimationFrame(updateHitboxPreview);
+
+    if (!secHitbox.isOpen() || !window.characterGetScreenBounds) {
+      hitboxPreview.style.display = 'none';
+      return;
+    }
+
+    const bounds = window.characterGetScreenBounds();
+    if (!bounds) {
+      hitboxPreview.style.display = 'none';
+      return;
+    }
+
+    const centerX = (bounds.left + bounds.right) / 2;
+    const centerY = (bounds.top + bounds.bottom) / 2;
+
+    const width = Math.max(1, hitboxSettings.width);
+    const height = Math.max(1, hitboxSettings.height);
+
+    hitboxPreview.style.display = 'block';
+    hitboxPreview.style.width = width + 'px';
+    hitboxPreview.style.height = height + 'px';
+    hitboxPreview.style.left = (centerX + hitboxSettings.offsetX - width / 2) + 'px';
+    hitboxPreview.style.top = (centerY + hitboxSettings.offsetY - height / 2) + 'px';
+  }
+
+  hitboxSaveBtn.addEventListener('click', () => {
+    Object.keys(hitboxFields).forEach((key) => {
+      hitboxSettings[key] = parseFloat(hitboxFields[key].value) || 0;
+    });
+
+    try {
+      localStorage.setItem(HITBOX_KEY, JSON.stringify(hitboxSettings));
+      hitboxStatus.textContent = 'Réglages enregistrés dans ce navigateur.';
+    } catch (e) {
+      hitboxStatus.textContent = 'Impossible d’enregistrer les réglages.';
+    }
+  });
+
+  updateHitboxPreview();
+  
+  // ---------------------------------------------------------------
   // Section : orientation (3 axes)
   // ---------------------------------------------------------------
 
