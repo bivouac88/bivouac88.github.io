@@ -13,11 +13,8 @@
   }
 
   function currentDevice() {
-    const w = window.innerWidth;
-    if (w < 768) return 'mobile';
-    if (w < 1024) return 'tablet';
-    return 'pc';
-  }
+  return window.innerWidth < 768 ? 'mobile' : 'pc';
+}
 
   function resolvePoint(p) {
     const el = p.selector ? document.querySelector(p.selector) : null;
