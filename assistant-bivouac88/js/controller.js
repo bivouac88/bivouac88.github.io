@@ -1730,6 +1730,27 @@ if (trigger.type === 'after-scene') {
     errors.push(`${label} : scène déclencheuse introuvable.`);
   }
 }
+      // Vérification des sélecteurs CSS des déclencheurs
+if (['enter', 'element-click', 'hover'].includes(trigger.type)) {
+  const selector = typeof trigger.selector === 'string'
+    ? trigger.selector.trim()
+    : '';
+
+  if (!selector) {
+    errors.push(`${label} : sélecteur CSS manquant.`);
+  } else {
+    try {
+      document.querySelector(selector);
+    } catch (e) {
+      errors.push(`${label} : sélecteur CSS invalide.`);
+    }
+  }
+}
+
+// Vérification du nom d'événement personnalisé
+if (trigger.type === 'event' && !trigger.eventName?.trim()) {
+  errors.push(`${label} : nom de l'événement manquant.`);
+}
       
       if (!Number.isFinite(cooldown) || cooldown < 0) {
       errors.push(`${label} : délai d'attente invalide.`);
