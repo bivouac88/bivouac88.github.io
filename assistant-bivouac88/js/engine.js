@@ -83,11 +83,22 @@ export function createEngine(knowledge) {
     };
   }
 
-  function isFollowUp(question) {
-    const text = normalizeText(question);
 
-    return /^(et |mais |alors |du coup |combien|pourquoi|comment|ou |quand|quel |quelle |quels |quelles |celui |celle |ceux |celles |la bas|ici |ensuite|ca |cela )/.test(text);
-  }
+function isFollowUp(question) {
+  const text = normalizeText(question);
+
+  const followUpPatterns = [
+    /^(et|mais|alors|du coup)\b/,
+    /^(combien|pourquoi|comment|ou|quand|quel|quelle|quels|quelles)\b/,
+    /^(ca|cela|ceci|cette|cet|ces|celui|celle|ceux|celles)\b/,
+    /^(la bas|ici|ensuite|apres|concernant)\b/,
+    /^(tu peux|peux tu|est ce que tu peux)\b/,
+    /\b(en dire plus|davantage|plus de details)\b/,
+    /\b(ca coute|quel prix|combien ca)\b/
+  ];
+
+  return followUpPatterns.some(pattern => pattern.test(text));
+}
 
   function contextualFallback() {
     const label = currentIntent.label.toLowerCase();
