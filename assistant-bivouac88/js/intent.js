@@ -219,10 +219,10 @@ function tokenMatches(token, candidates) {
   );
 }
 
+
 export function detectIntent(question, intents = []) {
   const normalizedQuestion = normalizeText(question);
   const questionTokens = tokenize(question);
-
   const scores = [];
 
   for (const intent of intents) {
@@ -234,28 +234,23 @@ export function detectIntent(question, intents = []) {
       const keyword = normalizeText(rawKeyword);
       if (!keyword) continue;
 
-const keywordTokens = tokenize(keyword);
+      const keywordTokens = tokenize(keyword);
 
-// Les expressions complètes sont vérifiées avant les stop words.
-if (
-  keyword.includes(" ") &&
-  normalizedQuestion.includes(keyword)
-) {
-  score += 5;
-  matched.push(rawKeyword);
-  continue;
-}
+      if (
+        keyword.includes(" ") &&
+        normalizedQuestion.includes(keyword)
+      ) {
+        score += 5;
+        matched.push(rawKeyword);
+        continue;
+      }
 
-if (!keywordTokens.length) continue;
+      if (!keywordTokens.length) continue;
 
-      // Évite de compter plusieurs fois un même mot-clé
-      // après normalisation ou synonymie.
       const keywordKey = keywordTokens.join(" ");
-
       if (processedKeywords.has(keywordKey)) continue;
       processedKeywords.add(keywordKey);
 
-      // Mot simple.
       if (keywordTokens.length === 1) {
         if (
           questionTokens.some(token =>
@@ -265,11 +260,9 @@ if (!keywordTokens.length) continue;
           score += 2.5;
           matched.push(rawKeyword);
         }
-
         continue;
       }
 
-      // Expression composée : tous les mots doivent correspondre.
       if (
         keywordTokens.every(keywordToken =>
           tokenMatches(keywordToken, questionTokens)
@@ -287,10 +280,17 @@ if (!keywordTokens.length) continue;
 
   scores.sort((a, b) => b.score - a.score);
 
+  const suggestions = scores.slice(0, 3).map(item => ({
+    id: item.intent.id,
+    label: item.intent.label,
+    score: item.score
+  }));
+
   if (!scores.length || scores[0].score < 2.5) {
     return {
       intent: null,
       ambiguous: [],
+      suggestions,
       score: scores[0]?.score || 0
     };
   }
@@ -298,7 +298,6 @@ if (!keywordTokens.length) continue;
   const best = scores[0];
   const second = scores[1];
 
-  // Deux intentions proches : demander une précision.
   if (
     second &&
     second.score >= 2.5 &&
@@ -313,6 +312,7 @@ if (!keywordTokens.length) continue;
           id: item.intent.id,
           label: item.intent.label
         })),
+      suggestions,
       score: best.score
     };
   }
@@ -320,6 +320,7 @@ if (!keywordTokens.length) continue;
   return {
     intent: best.intent,
     ambiguous: [],
+    suggestions,
     score: best.score,
     matched: best.matched
   };
