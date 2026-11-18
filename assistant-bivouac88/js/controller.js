@@ -21,9 +21,10 @@
     refreshWalkAnimSelect();
   });
 
+
   const PAGES = [
-    ['test', 'Test'],
-    ['accueil', 'Accueil'],
+    ['test', 'Index'],
+    ['accueil', 'Résumé'],
     ['stats', 'Stats'],
     ['etapes', 'Étapes'],
     ['journal', 'Journal de bord'],
@@ -1413,7 +1414,11 @@
   function renderSceneList() {
     sceneList.replaceChildren();
 
-    scenes.forEach((scene) => {
+    const filteredScenes = pageFilter.value === 'all'
+      ? scenes
+      : scenes.filter((scene) => scene.pages.includes(pageFilter.value));
+
+    filteredScenes.forEach((scene) => {
       const item = makeListItem();
 
       const label = document.createElement('span');
