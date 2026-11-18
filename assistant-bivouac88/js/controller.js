@@ -649,12 +649,35 @@ const section = {
     setPlacementMode(false);
   });
 
-  // Affichage de la position réelle (suit aussi le déplacement à la souris)
-  setInterval(() => {
-    if (!secPos.isOpen()) return;
-    const p = getAvatarPos();
-    coords.textContent = `x: ${Math.round(p.x)}  y: ${Math.round(p.y)}`;
-  }, 250);
+// Affichage de la position réelle uniquement quand la section est ouverte
+let positionInterval = null;
+
+function updateAvatarCoords() {
+  const p = getAvatarPos();
+  coords.textContent = `x: ${Math.round(p.x)}  y: ${Math.round(p.y)}`;
+}
+
+function startPositionUpdates() {
+  if (positionInterval !== null) return;
+
+  updateAvatarCoords();
+  positionInterval = setInterval(updateAvatarCoords, 250);
+}
+
+function stopPositionUpdates() {
+  if (positionInterval !== null) {
+    clearInterval(positionInterval);
+    positionInterval = null;
+  }
+}
+
+secPos.head.addEventListener('click', () => {
+  if (secPos.isOpen()) {
+    startPositionUpdates();
+  } else {
+    stopPositionUpdates();
+  }
+});
 
   // ---------------------------------------------------------------
   // Section : hitbox (prévisualisation admin uniquement)
