@@ -5,11 +5,9 @@ import { pickAnswer } from "./knowledge.js";
 export function createEngine(knowledge) {
   let fallbackIndex = 0;
 
-  // Mémoire de la conversation : conservée tant que le moteur existe.
   const history = [];
   let currentIntent = null;
 
-  // Les échanges conversationnels ne remplacent pas le sujet discuté.
   const conversationalIntents = new Set([
     "greeting",
     "politeness",
@@ -26,10 +24,21 @@ export function createEngine(knowledge) {
       timestamp: Date.now()
     });
 
-    // On conserve les 24 derniers messages.
     if (history.length > 24) {
       history.shift();
     }
+  }
+
+  function getIntent(intentId) {
+    return (knowledge.intents || []).find(
+      item => item.id === intentId
+    ) || null;
+  }
+
+  function getRelatedIntents(intent) {
+    if (!intent?.related) return [];
+
+    return intent.related.filter(id => getIntent(id));
   }
 
   function buildAnswer(intent) {
@@ -43,28 +52,37 @@ export function createEngine(knowledge) {
       intentLabel: intent.label,
       text: pickAnswer(intent),
       action: intent.action || null,
-      related: intent.related || [],
+      related: getRelatedIntents(intent),
       links: intent.links || []
     };
   }
 
-  function fallback(score = 0) {
-    const fallbacks = knowledge.assistant?.fallback || [
-      "Je ne sais pas encore répondre à ça."
-    ];
+  function fallback(score = 0, suggestions = []) {
+    const lowConfidence = knowledge.assistant?.lowConfidence;
 
-    const text = fallbacks[fallbackIndex % fallbacks.length];
-    fallbackIndex++;
+    let text;
+
+    if (score > 0 && lowConfidence) {
+      text = lowConfidence;
+    } else {
+      const fallbacks = knowledge.assistant?.fallback || [
+        "Je ne sais pas encore répondre à ça."
+      ];
+
+      text = fallbacks[fallbackIndex % fallbacks.length];
+      fallbackIndex++;
+    }
 
     return {
       type: "fallback",
       text,
-      confidence: score
+      confidence: score,
+      related: suggestions
+        .map(item => item.id)
+        .filter(id => getIntent(id))
     };
   }
 
-  // Repère les formulations qui dépendent probablement
-  // d'un échange précédent.
   function isFollowUp(question) {
     const text = normalizeText(question);
 
@@ -80,12 +98,13 @@ export function createEngine(knowledge) {
       intentLabel: currentIntent.label,
       text:
         `Je garde en tête qu'on parlait de ${label}. ` +
-        `Je n'ai pas encore assez d'informations pour répondre précisément. ` +
-        `Tu peux préciser ce que tu souhaites savoir à ce sujet ?`
+        "Je n'ai pas encore assez d'informations pour répondre précisément. " +
+        "Tu peux préciser ce que tu souhaites savoir ?",
+      related: getRelatedIntents(currentIntent)
     };
   }
 
-  function saveExchange(question, result) {
+  function saveExchange(result) {
     remember("assistant", result.text, result.intentId || null);
   }
 
@@ -111,7 +130,7 @@ export function createEngine(knowledge) {
     if (result.ambiguous.length) {
       response = {
         type: "clarification",
-        text: "Je vois plusieurs possibilités. Tu parles de quoi exactement ?",
+        text: "J'hésite entre plusieurs sujets. Tu peux préciser ?",
         choices: result.ambiguous
       };
     } else if (result.intent) {
@@ -119,10 +138,13 @@ export function createEngine(knowledge) {
     } else if (currentIntent && isFollowUp(cleanQuestion)) {
       response = contextualFallback();
     } else {
-      response = fallback(result.score);
+      response = fallback(
+        result.score,
+        result.suggestions || []
+      );
     }
 
-    saveExchange(cleanQuestion, response);
+    saveExchange(response);
 
     return response;
   }
@@ -137,18 +159,11 @@ export function createEngine(knowledge) {
     remember("user", intent.label, intent.id);
 
     const response = buildAnswer(intent);
-    saveExchange(intent.label, response);
+    saveExchange(response);
 
     return response;
   }
 
-  function getIntent(intentId) {
-    return (knowledge.intents || []).find(
-      item => item.id === intentId
-    ) || null;
-  }
-
-  // Accès à la mémoire pour les évolutions futures.
   function getHistory() {
     return history.map(message => ({ ...message }));
   }
