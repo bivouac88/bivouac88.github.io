@@ -47,15 +47,12 @@
     ['after-scene', 'Fin d\'une autre scène'],
     ['event', 'Événement personnalisé'],
   ];
-
-  const STORAGE_SCENES_KEY = 'b88-admin-scenes-v2';
   const PANEL_POSITION_KEY = 'b88-admin-panel-position';
   const PANEL_WIDTH = 270;
-
+  
   // ---------------------------------------------------------------
   // Petits utilitaires
   // ---------------------------------------------------------------
-
   const r2 = (n) => Math.round(n * 100) / 100;
   const num = (v) => {
     const n = parseFloat(v);
@@ -68,7 +65,6 @@
   // On appelle les fonctions du personnage au moment du clic : ça marche même
   // si character.js se charge après ce fichier.
   // ---------------------------------------------------------------
-
   let currentAnim = 'Angry';
   let currentX = window.innerWidth - 120;
   let currentY = 6;
@@ -1272,21 +1268,10 @@
 
   const secSaved = makeSection('SCÈNES ENREGISTRÉES');
 
-  let scenes = [];
+  let scenes = Array.isArray(window.B88_SCENES_DATA?.scenes)
+    ? clone(window.B88_SCENES_DATA.scenes)
+    : [];
   let editingId = null;
-
-  function persistScenes() {
-    try {
-      localStorage.setItem(STORAGE_SCENES_KEY, JSON.stringify(scenes));
-    } catch (e) {}
-  }
-
-  function loadPersistedScenes() {
-    try {
-      const saved = JSON.parse(localStorage.getItem(STORAGE_SCENES_KEY));
-      if (Array.isArray(saved)) scenes = saved;
-    } catch (e) {}
-  }
 
   function nextSceneId() {
     return scenes.reduce((max, s) => Math.max(max, s.id), 0) + 1;
@@ -1297,15 +1282,6 @@
 
   const exportBtn = makeButton('📤 Exporter JSON', { marginBottom: '6px' });
   secSaved.content.appendChild(exportBtn);
-
-  const importBtn = makeButton('📥 Importer JSON', { marginBottom: '8px' });
-  secSaved.content.appendChild(importBtn);
-
-  const importInput = document.createElement('input');
-  importInput.type = 'file';
-  importInput.accept = 'application/json,.json';
-  importInput.style.display = 'none';
-  secSaved.content.appendChild(importInput);
 
   const sceneList = document.createElement('div');
   secSaved.content.appendChild(sceneList);
@@ -1383,7 +1359,6 @@
       scenes.push(scene);
     }
 
-    persistScenes();
     renderSceneList();
     resetDraft();
 
@@ -1464,7 +1439,6 @@
       del.addEventListener('click', () => {
         if (!confirm(`Supprimer la scène #${scene.id} ?`)) return;
         scenes = scenes.filter((s) => s.id !== scene.id);
-        persistScenes();
         renderSceneList();
       });
 
@@ -1502,41 +1476,11 @@
     URL.revokeObjectURL(url);
   });
 
-  importBtn.addEventListener('click', () => importInput.click());
-
-  importInput.addEventListener('change', () => {
-    const file = importInput.files && importInput.files[0];
-    importInput.value = '';
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const data = JSON.parse(reader.result);
-
-        if (data.version !== 2 || !Array.isArray(data.scenes)) {
-          alert('Format non reconnu : ce panneau lit uniquement les JSON de version 2.');
-          return;
-        }
-
-        if (scenes.length && !confirm('Remplacer les scènes actuelles par celles du fichier ?')) return;
-
-        scenes = data.scenes;
-        persistScenes();
-        renderSceneList();
-      } catch (e) {
-        alert('Fichier illisible : ce n\'est pas un JSON valide.');
-      }
-    };
-    reader.readAsText(file);
-  });
-
   // ---------------------------------------------------------------
   // Démarrage
   // ---------------------------------------------------------------
 
   refreshWalkAnimSelect();
-  loadPersistedScenes();
   renderSceneList();
   refreshPointsUI();
   refreshStepsUI();
