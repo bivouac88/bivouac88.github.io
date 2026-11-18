@@ -51,6 +51,9 @@
 
     // 5. Charger le panneau uniquement en mode admin
     if (isAdmin) {
+      // Transmettre toutes les scènes au contrôleur
+      window.B88_SCENES_DATA = data;
+
       await import('./controller.js');
     }
 
