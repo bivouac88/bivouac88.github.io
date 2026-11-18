@@ -1,6 +1,12 @@
 // controller.js — panneau de contrôle (accès admin uniquement via ?edit=bivouac88admin)
 // Version 2 : sections déroulantes + scènes au format JSON v2
 // (points ancrés sur des éléments, déclencheurs, conditions, étapes riches).
+//
+// >>> CORRECTIF : la section "SCÈNES ENREGISTRÉES" était incomplète
+//     (renderSceneList() et les handlers de saveBtn/exportBtn manquaient),
+//     ce qui provoquait une ReferenceError au chargement et empêchait
+//     le panneau d'être ajouté à la page. Voir les blocs marqués
+//     "// --- RESTAURÉ ---" plus bas.
 
 (function () {
   const params = new URLSearchParams(window.location.search);
@@ -50,7 +56,7 @@
   ];
   const PANEL_POSITION_KEY = 'b88-admin-panel-position';
   const PANEL_WIDTH = 270;
-  
+
   // ---------------------------------------------------------------
   // Petits utilitaires
   // ---------------------------------------------------------------
@@ -899,7 +905,7 @@
     ['hold', 'Rester en place'],
     ['stop', 'S\'arrêter'],
   ], 'hold');
-  
+
   const trigLeaveRow = makeRow('Quand le déclencheur disparaît (sortie d\'écran, fin de survol)', trigLeave);
   secTrigger.content.appendChild(trigLeaveRow);
 
@@ -1009,7 +1015,7 @@
     ['hold', 'Rester en place à la fin'],
     ['chain', 'Enchaîner sur une autre scène'],
   ], 'hold');
-  
+
   secEnd.content.appendChild(makeRow('Fin de scène', endAction));
 
   const endNext = makeInput('number', 'ID de la scène suivante');
@@ -1263,7 +1269,7 @@
     });
   }
 
-   // ---------------------------------------------------------------
+  // ---------------------------------------------------------------
   // Section : scènes enregistrées (sauvegarde, export, import)
   // ---------------------------------------------------------------
 
@@ -1282,6 +1288,10 @@
   const saveBtn = makeButton('💾 Sauvegarder cette scène', { marginBottom: '6px' });
   secSaved.content.appendChild(saveBtn);
 
+  // --- RESTAURÉ --- bouton pour repartir sur une scène vierge
+  const newBtn = makeButton('🆕 Nouvelle scène (vider le formulaire)', { marginBottom: '6px' });
+  secSaved.content.appendChild(newBtn);
+
   const exportBtn = makeButton('📤 Exporter JSON', { marginBottom: '6px' });
   secSaved.content.appendChild(exportBtn);
 
@@ -1295,6 +1305,230 @@
   secSaved.content.appendChild(sceneList);
 
   pageFilter.addEventListener('change', renderSceneList);
+
+  // --- RESTAURÉ --- construit l'objet scène à partir de tous les champs du formulaire
+  function collectSceneFromUI() {
+    const trigger = buildTrigger();
+    if (!trigger) return null;
+
+    const pages = PAGES.filter(([v]) => pageChecks[v].checked).map(([v]) => v);
+    const devices = DEVICES.filter(([v]) => deviceChecks[v].checked).map(([v]) => v);
+
+    if (!pages.length) {
+      alert('Sélectionne au moins une page (section SCÈNE : OÙ ET POUR QUI).');
+      return null;
+    }
+    if (!devices.length) {
+      alert('Sélectionne au moins un appareil (section SCÈNE : OÙ ET POUR QUI).');
+      return null;
+    }
+    if (!Object.keys(draftPoints).length) {
+      alert('Crée au moins un point (section POINTS).');
+      return null;
+    }
+    if (!draftSteps.length) {
+      alert('Ajoute au moins une étape (section ÉTAPES).');
+      return null;
+    }
+
+    const id = editingId ?? nextSceneId();
+
+    return {
+      id,
+      name: nameInput.value.trim(),
+      enabled: true,
+      priority: num(priorityInput.value) || 0,
+      pages,
+      devices,
+      trigger,
+      conditions: {
+        frequency: condFrequency.value,
+        cooldownSeconds: num(condCooldown.value) || 0,
+        interruptible: condInterruptible.checked,
+      },
+      points: clone(draftPoints),
+      steps: clone(draftSteps),
+      end: {
+        action: endAction.value,
+        next: endAction.value === 'chain' ? num(endNext.value) : null,
+        repeat: num(endRepeat.value) ?? 1,
+      },
+      recorded: {
+        viewport: { width: window.innerWidth, height: window.innerHeight },
+        scrollY: window.scrollY,
+        date: new Date().toISOString(),
+      },
+    };
+  }
+
+  // --- RESTAURÉ --- vide le formulaire pour repartir sur une scène neuve
+  function resetEditor() {
+    editingId = null;
+
+    nameInput.value = '';
+    priorityInput.value = '0';
+
+    PAGES.forEach(([value]) => { pageChecks[value].checked = value === 'test'; });
+    DEVICES.forEach(([value]) => { deviceChecks[value].checked = value === 'pc'; });
+
+    applyTriggerToUI({ type: 'load', delay: 0 });
+
+    condFrequency.value = 'always';
+    condCooldown.value = '0';
+    condInterruptible.checked = true;
+
+    endAction.value = 'hold';
+    endNext.value = '';
+    endRepeat.value = '1';
+    refreshEndUI();
+
+    draftPoints = {};
+    draftSteps = [];
+    refreshPointsUI();
+    refreshStepsUI();
+
+    saveBtn.textContent = '💾 Sauvegarder cette scène';
+  }
+
+  // --- RESTAURÉ --- charge une scène existante dans le formulaire pour l'éditer
+  function loadSceneIntoEditor(scene) {
+    editingId = scene.id;
+
+    nameInput.value = scene.name || '';
+    priorityInput.value = scene.priority ?? 0;
+
+    PAGES.forEach(([value]) => {
+      pageChecks[value].checked = (scene.pages || []).includes(value);
+    });
+    DEVICES.forEach(([value]) => {
+      deviceChecks[value].checked = (scene.devices || []).includes(value);
+    });
+
+    applyTriggerToUI(scene.trigger || { type: 'load', delay: 0 });
+
+    condFrequency.value = scene.conditions?.frequency || 'always';
+    condCooldown.value = scene.conditions?.cooldownSeconds ?? 0;
+    condInterruptible.checked = scene.conditions?.interruptible !== false;
+
+    endAction.value = scene.end?.action || 'hold';
+    endNext.value = scene.end?.next ?? '';
+    endRepeat.value = scene.end?.repeat ?? 1;
+    refreshEndUI();
+
+    draftPoints = clone(scene.points || {});
+    draftSteps = clone(scene.steps || []);
+    refreshPointsUI();
+    refreshStepsUI();
+
+    saveBtn.textContent = `💾 Mettre à jour la scène #${scene.id}`;
+
+    secScene.open();
+    secTrigger.open();
+    secEnd.open();
+    secPoints.open();
+    secSteps.open();
+  }
+
+  // --- RESTAURÉ --- affiche la liste des scènes enregistrées (avec filtre par page)
+  function renderSceneList() {
+    sceneList.replaceChildren();
+
+    const filter = pageFilter.value;
+    const visible = scenes.filter(
+      (s) => filter === 'all' || (s.pages || []).includes(filter)
+    );
+
+    if (!visible.length) {
+      sceneList.appendChild(makeLabel('Aucune scène enregistrée pour ce filtre.', { fontSize: '10px' }));
+      return;
+    }
+
+    visible
+      .slice()
+      .sort((a, b) => a.id - b.id)
+      .forEach((scene) => {
+        const item = makeListItem();
+
+        const label = document.createElement('span');
+        label.style.overflow = 'hidden';
+        label.style.textOverflow = 'ellipsis';
+        label.style.whiteSpace = 'nowrap';
+        label.textContent = `#${scene.id} ${scene.name || '(sans nom)'}`;
+        label.title = `${label.textContent} — ${(scene.pages || []).join(', ')} / ${(scene.devices || []).join(', ')}`;
+
+        const btnWrap = document.createElement('div');
+        Object.assign(btnWrap.style, { display: 'flex', gap: '4px', flexShrink: '0' });
+
+        const playBtn = makeMiniButton('▶', '#3b7a57', 'Prévisualiser cette scène');
+        playBtn.addEventListener('click', () => {
+          if (typeof window.b88PlayScene === 'function') {
+            window.b88PlayScene(clone(scene));
+          } else {
+            alert('scene-reader.js (b88PlayScene) n\'est pas chargé sur cette page.');
+          }
+        });
+
+        const editBtn = makeMiniButton('✎', '#e58e26', 'Charger / éditer cette scène');
+        editBtn.addEventListener('click', () => loadSceneIntoEditor(scene));
+
+        const delBtn = makeMiniButton('✕', '#8a3b2e', 'Supprimer cette scène');
+        delBtn.addEventListener('click', () => {
+          if (!confirm(`Supprimer la scène #${scene.id} ("${scene.name || 'sans nom'}") ?`)) return;
+          scenes = scenes.filter((s) => s.id !== scene.id);
+          if (editingId === scene.id) resetEditor();
+          renderSceneList();
+        });
+
+        btnWrap.append(playBtn, editBtn, delBtn);
+        item.append(label, btnWrap);
+        sceneList.appendChild(item);
+      });
+  }
+
+  // --- RESTAURÉ --- sauvegarde (création ou mise à jour) de la scène courante
+  saveBtn.addEventListener('click', () => {
+    const scene = collectSceneFromUI();
+    if (!scene) return;
+
+    const idx = scenes.findIndex((s) => s.id === scene.id);
+    if (idx >= 0) {
+      scenes[idx] = scene;
+    } else {
+      scenes.push(scene);
+    }
+
+    editingId = scene.id;
+    saveBtn.textContent = `💾 Mettre à jour la scène #${scene.id}`;
+    renderSceneList();
+
+    alert(`Scène #${scene.id} sauvegardée en mémoire.\nPense à cliquer sur "Exporter JSON" pour la rendre permanente, puis remplace ton fichier sceneV2.json.`);
+  });
+
+  newBtn.addEventListener('click', () => {
+    if (!confirm('Vider le formulaire pour créer une nouvelle scène ? (les champs actuels seront perdus s\'ils ne sont pas sauvegardés)')) return;
+    resetEditor();
+  });
+
+  // --- RESTAURÉ --- exporte toutes les scènes en mémoire vers un fichier sceneV2.json téléchargeable
+  exportBtn.addEventListener('click', () => {
+    const data = {
+      version: 2,
+      exportedAt: new Date().toISOString(),
+      scenes,
+    };
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'sceneV2.json';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    URL.revokeObjectURL(url);
+  });
 
   // ---------------------------------------------------------------
   // Démarrage
