@@ -1683,8 +1683,16 @@ secHitbox.head.addEventListener('click', () => {
         ids.add(Number(scene.id));
       }
 
-      if (!scene.name?.trim()) {
-        warnings.push(`${label} : aucun nom renseigné.`);
+      const cooldown = Number(scene.conditions?.cooldownSeconds ?? 0);
+
+      const triggerDelay = Number(scene.trigger?.delay ?? 0);
+
+      if (!Number.isFinite(triggerDelay) || triggerDelay < 0) {
+      errors.push(`${label} : délai du déclencheur invalide.`);
+}
+      
+      if (!Number.isFinite(cooldown) || cooldown < 0) {
+      errors.push(`${label} : délai d'attente invalide.`);
       }
 
       if (!scene.steps?.length) {
