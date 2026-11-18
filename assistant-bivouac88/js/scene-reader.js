@@ -1,503 +1,877 @@
-// scene-reader.js — lecteur de scènes v2
-// Lit un JSON exporté par le panneau admin et exécute les scènes sur la page.
-// Passe uniquement par characterPlay, characterMoveTo, characterRotate, characterGetPosition.
+
+// scene-reader.js — moteur de scènes Bivouac88
+// Format JSON v2 — PC et Mobile
+// Déclencheurs, conditions, déplacements, animations et enchaînements.
 
 (function () {
+  'use strict';
 
   // ---------------------------------------------------------------
-  // Utilitaires
+  // CONFIGURATION
   // ---------------------------------------------------------------
+
+  const STORAGE_KEY = 'b88-scenes-state';
+  const MOBILE_BREAKPOINT = 768;
 
   function currentPage() {
     return document.body.dataset.page || '';
   }
 
   function currentDevice() {
-  return window.innerWidth < 768 ? 'mobile' : 'pc';
-}
+    return window.innerWidth < MOBILE_BREAKPOINT ? 'mobile' : 'pc';
+  }
 
-  function resolvePoint(p) {
-    const el = p.selector ? document.querySelector(p.selector) : null;
-    if (el) {
-      const rect = el.getBoundingClientRect();
-      const x = rect.left + (p.ax / 100) * rect.width + (p.offsetX || 0);
-      const yTop = rect.top + (p.ay / 100) * rect.height + (p.offsetY || 0);
-      return { x, y: window.innerHeight - yTop };
+  function getElement(selector) {
+    if (!selector) return null;
+    try {
+      return document.querySelector(selector);
+    } catch (error) {
+      console.warn('[scene-reader] Sélecteur invalide :', selector);
+      return null;
     }
+  }
+
+  function resolvePoint(point) {
+    if (!point || typeof point !== 'object') {
+      return { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+    }
+
+    const element = getElement(point.selector);
+
+    if (element) {
+      const rect = element.getBoundingClientRect();
+
+      return {
+        x: rect.left + ((Number(point.ax) || 0) / 100) * rect.width
+          + (Number(point.offsetX) || 0),
+
+        y: window.innerHeight - (
+          rect.top + ((Number(point.ay) || 0) / 100) * rect.height
+          + (Number(point.offsetY) || 0)
+        )
+      };
+    }
+
+    const fallback = point.fallback || {};
+
     return {
-      x: (p.fallback.xPct / 100) * window.innerWidth,
-      y: (p.fallback.yPct / 100) * window.innerHeight,
+      x: ((Number(fallback.xPct) || 50) / 100) * window.innerWidth,
+      y: ((Number(fallback.yPct) || 50) / 100) * window.innerHeight
     };
   }
 
-  function prefersReducedMotion() {
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function wait(ms, cancelRef) {
+    return new Promise(resolve => {
+      if (cancelRef.cancelled) {
+        resolve();
+        return;
+      }
+
+      const timer = setTimeout(() => {
+        cancelRef.timers.delete(timer);
+        resolve();
+      }, Math.max(0, ms));
+
+      cancelRef.timers.add(timer);
+    });
   }
 
   // ---------------------------------------------------------------
-  // Mémoire des conditions (fréquence, cooldown)
+  // MÉMOIRE DES CONDITIONS
   // ---------------------------------------------------------------
 
-  const STORAGE_KEY = 'b88-scenes-state';
-
-  function loadState() {
-    try { return JSON.parse(sessionStorage.getItem(STORAGE_KEY)) || {}; } catch (e) { return {}; }
+  function readStorage(storage) {
+    try {
+      return JSON.parse(storage.getItem(STORAGE_KEY)) || {};
+    } catch (error) {
+      return {};
+    }
   }
 
-  function saveState(state) {
-    try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+  function writeStorage(storage, data) {
+    try {
+      storage.setItem(STORAGE_KEY, JSON.stringify(data));
+    } catch (error) {
+      // Le stockage peut être indisponible.
+    }
   }
+
+  const ranThisLoad = new Set();
 
   function canRun(scene) {
-    const freq = scene.conditions?.frequency || 'always';
-    const cooldown = scene.conditions?.cooldownSeconds || 0;
-    const state = loadState();
-    const entry = state[scene.id] || {};
+    const conditions = scene.conditions || {};
+    const frequency = conditions.frequency || 'always';
+    const cooldown = Math.max(0, Number(conditions.cooldownSeconds) || 0);
+
+    const sessionState = readStorage(sessionStorage);
+    const entry = sessionState[scene.id] || {};
     const now = Date.now();
 
-    if (cooldown > 0 && entry.lastRun && (now - entry.lastRun) < cooldown * 1000) return false;
-
-    if (freq === 'load') return !entry.ranThisLoad;
-    if (freq === 'session') return !entry.ranThisSession;
-    if (freq === 'visitor') {
-      try {
-        const ls = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-        return !ls[scene.id]?.ranEver;
-      } catch (e) { return true; }
+    if (
+      cooldown > 0 &&
+      entry.lastRun &&
+      now - entry.lastRun < cooldown * 1000
+    ) {
+      return false;
     }
+
+    if (frequency === 'load') {
+      return !ranThisLoad.has(String(scene.id));
+    }
+
+    if (frequency === 'session') {
+      return !entry.ranThisSession;
+    }
+
+    if (frequency === 'visitor') {
+      const visitorState = readStorage(localStorage);
+      return !visitorState[scene.id]?.ranEver;
+    }
+
     return true;
   }
 
   function markRan(scene) {
-    const state = loadState();
+    const state = readStorage(sessionStorage);
+
     state[scene.id] = {
       lastRun: Date.now(),
-      ranThisLoad: true,
-      ranThisSession: true,
+      ranThisSession: true
     };
-    saveState(state);
 
-    if (scene.conditions?.frequency === 'visitor') {
-      try {
-        const ls = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-        ls[scene.id] = { ranEver: true };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(ls));
-      } catch (e) {}
+    writeStorage(sessionStorage, state);
+    ranThisLoad.add(String(scene.id));
+
+    if ((scene.conditions || {}).frequency === 'visitor') {
+      const visitorState = readStorage(localStorage);
+
+      visitorState[scene.id] = { ranEver: true };
+
+      writeStorage(localStorage, visitorState);
     }
   }
 
   // ---------------------------------------------------------------
-  // Exécution d'une scène
+  // POSITION DES CHAMPS DE DIALOGUE
   // ---------------------------------------------------------------
 
-let runningScene = null; // { id, cancel }
-let activePositionCleanup = null;
-
-function clearPositionUpdater() {
-  if (activePositionCleanup) {
-    activePositionCleanup();
-    activePositionCleanup = null;
-  }
-}
   let currentFieldOffsets = null;
 
-function applyFieldOffsets(bubble, form) {
-  currentFieldOffsets = { bubble, form };
+  function applyFieldOffsets(bubble, form) {
+    currentFieldOffsets = { bubble, form };
 
-  const apply = (selector, offset) => {
-    if (!offset) return;
+    const apply = (selector, offset) => {
+      if (!offset || !Number.isFinite(Number(offset.x))
+          || !Number.isFinite(Number(offset.y))) return;
 
-    const el = document.querySelector(selector);
-    if (!el) return;
+      const element = getElement(selector);
+      if (!element) return;
 
-    el.dataset.dragX = String(offset.x);
-    el.dataset.dragY = String(offset.y);
-    el.style.translate = `${offset.x}px ${offset.y}px`;
-  };
+      element.dataset.dragX = String(offset.x);
+      element.dataset.dragY = String(offset.y);
+      element.style.translate = `${offset.x}px ${offset.y}px`;
+    };
 
-  apply('.b88-dialogue-bubble', bubble);
-  apply('.b88-dialogue-form', form);
-}
-
-// Réappliquer les positions lorsque les champs sont créés
-document.addEventListener('b88:dialogue-ready', () => {
-  if (!currentFieldOffsets) return;
-
-  applyFieldOffsets(
-    currentFieldOffsets.bubble,
-    currentFieldOffsets.form
-  );
-});
-
-  function wait(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+    apply('.b88-dialogue-bubble', bubble);
+    apply('.b88-dialogue-form', form);
   }
 
-  // Déplace l'avatar à pied vers (tx, ty) à une vitesse donnée (px/s).
-  // Retourne une promesse qui se résout quand la destination est atteinte.
-  function walkTo(tx, ty, speed, walkAnim, autoFace, cancelRef) {
-    return new Promise((resolve) => {
-      if (typeof window.characterPlay === 'function') window.characterPlay(walkAnim);
+  document.addEventListener('b88:dialogue-ready', () => {
+    if (!currentFieldOffsets) return;
 
-      const STEP_MS = 16;
-      const pxPerStep = (speed / 1000) * STEP_MS;
+    applyFieldOffsets(
+      currentFieldOffsets.bubble,
+      currentFieldOffsets.form
+    );
+  });
+
+  // ---------------------------------------------------------------
+  // ÉTAT DU MOTEUR
+  // ---------------------------------------------------------------
+
+  let scenes = [];
+  let runningScene = null;
+  let positionCleanup = null;
+  let tourActive = false;
+
+  const triggerCleanups = [];
+
+  document.addEventListener('b88:tour-start', () => {
+    tourActive = true;
+  });
+
+  document.addEventListener('b88:tour-end', () => {
+    tourActive = false;
+  });
+
+  function clearPositionUpdater() {
+    if (positionCleanup) {
+      positionCleanup();
+      positionCleanup = null;
+    }
+  }
+
+  function cancelCurrentScene() {
+    if (!runningScene) return;
+
+    runningScene.cancel();
+  }
+
+  // ---------------------------------------------------------------
+  // DÉPLACEMENT À PIED
+  // ---------------------------------------------------------------
+
+  function walkTo(
+    targetX,
+    targetY,
+    speed,
+    walkAnimation,
+    autoFace,
+    cancelRef
+  ) {
+    return new Promise(resolve => {
+      const stepMs = 16;
+      const pixelsPerStep = Math.max(1, speed) / 1000 * stepMs;
+
+      if (typeof window.characterPlay === 'function') {
+        window.characterPlay(walkAnimation);
+      }
+
+      function finish() {
+        if (!cancelRef.cancelled &&
+            typeof window.characterMoveTo === 'function') {
+          window.characterMoveTo(targetX, targetY);
+        }
+
+        resolve();
+      }
 
       function tick() {
-        if (cancelRef.cancelled) { resolve(); return; }
+        if (cancelRef.cancelled) {
+          resolve();
+          return;
+        }
 
-        const pos = typeof window.characterGetPosition === 'function'
-          ? window.characterGetPosition()
-          : null;
+        const position =
+          typeof window.characterGetPosition === 'function'
+            ? window.characterGetPosition()
+            : null;
 
-        if (!pos) { arrive(); return; }
+        if (!position) {
+          finish();
+          return;
+        }
 
-        const dx = tx - pos.x;
-        const dy = ty - pos.y;
-        const dist = Math.hypot(dx, dy);
+        const dx = targetX - position.x;
+        const dy = targetY - position.y;
+        const distance = Math.hypot(dx, dy);
 
-        if (dist <= pxPerStep) { arrive(); return; }
+        if (distance <= pixelsPerStep) {
+          finish();
+          return;
+        }
 
-        const nx = pos.x + (dx / dist) * pxPerStep;
-        const ny = pos.y + (dy / dist) * pxPerStep;
+        const nextX = position.x + dx / distance * pixelsPerStep;
+        const nextY = position.y + dy / distance * pixelsPerStep;
 
         if (autoFace && typeof window.characterRotate === 'function') {
-          // Tourne vers la gauche ou la droite selon le sens de marche
           window.characterRotate(0, dx < 0 ? 180 : 0, 0);
         }
 
-        if (typeof window.characterMoveTo === 'function') window.characterMoveTo(nx, ny);
-        setTimeout(tick, STEP_MS);
-      }
+        if (typeof window.characterMoveTo === 'function') {
+          window.characterMoveTo(nextX, nextY);
+        }
 
-      function arrive() {
-        if (typeof window.characterMoveTo === 'function') window.characterMoveTo(tx, ty);
-        resolve();
+        const timer = setTimeout(() => {
+          cancelRef.timers.delete(timer);
+          tick();
+        }, stepMs);
+
+        cancelRef.timers.add(timer);
       }
 
       tick();
     });
   }
 
-  async function runScene(scene) {
-    if (prefersReducedMotion()) return;
-    if (!canRun(scene)) return;
+  // ---------------------------------------------------------------
+  // GESTION DE LA POSITION PENDANT UNE ÉTAPE
+  // ---------------------------------------------------------------
 
-    // Interrompre la scène en cours si elle l'autorise
-    if (runningScene) {
-      const current = runningScene;
-      // On annule seulement si la scène en cours est interruptible
-      const currentSceneDef = _scenes.find((s) => s.id === current.id);
-      if (currentSceneDef?.conditions?.interruptible !== false) {
-        current.cancel();
-      } else {
-        return; // La scène en cours refuse d'être interrompue
-      }
+  function activatePositionMode(point, target, cancelRef) {
+    clearPositionUpdater();
+
+    if (point.mode === 'follow') {
+      const update = () => {
+        if (cancelRef.cancelled) return;
+
+        const position = resolvePoint(point);
+
+        if (typeof window.characterMoveTo === 'function') {
+          window.characterMoveTo(position.x, position.y);
+        }
+      };
+
+      const interval = setInterval(update, 100);
+
+      positionCleanup = () => clearInterval(interval);
+
+      return;
     }
 
-    markRan(scene);
+    const xRatio = target.x / Math.max(1, window.innerWidth);
+    const yRatio = target.y / Math.max(1, window.innerHeight);
 
-clearPositionUpdater();
+    const onResize = () => {
+      if (cancelRef.cancelled) return;
 
-const cancelRef = { cancelled: false };
-runningScene = {
-  id: scene.id,
-  cancel: () => {
-    cancelRef.cancelled = true;
-    clearPositionUpdater();
-    runningScene = null;
+      if (typeof window.characterMoveTo === 'function') {
+        window.characterMoveTo(
+          xRatio * window.innerWidth,
+          yRatio * window.innerHeight
+        );
+      }
+    };
+
+    window.addEventListener('resize', onResize);
+
+    positionCleanup = () => {
+      window.removeEventListener('resize', onResize);
+    };
   }
-};
 
-    const repeat = scene.end?.repeat ?? 1;
+  // ---------------------------------------------------------------
+  // EXÉCUTION D'UNE SCÈNE
+  // ---------------------------------------------------------------
+
+  async function runScene(scene, options = {}) {
+    const preview = options.preview === true;
+
+    if (!scene || !Array.isArray(scene.steps) || !scene.steps.length) {
+      console.warn('[scene-reader] Scène vide ou invalide.');
+      return;
+    }
+
+    if (tourActive && !preview) return;
+    if (!preview && !canRun(scene)) return;
+
+    // Une scène non interruptible bloque les autres scènes.
+    if (runningScene) {
+      const currentDefinition = scenes.find(
+        item => String(item.id) === String(runningScene.id)
+      );
+
+      if (
+        currentDefinition &&
+        currentDefinition.conditions?.interruptible === false
+      ) {
+        return;
+      }
+
+      cancelCurrentScene();
+    }
+
+    if (!preview) markRan(scene);
+
+    clearPositionUpdater();
+
+    const cancelRef = {
+      cancelled: false,
+      timers: new Set()
+    };
+
+    runningScene = {
+      id: scene.id,
+
+      cancel() {
+        cancelRef.cancelled = true;
+
+        cancelRef.timers.forEach(timer => {
+          clearTimeout(timer);
+        });
+
+        cancelRef.timers.clear();
+        clearPositionUpdater();
+
+        if (runningScene?.id === scene.id) {
+          runningScene = null;
+        }
+      }
+    };
+
+    const repeat = Math.max(0, Number(scene.end?.repeat ?? 1));
     const loops = repeat === 0 ? Infinity : repeat;
 
-    for (let loop = 0; loop < loops; loop++) {
-      if (cancelRef.cancelled) break;
-
-      for (const step of scene.steps) {
+    try {
+      for (let loop = 0; loop < loops; loop++) {
         if (cancelRef.cancelled) break;
 
-        // Pause avant l'étape
-        if (step.pause > 0) await wait(step.pause * 1000);
-        if (cancelRef.cancelled) break;
+        for (const step of scene.steps) {
+          if (cancelRef.cancelled) break;
 
-        const point = scene.points[step.at];
-        if (!point) continue;
+          const pause = Math.max(0, Number(step.pause) || 0);
 
-        // Position cible
-        let target;
-        if (point.mode === 'follow') {
-          // Recalcul en temps réel : on démarre simplement avec la position actuelle
-          target = resolvePoint(point);
-        } else {
-          target = resolvePoint(point);
+          if (pause > 0) {
+            await wait(pause * 1000, cancelRef);
+          }
+
+          if (cancelRef.cancelled) break;
+
+          const point = scene.points?.[step.at];
+
+          if (!point) {
+            console.warn(
+              `[scene-reader] Point "${step.at}" introuvable dans la scène ${scene.id}.`
+            );
+            continue;
+          }
+
+          const target = resolvePoint(point);
+          const move = step.move || {};
+
+          // Déplacement
+          if (
+            move.type === 'walk' &&
+            !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+          ) {
+            await walkTo(
+              target.x,
+              target.y,
+              Number(move.speed) || 200,
+              move.walkAnimation || 'Running',
+              step.autoFace !== false,
+              cancelRef
+            );
+          } else if (typeof window.characterMoveTo === 'function') {
+            window.characterMoveTo(target.x, target.y);
+          }
+
+          if (cancelRef.cancelled) break;
+
+          // Animation
+          if (
+            step.animation &&
+            typeof window.characterPlay === 'function'
+          ) {
+            window.characterPlay(step.animation);
+          }
+
+          // Orientation
+          const rotation = step.rotation || {};
+
+          if (typeof window.characterRotate === 'function') {
+            window.characterRotate(
+              Number(rotation.x) || 0,
+              Number(rotation.y) || 0,
+              Number(rotation.z) || 0
+            );
+          }
+
+          // Champs de dialogue
+          applyFieldOffsets(step.bubble, step.form);
+
+          // Positionnement dynamique
+          activatePositionMode(point, target, cancelRef);
+
+          // Durée facultative : null signifie maintien jusqu'à la suite.
+          if (step.duration !== null && step.duration !== undefined) {
+            const duration = Math.max(0, Number(step.duration) || 0);
+
+            await wait(duration * 1000, cancelRef);
+
+            if (!cancelRef.cancelled) {
+              clearPositionUpdater();
+            }
+          }
         }
-
-        // Déplacement
-        if (step.move?.type === 'walk') {
-          await walkTo(
-            target.x, target.y,
-            step.move.speed || 200,
-            step.move.walkAnimation || 'Running',
-            step.autoFace ?? true,
-            cancelRef
-          );
-        } else {
-          if (typeof window.characterMoveTo === 'function') window.characterMoveTo(target.x, target.y);
-        }
-
-        if (cancelRef.cancelled) break;
-
-        // Animation et orientation
-        if (typeof window.characterPlay === 'function') window.characterPlay(step.animation);
-        if (typeof window.characterRotate === 'function') {
-          window.characterRotate(step.rotation.x, step.rotation.y, step.rotation.z);
-        }
-
-        // Champs de dialogue
-        applyFieldOffsets(step.bubble, step.form);
-
- // Gestion de la position selon le mode
-clearPositionUpdater();
-
-if (point.mode === 'follow') {
-  const followInterval = setInterval(() => {
-    if (cancelRef.cancelled) {
-      clearInterval(followInterval);
-      return;
-    }
-
-    const pos = resolvePoint(point);
-    if (typeof window.characterMoveTo === 'function') {
-      window.characterMoveTo(pos.x, pos.y);
-    }
-  }, 100);
-
-  activePositionCleanup = () => clearInterval(followInterval);
-
-  if (step.duration != null) {
-    await wait(step.duration * 1000);
-    clearPositionUpdater();
-  }
-
-} else {
-  // Position proportionnelle à l'écran
-  const xPct = target.x / window.innerWidth;
-  const yPct = target.y / window.innerHeight;
-
-  const onResize = () => {
-    if (typeof window.characterMoveTo === 'function') {
-      window.characterMoveTo(
-        xPct * window.innerWidth,
-        yPct * window.innerHeight
-      );
-    }
-  };
-
-  window.addEventListener('resize', onResize);
-
-  activePositionCleanup = () => {
-    window.removeEventListener('resize', onResize);
-  };
-  if (step.duration != null) {
-    await wait(step.duration * 1000);
-    clearPositionUpdater();
-  }
-}
-
-// Fin de l'étape
       }
-    }
 
-// Fin de la scène
-    if (!cancelRef.cancelled) {
-      // Fin de scène
+      if (cancelRef.cancelled) return;
+
+      // Fin de scène : on arrête les mises à jour de position.
+      clearPositionUpdater();
+
       const endAction = scene.end?.action || 'hold';
-      if (endAction === 'chain' && scene.end?.next != null) {
-        const next = _scenes.find((s) => s.id === scene.end.next);
-        if (next) runScene(next);
-      }
+      const nextId = scene.end?.next;
+
       runningScene = null;
+
+      // Signale la fin aux scènes qui attendent cet événement.
+      document.dispatchEvent(new CustomEvent('b88:scene-ended', {
+        detail: { id: scene.id }
+      }));
+
+      // Enchaînement éventuel.
+      if (endAction === 'chain' && nextId !== null && nextId !== undefined) {
+        const nextScene = scenes.find(
+          item => String(item.id) === String(nextId)
+        );
+
+        if (nextScene) {
+          runScene(nextScene, { preview });
+        } else {
+          console.warn(
+            `[scene-reader] Scène suivante introuvable : ${nextId}.`
+          );
+        }
+      }
+
+    } catch (error) {
+      console.error(
+        `[scene-reader] Erreur pendant la scène ${scene.id} :`,
+        error
+      );
+
+      clearPositionUpdater();
+
+      if (runningScene?.id === scene.id) {
+        runningScene = null;
+      }
     }
   }
 
   // ---------------------------------------------------------------
-  // Déclencheurs
+  // DÉCLENCHEURS
   // ---------------------------------------------------------------
-
-  let _scenes = [];
-  let _tourActive = false;
-
-  // La visite guidée met le lecteur en pause
-  document.addEventListener('b88:tour-start', () => { _tourActive = true; });
-  document.addEventListener('b88:tour-end', () => { _tourActive = false; });
 
   function tryRun(scene) {
-    if (_tourActive) return;
-    runScene(scene);
+    if (!tourActive) runScene(scene);
   }
 
-  const _observers = new Map();   // sceneId → IntersectionObserver
-  const _intervals = new Map();   // sceneId → setInterval
-  const _listeners = new Map();   // sceneId → { target, type, fn }
+  function addTriggerCleanup(cleanup) {
+    triggerCleanups.push(cleanup);
+  }
 
   function attachTrigger(scene) {
-    const t = scene.trigger;
-    const delay = (t.delay || 0) * 1000;
+    const trigger = scene.trigger || {};
+    const type = trigger.type;
+    const delay = Math.max(0, Number(trigger.delay) || 0) * 1000;
 
-    // ---- Chargement ----
-    if (t.type === 'load') {
-      setTimeout(() => tryRun(scene), delay);
+    let pendingTimer = null;
+
+    function fire() {
+      if (pendingTimer) clearTimeout(pendingTimer);
+
+      pendingTimer = setTimeout(() => {
+        pendingTimer = null;
+        tryRun(scene);
+      }, delay);
+    }
+
+    function cleanupTimer() {
+      if (pendingTimer) {
+        clearTimeout(pendingTimer);
+        pendingTimer = null;
+      }
+    }
+
+    // Chargement de la page
+    if (type === 'load') {
+      fire();
+      addTriggerCleanup(cleanupTimer);
       return;
     }
 
-    // ---- Élément entre dans l'écran ----
-    if (t.type === 'enter') {
-      const el = document.querySelector(t.selector);
-      if (!el) return;
+    // Entrée d'un élément dans l'écran
+    if (type === 'enter') {
+      const element = getElement(trigger.selector);
+      if (!element) return;
 
-      const obs = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
           if (entry.isIntersecting) {
-            setTimeout(() => tryRun(scene), delay);
-            if (t.leave === 'stop' || t.leave === 'revert') {
-              // géré à la sortie ci-dessous
+            fire();
+          } else if (trigger.leave === 'stop') {
+            cleanupTimer();
+
+            if (runningScene?.id === scene.id) {
+              cancelCurrentScene();
             }
-          } else if (t.leave === 'stop' || t.leave === 'revert') {
-            if (runningScene?.id === scene.id) runningScene.cancel();
           }
         });
-      }, { threshold: t.threshold ?? 0.5 });
-
-      obs.observe(el);
-      _observers.set(scene.id, obs);
-      return;
-    }
-
-    // ---- Scroll % ----
-    if (t.type === 'scroll') {
-      let fired = false;
-      const onScroll = () => {
-        const pct = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
-        if (!fired && pct >= (t.scrollPct ?? 50)) {
-          fired = true;
-          setTimeout(() => tryRun(scene), delay);
-        }
-        if (fired && pct < (t.scrollPct ?? 50) && t.leave === 'revert') {
-          fired = false;
-          if (runningScene?.id === scene.id) runningScene.cancel();
-        }
-      };
-      window.addEventListener('scroll', onScroll, { passive: true });
-      _listeners.set(scene.id, { target: window, type: 'scroll', fn: onScroll });
-      return;
-    }
-
-    // ---- Clic sur l'avatar ----
-    if (t.type === 'avatar-click') {
-      const fn = () => setTimeout(() => tryRun(scene), delay);
-      document.addEventListener('b88:character-click', fn);
-      _listeners.set(scene.id, { target: document, type: 'b88:character-click', fn });
-      return;
-    }
-
-    // ---- Clic sur un élément ----
-    if (t.type === 'element-click') {
-      const el = document.querySelector(t.selector);
-      if (!el) return;
-      const fn = () => setTimeout(() => tryRun(scene), delay);
-      el.addEventListener('click', fn);
-      _listeners.set(scene.id, { target: el, type: 'click', fn });
-      return;
-    }
-
-    // ---- Survol ----
-    if (t.type === 'hover') {
-      const el = document.querySelector(t.selector);
-      if (!el) return;
-      const fnIn = () => setTimeout(() => tryRun(scene), delay);
-      const fnOut = () => { if (runningScene?.id === scene.id) runningScene.cancel(); };
-      el.addEventListener('mouseenter', fnIn);
-      if (t.leave !== 'hold') el.addEventListener('mouseleave', fnOut);
-      _listeners.set(scene.id, { target: el, type: 'mouseenter', fn: fnIn });
-      return;
-    }
-
-    // ---- Inactivité ----
-    if (t.type === 'idle') {
-      const idleMs = (t.idleSeconds ?? 10) * 1000;
-      let timer = null;
-      const reset = () => {
-        clearTimeout(timer);
-        timer = setTimeout(() => tryRun(scene), idleMs + delay);
-      };
-      ['mousemove', 'keydown', 'scroll', 'click', 'touchstart'].forEach((ev) => {
-        window.addEventListener(ev, reset, { passive: true });
+      }, {
+        threshold: Math.min(
+          1,
+          Math.max(0, Number(trigger.threshold ?? 0.5))
+        )
       });
-      reset();
+
+      observer.observe(element);
+
+      addTriggerCleanup(() => {
+        observer.disconnect();
+        cleanupTimer();
+      });
+
       return;
     }
 
-    // ---- Événement personnalisé ----
-    if (t.type === 'event') {
-      const fn = () => setTimeout(() => tryRun(scene), delay);
-      document.addEventListener(t.eventName, fn);
-      _listeners.set(scene.id, { target: document, type: t.eventName, fn });
+    // Pourcentage de défilement
+    if (type === 'scroll') {
+      let fired = false;
+
+      const onScroll = () => {
+        const maxScroll = document.documentElement.scrollHeight
+          - window.innerHeight;
+
+        const percentage = maxScroll > 0
+          ? window.scrollY / maxScroll * 100
+          : 0;
+
+        const threshold = Number(trigger.scrollPct ?? 50);
+
+        if (!fired && percentage >= threshold) {
+          fired = true;
+          fire();
+        }
+
+        if (
+          fired &&
+          percentage < threshold &&
+          trigger.leave === 'stop'
+        ) {
+          fired = false;
+          cleanupTimer();
+
+          if (runningScene?.id === scene.id) {
+            cancelCurrentScene();
+          }
+        }
+      };
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+
+      addTriggerCleanup(() => {
+        window.removeEventListener('scroll', onScroll);
+        cleanupTimer();
+      });
+
       return;
+    }
+
+    // Clic sur l'avatar
+    if (type === 'avatar-click') {
+      const listener = fire;
+
+      document.addEventListener('b88:character-click', listener);
+
+      addTriggerCleanup(() => {
+        document.removeEventListener('b88:character-click', listener);
+        cleanupTimer();
+      });
+
+      return;
+    }
+
+    // Clic sur un élément
+    if (type === 'element-click') {
+      const element = getElement(trigger.selector);
+      if (!element) return;
+
+      element.addEventListener('click', fire);
+
+      addTriggerCleanup(() => {
+        element.removeEventListener('click', fire);
+        cleanupTimer();
+      });
+
+      return;
+    }
+
+    // Survol d'un élément
+    if (type === 'hover') {
+      const element = getElement(trigger.selector);
+      if (!element) return;
+
+      const onEnter = fire;
+
+      const onLeave = () => {
+        cleanupTimer();
+
+        if (
+          trigger.leave === 'stop' &&
+          runningScene?.id === scene.id
+        ) {
+          cancelCurrentScene();
+        }
+      };
+
+      element.addEventListener('mouseenter', onEnter);
+
+      if (trigger.leave === 'stop') {
+        element.addEventListener('mouseleave', onLeave);
+      }
+
+      addTriggerCleanup(() => {
+        element.removeEventListener('mouseenter', onEnter);
+        element.removeEventListener('mouseleave', onLeave);
+        cleanupTimer();
+      });
+
+      return;
+    }
+
+    // Inactivité
+    if (type === 'idle') {
+      const idleMs = Math.max(
+        0,
+        Number(trigger.idleSeconds ?? 10)
+      ) * 1000;
+
+      let idleTimer = null;
+
+      const reset = () => {
+        clearTimeout(idleTimer);
+
+        idleTimer = setTimeout(() => {
+          fire();
+        }, idleMs);
+      };
+
+      const events = [
+        'mousemove',
+        'keydown',
+        'scroll',
+        'click',
+        'touchstart'
+      ];
+
+      events.forEach(eventName => {
+        window.addEventListener(eventName, reset, { passive: true });
+      });
+
+      reset();
+
+      addTriggerCleanup(() => {
+        clearTimeout(idleTimer);
+        cleanupTimer();
+
+        events.forEach(eventName => {
+          window.removeEventListener(eventName, reset);
+        });
+      });
+
+      return;
+    }
+
+    // Fin d'une autre scène
+    if (type === 'after-scene') {
+      const expectedId = String(trigger.afterScene);
+
+      const listener = event => {
+        if (String(event.detail?.id) === expectedId) {
+          fire();
+        }
+      };
+
+      document.addEventListener('b88:scene-ended', listener);
+
+      addTriggerCleanup(() => {
+        document.removeEventListener('b88:scene-ended', listener);
+        cleanupTimer();
+      });
+
+      return;
+    }
+
+    // Événement personnalisé
+    if (type === 'event') {
+      if (!trigger.eventName) return;
+
+      const listener = fire;
+
+      document.addEventListener(trigger.eventName, listener);
+
+      addTriggerCleanup(() => {
+        document.removeEventListener(trigger.eventName, listener);
+        cleanupTimer();
+      });
     }
   }
 
   // ---------------------------------------------------------------
-  // Initialisation
+  // INITIALISATION
   // ---------------------------------------------------------------
 
   function init(data) {
-    if (!data || data.version !== 2 || !Array.isArray(data.scenes)) {
+    if (
+      !data ||
+      data.version !== 2 ||
+      !Array.isArray(data.scenes)
+    ) {
       console.warn('[scene-reader] JSON invalide ou version incorrecte.');
       return;
     }
 
+    // Nettoyage d'une éventuelle initialisation précédente.
+    triggerCleanups.forEach(cleanup => cleanup());
+    triggerCleanups.length = 0;
+
+    cancelCurrentScene();
+    clearPositionUpdater();
+
     const page = currentPage();
     const device = currentDevice();
 
-    _scenes = data.scenes.filter((s) =>
-      s.enabled &&
-      s.pages.includes(page) &&
-      s.devices.includes(device)
-    );
+    scenes = data.scenes.filter(scene => {
+      return (
+        scene &&
+        scene.enabled === true &&
+        Array.isArray(scene.pages) &&
+        scene.pages.includes(page) &&
+        Array.isArray(scene.devices) &&
+        scene.devices.includes(device)
+      );
+    });
 
-    _scenes.sort((a, b) => (b.priority || 0) - (a.priority || 0));
+    scenes.sort((a, b) => {
+      return (Number(b.priority) || 0) - (Number(a.priority) || 0);
+    });
 
-    // Attendre que l'avatar soit prêt avant d'attacher les déclencheurs.
-    if (window.characterAnimations && window.characterAnimations.length) {
-      _scenes.forEach(attachTrigger);
-      console.info(`[scene-reader] ${_scenes.length} scène(s) chargée(s) pour "${page}" / "${device}".`);
+    const attachAll = () => {
+      scenes.forEach(attachTrigger);
+
+      console.info(
+        `[scene-reader] ${scenes.length} scène(s) chargée(s) pour "${page}" / "${device}".`
+      );
+    };
+
+    if (
+      window.characterAnimations &&
+      window.characterAnimations.length
+    ) {
+      attachAll();
     } else {
-      document.addEventListener('b88:animations-ready', () => {
-        _scenes.forEach(attachTrigger);
-        console.info(`[scene-reader] ${_scenes.length} scène(s) chargée(s) pour "${page}" / "${device}".`);
-      }, { once: true });
+      document.addEventListener('b88:animations-ready', attachAll, {
+        once: true
+      });
     }
   }
 
   // ---------------------------------------------------------------
-  // API publique
+  // API PUBLIQUE
   // ---------------------------------------------------------------
 
-  // Lecture d'un fichier JSON via fetch
   window.b88LoadScenes = function (url) {
     fetch(url)
-      .then((r) => r.json())
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        return response.json();
+      })
       .then(init)
-      .catch((e) => console.warn('[scene-reader] Impossible de charger', url, e));
+      .catch(error => {
+        console.warn('[scene-reader] Impossible de charger le JSON :', error);
+      });
   };
 
-  // Lecture directe d'un objet (utile pour le panneau admin)
   window.b88InitScenes = init;
 
-  // Jouer une scène directement (utilisé par le bouton aperçu du panneau admin)
+  // L'aperçu admin ne consomme pas les conditions de fréquence.
   window.b88PlayScene = function (scene) {
-    runScene(scene);
+    runScene(scene, { preview: true });
   };
 
 })();
