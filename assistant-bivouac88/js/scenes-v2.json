@@ -78,7 +78,7 @@
     {
       "id": 3,
       "name": "Welcome",
-      "enabled": true,
+      "enabled": false,
       "priority": 0,
       "pages": [
         "test"
@@ -151,7 +151,7 @@
     {
       "id": 4,
       "name": "Scène 4 : Excited",
-      "enabled": true,
+      "enabled": false,
       "priority": 0,
       "pages": [
         "test"
