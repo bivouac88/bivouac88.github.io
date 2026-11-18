@@ -1067,30 +1067,103 @@ secHitbox.head.addEventListener('click', () => {
   const trigLeaveRow = makeRow('Quand le déclencheur disparaît (sortie d\'écran, fin de survol)', trigLeave);
   secTrigger.content.appendChild(trigLeaveRow);
 
-  const TRIGGER_VALUE_INFO = {
-    enter: ['Seuil de visibilité (0 à 1)', '0.5'],
-    scroll: ['Position dans la page (0 à 100 %)', '50'],
-    idle: ['Secondes sans bouger', '10'],
-    'after-scene': ['ID de la scène précédente', ''],
-    event: ['Nom de l\'événement', 'b88:'],
-  };
+const TRIGGER_VALUE_INFO = {
+  enter: {
+    label: 'Seuil de visibilité',
+    placeholder: 'Exemple : 0.5',
+    help: 'Déclenche la scène lorsque l’élément devient suffisamment visible. 0 = aucun seuil, 1 = entièrement visible.',
+    type: 'number',
+    min: 0,
+    max: 1,
+    step: 0.05,
+    value: '0.5',
+  },
+  scroll: {
+    label: 'Pourcentage de défilement',
+    placeholder: 'Exemple : 50',
+    help: 'Définit le pourcentage de défilement auquel la scène doit se déclencher.',
+    type: 'number',
+    min: 0,
+    max: 100,
+    step: 1,
+    value: '50',
+  },
+  idle: {
+    label: 'Durée sans activité (secondes)',
+    placeholder: 'Exemple : 10',
+    help: 'La scène se déclenche après cette durée sans activité de l’utilisateur.',
+    type: 'number',
+    min: 0,
+    step: 1,
+    value: '10',
+  },
+  'after-scene': {
+    label: 'Identifiant de la scène précédente',
+    placeholder: 'Exemple : 2',
+    help: 'La scène démarre lorsque la scène indiquée est terminée.',
+    type: 'number',
+    min: 1,
+    step: 1,
+    value: '',
+  },
+  event: {
+    label: 'Nom de l’événement personnalisé',
+    placeholder: 'Exemple : b88:mon-evenement',
+    help: 'La scène démarre lorsqu’un événement portant exactement ce nom est envoyé.',
+    type: 'text',
+    value: 'b88:',
+  },
+};
 
-  function refreshTriggerUI(resetValue) {
-    const type = trigType.value;
-    const info = TRIGGER_VALUE_INFO[type];
+const trigHelp = makeLabel('', {
+  fontSize: '10px',
+  marginBottom: '7px',
+});
+trigHelp.style.color = '#c5a879';
+secTrigger.content.insertBefore(trigHelp, trigSelectorRow);
 
-    trigSelectorRow.style.display = ['enter', 'element-click', 'hover'].includes(type) ? 'block' : 'none';
-    trigValueRow.style.display = info ? 'block' : 'none';
-    trigLeaveRow.style.display = ['enter', 'scroll', 'hover'].includes(type) ? 'block' : 'none';
+function refreshTriggerUI(resetValue) {
+  const type = trigType.value;
+  const info = TRIGGER_VALUE_INFO[type];
 
-    if (info) {
-      trigValueLabel.textContent = info[0];
-      if (resetValue) trigValue.value = info[1];
+  const needsSelector = ['enter', 'element-click', 'hover'].includes(type);
+
+  trigSelectorRow.style.display = needsSelector ? 'block' : 'none';
+  trigValueRow.style.display = info ? 'block' : 'none';
+  trigLeaveRow.style.display = ['enter', 'scroll', 'hover'].includes(type)
+    ? 'block'
+    : 'none';
+
+  if (info) {
+    trigValueLabel.textContent = info.label;
+    trigValue.placeholder = info.placeholder;
+    trigValue.type = info.type;
+
+    trigValue.min = info.min ?? '';
+    trigValue.max = info.max ?? '';
+    trigValue.step = info.step ?? '';
+
+    trigHelp.textContent = info.help;
+
+    if (resetValue) {
+      trigValue.value = info.value;
     }
+  } else {
+    trigHelp.textContent = {
+      load: 'La scène démarre au chargement de la page.',
+      'avatar-click': 'La scène démarre lorsque le visiteur clique sur le personnage.',
+      'element-click': 'La scène démarre lorsque le visiteur clique sur l’élément choisi.',
+      hover: 'La scène démarre lorsque le visiteur passe la souris sur l’élément choisi.',
+    }[type] || '';
   }
 
-  trigType.addEventListener('change', () => refreshTriggerUI(true));
-  refreshTriggerUI(true);
+  if (needsSelector) {
+    trigSelector.placeholder = 'Exemple : #photos ou .mon-element';
+  }
+}
+
+trigType.addEventListener('change', () => refreshTriggerUI(true));
+refreshTriggerUI(true);
 
   function buildTrigger() {
     const type = trigType.value;
