@@ -232,8 +232,8 @@
       "id": "tour",
       "label": "Visite guidée",
       "keywords": [
-        "visite guidée", "visite", "tutoriel", "guide",
-        "aide", "comment visiter"
+      "visite guidée", "visite", "tutoriel", "guide",
+      "comment visiter"
       ],
       "answers": [
         "Une visite guidée interactive est prévue pour présenter les principales zones du site. Elle restera facultative et pourra être quittée à tout moment."
@@ -254,5 +254,55 @@
         "Le site peut proposer un lien de soutien facultatif. Le voyage reste indépendant : le soutien n'influence ni l'itinéraire ni les décisions."
       ]
     }
+    
+,
+{
+  "id": "greeting",
+  "label": "Salutations",
+  "keywords": ["bonjour", "salut", "coucou", "hello", "bonsoir"],
+  "answers": [
+    "Salut ! Bienvenue dans mon petit coin de voyage. Qu'est-ce que tu veux découvrir ?",
+    "Bonjour ! Installe-toi, on peut discuter du voyage ou du site.",
+    "Hey ! Toujours prêt à parler vélo, voyage et aventure."
+  ]
+},
+{
+  "id": "politeness",
+  "label": "Politesse et au revoir",
+  "keywords": ["merci", "merci beaucoup", "au revoir", "à bientôt", "bonne journée", "bonne soirée", "à plus"],
+  "answers": [
+    "Avec plaisir ! Bonne route à toi.",
+    "Pas de souci ! Reviens quand tu veux.",
+    "Merci à toi pour ta visite. À bientôt !"
+  ]
+},
+{
+  "id": "identity",
+  "label": "Identité du Bivouaciste",
+  "keywords": ["qui es-tu", "tu es qui", "c'est quoi ton nom", "comment tu t'appelles", "tu t'appelles comment", "présente-toi"],
+  "answers": [
+    "Moi, c'est le Bivouaciste ! Je suis le compagnon virtuel de Bivouac88. Mon boulot : te faire découvrir le projet, répondre à tes questions et discuter avec toi.",
+    "Je suis le Bivouaciste, l'assistant du site Bivouac88. Un compagnon numérique avec un faible pour les voyages à vélo et la liberté."
+  ]
+},
+{
+  "id": "help",
+  "label": "Aide et possibilités",
+  "keywords": ["que peux-tu faire", "que puis-je te demander", "qu'est-ce que je peux te demander", "je ne sais pas quoi demander", "aide-moi", "j'ai besoin d'aide", "comment tu peux m'aider"],
+  "answers": [
+    "Tu peux me poser des questions sur Bivouac88, le voyage, les étapes, les photos, les cartes, les statistiques ou la pêche et la météo. Tu peux aussi simplement discuter avec moi.",
+    "Je peux te présenter le projet, t'aider à naviguer sur le site et répondre aux questions sur ses différentes rubriques. Essaie simplement de me demander ce qui t'intéresse."
+  ]
+},
+{
+  "id": "smalltalk",
+  "label": "Petite conversation",
+  "keywords": ["ça va", "comment ça va", "comment vas-tu", "tu vas bien", "comment tu vas", "quoi de neuf", "tu fais quoi"],
+  "answers": [
+    "Ça roule ! Enfin, façon de parler : je suis plutôt du genre à rester derrière mon écran. Et toi ?",
+    "Tout va bien au bivouac ! Je suis là pour discuter et répondre à tes questions.",
+    "Pas grand-chose de neuf, je garde un œil sur le voyage. Et toi, quoi de beau ?"
+  ]
+}
   ]
 }
