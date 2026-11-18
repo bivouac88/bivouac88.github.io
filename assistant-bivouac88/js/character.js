@@ -272,11 +272,39 @@ function isOverCharacter(mx, my) {
   const bounds = window.characterGetScreenBounds();
   if (!bounds) return false;
 
+  let hitbox = {
+    width: 140,
+    height: 145,
+    offsetX: 0,
+    offsetY: 0,
+  };
+
+  try {
+    const saved = JSON.parse(
+      localStorage.getItem('b88-admin-hitbox-settings')
+    );
+
+    if (saved && typeof saved === 'object') {
+      const width = Number(saved.width);
+      const height = Number(saved.height);
+      const offsetX = Number(saved.offsetX);
+      const offsetY = Number(saved.offsetY);
+
+      if (Number.isFinite(width) && width > 0) hitbox.width = width;
+      if (Number.isFinite(height) && height > 0) hitbox.height = height;
+      if (Number.isFinite(offsetX)) hitbox.offsetX = offsetX;
+      if (Number.isFinite(offsetY)) hitbox.offsetY = offsetY;
+    }
+  } catch (e) {}
+
+  const centerX = (bounds.left + bounds.right) / 2 + hitbox.offsetX;
+  const centerY = (bounds.top + bounds.bottom) / 2 + hitbox.offsetY;
+
   return (
-    mx >= bounds.left - CLICK_PADDING_PX &&
-    mx <= bounds.right + CLICK_PADDING_PX &&
-    my >= bounds.top - CLICK_PADDING_PX &&
-    my <= bounds.bottom + CLICK_PADDING_PX
+    mx >= centerX - hitbox.width / 2 &&
+    mx <= centerX + hitbox.width / 2 &&
+    my >= centerY - hitbox.height / 2 &&
+    my <= centerY + hitbox.height / 2
   );
 }
 
