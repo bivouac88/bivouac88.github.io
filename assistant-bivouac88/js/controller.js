@@ -1284,8 +1284,16 @@
   const exportBtn = makeButton('📤 Exporter JSON', { marginBottom: '6px' });
   secSaved.content.appendChild(exportBtn);
 
+  const pageFilter = makeSelect(
+    [['all', 'Toutes les pages'], ...PAGES],
+    'all'
+  );
+  secSaved.content.appendChild(makeRow('Filtrer par page', pageFilter));
+
   const sceneList = document.createElement('div');
   secSaved.content.appendChild(sceneList);
+
+  pageFilter.addEventListener('change', renderSceneList);
 
   function buildSceneFromEditor() {
     const pages = PAGES.map(([v]) => v).filter((v) => pageChecks[v].checked);
