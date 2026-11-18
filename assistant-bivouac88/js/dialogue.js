@@ -1,6 +1,32 @@
-
 import { loadKnowledge } from "./knowledge.js";
 import { createEngine } from "./engine.js";
+
+function loadCompromise() {
+  if (typeof window.frCompromise === "function") return;
+
+  const script = document.createElement("script");
+
+  script.src = new URL(
+    "../bibliotheques/compromise/fr-compromise.min.js",
+    import.meta.url
+  ).href;
+
+  script.onload = () => {
+    if (typeof window.frCompromise === "function") {
+      console.info("[Bivouaciste] Compromise chargé.");
+    } else {
+      console.warn("[Bivouaciste] Compromise non disponible.");
+    }
+  };
+
+  script.onerror = () => {
+    console.warn("[Bivouaciste] Impossible de charger Compromise.");
+  };
+
+  document.head.appendChild(script);
+}
+
+loadCompromise();
 
 const character = document.getElementById("b88-character");
 
