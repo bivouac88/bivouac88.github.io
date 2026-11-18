@@ -1,5 +1,7 @@
+
 import { loadKnowledge } from "./knowledge.js";
 import { createEngine } from "./engine.js";
+import { getWelcomeMessage } from "./personality.js";
 
 function loadCompromise() {
   if (typeof window.frCompromise === "function") return;
@@ -13,14 +15,14 @@ function loadCompromise() {
 
   script.onload = () => {
     if (typeof window.frCompromise === "function") {
-      console.info("[Bivouaciste] Compromise chargé.");
+      console.info("[Niamh] Compromise chargé.");
     } else {
-      console.warn("[Bivouaciste] Compromise non disponible.");
+      console.warn("[Niamh] Compromise non disponible.");
     }
   };
 
   script.onerror = () => {
-    console.warn("[Bivouaciste] Impossible de charger Compromise.");
+    console.warn("[Niamh] Impossible de charger Compromise.");
   };
 
   document.head.appendChild(script);
@@ -31,7 +33,7 @@ loadCompromise();
 const character = document.getElementById("b88-character");
 
 if (!character) {
-  console.warn("Le Bivouaciste est introuvable.");
+  console.warn("Le personnage est introuvable.");
 } else {
   initDialogue(character);
 }
@@ -87,7 +89,6 @@ async function initDialogue(character) {
       const margin = 10;
       const dialogueWidth = dialogue.offsetWidth;
 
-      // Centrage horizontal
       let left =
         (bounds.left + bounds.right) / 2 - dialogueWidth / 2;
 
@@ -96,12 +97,10 @@ async function initDialogue(character) {
         Math.min(left, window.innerWidth - dialogueWidth - margin)
       );
 
-      // Bulle au-dessus de la tête
       bubble.style.width = `${dialogueWidth}px`;
       bubble.style.left = `${left}px`;
       bubble.style.top = `${bounds.top - bubble.offsetHeight - gap}px`;
 
-      // Champ de saisie sous les pieds
       form.style.width = `${dialogueWidth}px`;
       form.style.left = `${left}px`;
       form.style.top = `${bounds.bottom + gap}px`;
@@ -120,16 +119,16 @@ async function initDialogue(character) {
     bubble.classList.add("visible");
   }
 
-function hideDialogue() {
-  opened = false;
-  dialogue.classList.remove("active");
-  bubble.classList.remove("visible");
-  choices.replaceChildren();
+  function hideDialogue() {
+    opened = false;
+    dialogue.classList.remove("active");
+    bubble.classList.remove("visible");
+    choices.replaceChildren();
 
-  setTimeout(() => {
-    document.dispatchEvent(new CustomEvent("b88:dialogue-close"));
-  }, 0);
-}
+    setTimeout(() => {
+      document.dispatchEvent(new CustomEvent("b88:dialogue-close"));
+    }, 0);
+  }
 
   function openDialogue() {
     opened = true;
@@ -137,9 +136,11 @@ function hideDialogue() {
     choices.replaceChildren();
 
     if (!engine) {
-      showBubble("Oups... Mon cerveau est encore dans mes sacoches. Réessaie dans un instant !");
+      showBubble(
+        "Oups... Mon cerveau est encore dans mes sacoches. Réessaie dans un instant !"
+      );
     } else {
-      showBubble("Salut voyageur ! Qu'est-ce que tu aimerais savoir ?");
+      showBubble(getWelcomeMessage());
     }
 
     input.focus();
@@ -211,7 +212,7 @@ function hideDialogue() {
     }
   }
 
-  // --- Envoi du message ---
+  // --- Envoi des messages ---
 
   form.addEventListener("submit", event => {
     event.preventDefault();
@@ -222,7 +223,9 @@ function hideDialogue() {
     input.value = "";
 
     if (!engine) {
-      showBubble("Je n'arrive pas encore à réfléchir. Réessaie un peu plus tard !");
+      showBubble(
+        "Je n'arrive pas encore à réfléchir. Réessaie un peu plus tard !"
+      );
       return;
     }
 
