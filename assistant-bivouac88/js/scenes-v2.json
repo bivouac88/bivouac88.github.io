@@ -78,7 +78,7 @@
     {
       "id": 3,
       "name": "Welcome",
-      "enabled": false,
+      "enabled": true,
       "priority": 0,
       "pages": [
         "test"
