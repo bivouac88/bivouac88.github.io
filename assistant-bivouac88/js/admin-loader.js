@@ -22,7 +22,7 @@
     // 2. Vérifier si une scène concerne cette page et cet appareil
     const page = document.body.dataset.page || '';
     const width = window.innerWidth;
-    const device = width < 768 ? 'mobile' : width < 1024 ? 'tablet' : 'pc';
+    const device = width < 768 ? 'mobile' : 'pc';
 
     const matchingScenes = data.scenes.filter(scene =>
       scene.enabled &&
