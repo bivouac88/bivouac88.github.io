@@ -1,4 +1,3 @@
-
 import { detectIntent, normalizeText } from "./intent.js";
 import { pickAnswer } from "./knowledge.js";
 
@@ -6,7 +5,12 @@ export function createEngine(knowledge) {
   let fallbackIndex = 0;
 
   const history = [];
+  const recentTopics = [];
+
   let currentIntent = null;
+
+  const MAX_HISTORY = 24;
+  const MAX_TOPICS = 8;
 
   const conversationalIntents = new Set([
     "greeting",
@@ -16,18 +20,27 @@ export function createEngine(knowledge) {
     "smalltalk"
   ]);
 
+  // --------------------------------------------------
+  // MÉMOIRE DES ÉCHANGES
+  // --------------------------------------------------
+
   function remember(role, text, intentId = null) {
     history.push({
       role,
       text,
       intentId,
+      topicId: currentIntent?.id || null,
       timestamp: Date.now()
     });
 
-    if (history.length > 24) {
+    if (history.length > MAX_HISTORY) {
       history.shift();
     }
   }
+
+  // --------------------------------------------------
+  // GESTION DES INTENTIONS
+  // --------------------------------------------------
 
   function getIntent(intentId) {
     return (knowledge.intents || []).find(
@@ -41,10 +54,34 @@ export function createEngine(knowledge) {
     return intent.related.filter(id => getIntent(id));
   }
 
-  function buildAnswer(intent) {
-    if (!conversationalIntents.has(intent.id)) {
-      currentIntent = intent;
+  function rememberTopic(intent) {
+    if (!intent || conversationalIntents.has(intent.id)) {
+      return;
     }
+
+    currentIntent = intent;
+
+    const existingIndex = recentTopics.findIndex(
+      topic => topic.id === intent.id
+    );
+
+    if (existingIndex !== -1) {
+      recentTopics.splice(existingIndex, 1);
+    }
+
+    recentTopics.unshift({
+      id: intent.id,
+      label: intent.label,
+      timestamp: Date.now()
+    });
+
+    if (recentTopics.length > MAX_TOPICS) {
+      recentTopics.pop();
+    }
+  }
+
+  function buildAnswer(intent) {
+    rememberTopic(intent);
 
     return {
       type: "answer",
@@ -54,6 +91,74 @@ export function createEngine(knowledge) {
       action: intent.action || null,
       related: getRelatedIntents(intent),
       links: intent.links || []
+    };
+  }
+
+  // --------------------------------------------------
+  // RECONNAISSANCE DES RELANCES
+  // --------------------------------------------------
+
+  function isFollowUp(question) {
+    const text = normalizeText(question);
+
+    const patterns = [
+      /^(et|mais|alors|du coup)\b/,
+      /^(combien|pourquoi|comment|ou|quand|quel|quelle|quels|quelles)\b/,
+      /^(ca|cela|ceci|cette|cet|ces|celui|celle|ceux|celles)\b/,
+      /^(la bas|ici|ensuite|apres|concernant)\b/,
+      /^(tu peux|peux tu|est ce que tu peux)\b/,
+      /\b(en dire plus|davantage|plus de details)\b/,
+      /\b(ca coute|quel prix|combien ca)\b/,
+      /\b(son prix|sa distance|ses dimensions|son fonctionnement)\b/
+    ];
+
+    return patterns.some(pattern => pattern.test(text));
+  }
+
+  // --------------------------------------------------
+  // RETROUVER LE SUJET PERTINENT
+  // --------------------------------------------------
+
+  function resolveContext(question) {
+    if (!recentTopics.length) return null;
+
+    const text = normalizeText(question);
+
+    // Une référence explicite au sujet précédent.
+    if (
+      /\b(sujet precedent|ce dont on parlait avant|revenons a)\b/.test(text)
+    ) {
+      return recentTopics[1]
+        ? getIntent(recentTopics[1].id)
+        : currentIntent;
+    }
+
+    // Par défaut, on privilégie le sujet actif.
+    if (currentIntent) {
+      return currentIntent;
+    }
+
+    return getIntent(recentTopics[0].id);
+  }
+
+  // --------------------------------------------------
+  // RÉPONSES CONTEXTUELLES
+  // --------------------------------------------------
+
+  function contextualFallback(intent) {
+    if (!intent) {
+      return fallback();
+    }
+
+    return {
+      type: "contextual",
+      intentId: intent.id,
+      intentLabel: intent.label,
+      text:
+        `On parlait de ${intent.label.toLowerCase()}. ` +
+        "Je garde le fil de notre conversation, mais je n'ai pas encore " +
+        "l'information précise que tu demandes. Tu peux préciser ?",
+      related: getRelatedIntents(intent)
     };
   }
 
@@ -83,37 +188,9 @@ export function createEngine(knowledge) {
     };
   }
 
-
-function isFollowUp(question) {
-  const text = normalizeText(question);
-
-  const followUpPatterns = [
-    /^(et|mais|alors|du coup)\b/,
-    /^(combien|pourquoi|comment|ou|quand|quel|quelle|quels|quelles)\b/,
-    /^(ca|cela|ceci|cette|cet|ces|celui|celle|ceux|celles)\b/,
-    /^(la bas|ici|ensuite|apres|concernant)\b/,
-    /^(tu peux|peux tu|est ce que tu peux)\b/,
-    /\b(en dire plus|davantage|plus de details)\b/,
-    /\b(ca coute|quel prix|combien ca)\b/
-  ];
-
-  return followUpPatterns.some(pattern => pattern.test(text));
-}
-
-  function contextualFallback() {
-    const label = currentIntent.label.toLowerCase();
-
-    return {
-      type: "contextual",
-      intentId: currentIntent.id,
-      intentLabel: currentIntent.label,
-      text:
-        `Je garde en tête qu'on parlait de ${label}. ` +
-        "Je n'ai pas encore assez d'informations pour répondre précisément. " +
-        "Tu peux préciser ce que tu souhaites savoir ?",
-      related: getRelatedIntents(currentIntent)
-    };
-  }
+  // --------------------------------------------------
+  // TRAITEMENT DES MESSAGES
+  // --------------------------------------------------
 
   function saveExchange(result) {
     remember("assistant", result.text, result.intentId || null);
@@ -146,8 +223,12 @@ function isFollowUp(question) {
       };
     } else if (result.intent) {
       response = buildAnswer(result.intent);
-    } else if (currentIntent && isFollowUp(cleanQuestion)) {
-      response = contextualFallback();
+    } else if (isFollowUp(cleanQuestion)) {
+      const context = resolveContext(cleanQuestion);
+
+      response = context
+        ? contextualFallback(context)
+        : fallback(result.score, result.suggestions || []);
     } else {
       response = fallback(
         result.score,
@@ -175,17 +256,25 @@ function isFollowUp(question) {
     return response;
   }
 
+  // --------------------------------------------------
+  // ACCÈS À LA MÉMOIRE
+  // --------------------------------------------------
+
   function getHistory() {
     return history.map(message => ({ ...message }));
   }
 
   function getContext() {
-    return currentIntent
-      ? {
-          intentId: currentIntent.id,
-          intentLabel: currentIntent.label
-        }
-      : null;
+    return {
+      current: currentIntent
+        ? {
+            intentId: currentIntent.id,
+            intentLabel: currentIntent.label
+          }
+        : null,
+
+      recent: recentTopics.map(topic => ({ ...topic }))
+    };
   }
 
   return {
