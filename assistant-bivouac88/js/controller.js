@@ -1267,21 +1267,12 @@
   // Section : scènes enregistrées (sauvegarde, export, import)
   // ---------------------------------------------------------------
 
-const secSaved = makeSection('SCÈNES ENREGISTRÉES');
-const pageFilter = makeSelect(
-  [['all', 'Toutes les pages'], ...PAGES],
-  'all'
-);
-secSaved.content.appendChild(makeRow('Filtrer par page', pageFilter));
-const pageFilter = makeSelect(
-  [['all', 'Toutes les pages'], ...PAGES],
-  'all'
-);
-secSaved.content.appendChild(makeRow('Filtrer par page', pageFilter));
+  const secSaved = makeSection('SCÈNES ENREGISTRÉES');
 
-let scenes = Array.isArray(window.B88_SCENES_DATA?.scenes)
+  let scenes = Array.isArray(window.B88_SCENES_DATA?.scenes)
     ? clone(window.B88_SCENES_DATA.scenes)
     : [];
+
   let editingId = null;
 
   function nextSceneId() {
@@ -1302,8 +1293,7 @@ let scenes = Array.isArray(window.B88_SCENES_DATA?.scenes)
 
   const sceneList = document.createElement('div');
   secSaved.content.appendChild(sceneList);
-  pageFilter.addEventListener('change', renderSceneList);
-  pageFilter.addEventListener('change', renderSceneList);
+
   pageFilter.addEventListener('change', renderSceneList);
 
   function buildSceneFromEditor() {
