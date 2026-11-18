@@ -1,5 +1,10 @@
+
 import { detectIntent, normalizeText } from "./intent.js";
 import { pickAnswer } from "./knowledge.js";
+import {
+  getPersonalityAnswer,
+  personalizeIntentAnswer
+} from "./personality.js";
 
 export function createEngine(knowledge) {
   let fallbackIndex = 0;
@@ -80,14 +85,20 @@ export function createEngine(knowledge) {
     }
   }
 
-  function buildAnswer(intent) {
+  function buildAnswer(intent, question = "") {
     rememberTopic(intent);
+
+    const originalAnswer = pickAnswer(intent);
 
     return {
       type: "answer",
       intentId: intent.id,
       intentLabel: intent.label,
-      text: pickAnswer(intent),
+      text: personalizeIntentAnswer(
+        intent.id,
+        originalAnswer,
+        question
+      ),
       action: intent.action || null,
       related: getRelatedIntents(intent),
       links: intent.links || []
@@ -119,51 +130,46 @@ export function createEngine(knowledge) {
   // RETROUVER LE SUJET PERTINENT
   // --------------------------------------------------
 
+  function resolveContext(question) {
+    if (!recentTopics.length) return null;
 
-function resolveContext(question) {
-  if (!recentTopics.length) return null;
+    const text = normalizeText(question);
 
-  const text = normalizeText(question);
-
-  // Demande explicite de revenir au sujet précédent.
-  if (
-    /\b(sujet precedent|ce dont on parlait avant|revenons a|retournons a)\b/.test(text)
-  ) {
-    return recentTopics[1]
-      ? getIntent(recentTopics[1].id)
-      : currentIntent;
-  }
-
-  // Référence à un autre sujet évoqué précédemment.
-  if (
-    /\b(l autre|un autre sujet|celui d avant|celle d avant|le precedent|la precedente)\b/.test(text)
-  ) {
-    return recentTopics[1]
-      ? getIntent(recentTopics[1].id)
-      : null;
-  }
-
-  // Référence à plusieurs sujets.
-  if (/\b(les deux|tous les deux|comparer|compare)\b/.test(text)) {
-    return null;
-  }
-
-  // Recherche dans les derniers échanges utilisateur.
-  const previousUserMessages = history
-    .filter(message => message.role === "user" && message.intentId)
-    .slice()
-    .reverse();
-
-  for (const message of previousUserMessages) {
-    const intent = getIntent(message.intentId);
-
-    if (intent && !conversationalIntents.has(intent.id)) {
-      return intent;
+    if (
+      /\b(sujet precedent|ce dont on parlait avant|revenons a|retournons a)\b/.test(text)
+    ) {
+      return recentTopics[1]
+        ? getIntent(recentTopics[1].id)
+        : currentIntent;
     }
-  }
 
-  return currentIntent || getIntent(recentTopics[0].id);
-}
+    if (
+      /\b(l autre|un autre sujet|celui d avant|celle d avant|le precedent|la precedente)\b/.test(text)
+    ) {
+      return recentTopics[1]
+        ? getIntent(recentTopics[1].id)
+        : null;
+    }
+
+    if (/\b(les deux|tous les deux|comparer|compare)\b/.test(text)) {
+      return null;
+    }
+
+    const previousUserMessages = history
+      .filter(message => message.role === "user" && message.intentId)
+      .slice()
+      .reverse();
+
+    for (const message of previousUserMessages) {
+      const intent = getIntent(message.intentId);
+
+      if (intent && !conversationalIntents.has(intent.id)) {
+        return intent;
+      }
+    }
+
+    return currentIntent || getIntent(recentTopics[0].id);
+  }
 
   // --------------------------------------------------
   // RÉPONSES CONTEXTUELLES
@@ -220,76 +226,85 @@ function resolveContext(question) {
     remember("assistant", result.text, result.intentId || null);
   }
 
+  function ask(question) {
+    const cleanQuestion = String(question || "").trim();
 
-function ask(question) {
-  const cleanQuestion = String(question || "").trim();
+    if (!cleanQuestion) {
+      return {
+        type: "empty",
+        text: "Écris-moi une question et on regarde ça."
+      };
+    }
 
-  if (!cleanQuestion) {
-    return {
-      type: "empty",
-      text: "Écris-moi une question et on regarde ça."
-    };
-  }
+    // La personnalité traite uniquement les questions qui la concernent.
+    // Les autres questions continuent vers le moteur de compréhension.
+    const personalityAnswer = getPersonalityAnswer(cleanQuestion);
 
-  const result = detectIntent(
-    cleanQuestion,
-    knowledge.intents || []
-  );
+    if (personalityAnswer) {
+      remember("user", cleanQuestion, null);
 
-  // On identifie le sujet avant d'enregistrer le message.
-  if (result.intent) {
-    rememberTopic(result.intent);
-  }
+      saveExchange(personalityAnswer);
 
-  // Le message est maintenant associé au bon sujet.
-  remember(
-    "user",
-    cleanQuestion,
-    result.intent?.id || currentIntent?.id || null
-  );
+      return personalityAnswer;
+    }
 
-  let response;
-
-  if (result.ambiguous.length) {
-    response = {
-      type: "clarification",
-      text: "J'hésite entre plusieurs sujets. Tu peux préciser ?",
-      choices: result.ambiguous
-    };
-  } else if (result.intent) {
-    response = buildAnswer(result.intent);
-  } else if (isFollowUp(cleanQuestion)) {
-    const context = resolveContext(cleanQuestion);
-
-    response = context
-      ? contextualFallback(context)
-      : fallback(result.score, result.suggestions || []);
-  } else {
-    response = fallback(
-      result.score,
-      result.suggestions || []
+    const result = detectIntent(
+      cleanQuestion,
+      knowledge.intents || []
     );
+
+    if (result.intent) {
+      rememberTopic(result.intent);
+    }
+
+    remember(
+      "user",
+      cleanQuestion,
+      result.intent?.id || currentIntent?.id || null
+    );
+
+    let response;
+
+    if (result.ambiguous.length) {
+      response = {
+        type: "clarification",
+        text: "J'hésite entre plusieurs sujets. Tu peux préciser ?",
+        choices: result.ambiguous
+      };
+    } else if (result.intent) {
+      response = buildAnswer(result.intent, cleanQuestion);
+    } else if (isFollowUp(cleanQuestion)) {
+      const context = resolveContext(cleanQuestion);
+
+      response = context
+        ? contextualFallback(context)
+        : fallback(result.score, result.suggestions || []);
+    } else {
+      response = fallback(
+        result.score,
+        result.suggestions || []
+      );
+    }
+
+    saveExchange(response);
+
+    return response;
   }
 
-  saveExchange(response);
+  function askIntent(intentId) {
+    const intent = getIntent(intentId);
 
-  return response;
-}
-  
-function askIntent(intentId) {
-  const intent = getIntent(intentId);
+    if (!intent) {
+      return fallback();
+    }
 
-  if (!intent) {
-    return fallback();
+    remember("user", intent.label, intent.id);
+
+    const response = buildAnswer(intent, intent.label);
+    saveExchange(response);
+
+    return response;
   }
-
-  remember("user", intent.label, intent.id);
-
-  const response = buildAnswer(intent);
-  saveExchange(response);
-
-  return response;
-}
 
   // --------------------------------------------------
   // ACCÈS À LA MÉMOIRE
