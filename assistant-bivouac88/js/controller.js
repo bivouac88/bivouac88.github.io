@@ -1790,8 +1790,11 @@ secHitbox.head.addEventListener('click', () => {
     a.click();
     a.remove();
 
-    URL.revokeObjectURL(url);
-  });
+// Laisse au navigateur le temps de démarrer le téléchargement.
+setTimeout(() => {
+  URL.revokeObjectURL(url);
+}, 1000);
+});
 
   // ---------------------------------------------------------------
   // Démarrage
