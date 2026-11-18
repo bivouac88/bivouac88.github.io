@@ -737,8 +737,17 @@ secPos.head.addEventListener('click', () => {
   });
   secHitbox.content.appendChild(hitboxSaveBtn);
 
-  const hitboxStatus = makeLabel('Prévisualisation active lorsque cette section est ouverte.');
+  const hitboxStatus = makeLabel('Réglages non encore sauvegardés.');
   secHitbox.content.appendChild(hitboxStatus);
+
+  hitboxSaveBtn.addEventListener('click', () => {
+    try {
+      localStorage.setItem(HITBOX_KEY, JSON.stringify(hitboxSettings));
+      hitboxStatus.textContent = 'Réglages de la hitbox sauvegardés.';
+    } catch (e) {
+      hitboxStatus.textContent = 'Erreur lors de la sauvegarde.';
+    }
+  });
 
   const hitboxPreview = document.createElement('div');
   Object.assign(hitboxPreview.style, {
