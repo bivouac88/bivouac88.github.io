@@ -897,8 +897,8 @@
   const trigLeave = makeSelect([
     ['hold', 'Rester en place'],
     ['stop', 'S\'arrêter'],
-    ['revert', 'Revenir à l\'état d\'avant'],
   ], 'hold');
+  
   const trigLeaveRow = makeRow('Quand le déclencheur disparaît (sortie d\'écran, fin de survol)', trigLeave);
   secTrigger.content.appendChild(trigLeaveRow);
 
