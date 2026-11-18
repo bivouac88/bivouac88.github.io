@@ -1728,6 +1728,8 @@ if (trigger.type === 'after-scene') {
 
   if (!Number.isInteger(afterScene) || !scenes.some(s => Number(s.id) === afterScene)) {
     errors.push(`${label} : scène déclencheuse introuvable.`);
+  } else if (afterScene === Number(scene.id)) {
+    errors.push(`${label} : une scène ne peut pas attendre sa propre fin.`);
   }
 }
       // Vérification des sélecteurs CSS des déclencheurs
