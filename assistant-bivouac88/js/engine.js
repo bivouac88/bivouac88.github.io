@@ -196,65 +196,61 @@ export function createEngine(knowledge) {
     remember("assistant", result.text, result.intentId || null);
   }
 
-  function ask(question) {
-    const cleanQuestion = String(question || "").trim();
 
-    if (!cleanQuestion) {
-      return {
-        type: "empty",
-        text: "Écris-moi une question et on regarde ça."
-      };
-    }
+function ask(question) {
+  const cleanQuestion = String(question || "").trim();
 
-    remember("user", cleanQuestion);
+  if (!cleanQuestion) {
+    return {
+      type: "empty",
+      text: "Écris-moi une question et on regarde ça."
+    };
+  }
 
-    const result = detectIntent(
-      cleanQuestion,
-      knowledge.intents || []
+  const result = detectIntent(
+    cleanQuestion,
+    knowledge.intents || []
+  );
+
+  // On identifie le sujet avant d'enregistrer le message.
+  if (result.intent) {
+    rememberTopic(result.intent);
+  }
+
+  // Le message est maintenant associé au bon sujet.
+  remember(
+    "user",
+    cleanQuestion,
+    result.intent?.id || currentIntent?.id || null
+  );
+
+  let response;
+
+  if (result.ambiguous.length) {
+    response = {
+      type: "clarification",
+      text: "J'hésite entre plusieurs sujets. Tu peux préciser ?",
+      choices: result.ambiguous
+    };
+  } else if (result.intent) {
+    response = buildAnswer(result.intent);
+  } else if (isFollowUp(cleanQuestion)) {
+    const context = resolveContext(cleanQuestion);
+
+    response = context
+      ? contextualFallback(context)
+      : fallback(result.score, result.suggestions || []);
+  } else {
+    response = fallback(
+      result.score,
+      result.suggestions || []
     );
-
-    let response;
-
-    if (result.ambiguous.length) {
-      response = {
-        type: "clarification",
-        text: "J'hésite entre plusieurs sujets. Tu peux préciser ?",
-        choices: result.ambiguous
-      };
-    } else if (result.intent) {
-      response = buildAnswer(result.intent);
-    } else if (isFollowUp(cleanQuestion)) {
-      const context = resolveContext(cleanQuestion);
-
-      response = context
-        ? contextualFallback(context)
-        : fallback(result.score, result.suggestions || []);
-    } else {
-      response = fallback(
-        result.score,
-        result.suggestions || []
-      );
-    }
-
-    saveExchange(response);
-
-    return response;
   }
 
-  function askIntent(intentId) {
-    const intent = getIntent(intentId);
+  saveExchange(response);
 
-    if (!intent) {
-      return fallback();
-    }
-
-    remember("user", intent.label, intent.id);
-
-    const response = buildAnswer(intent);
-    saveExchange(response);
-
-    return response;
-  }
+  return response;
+}
 
   // --------------------------------------------------
   // ACCÈS À LA MÉMOIRE
