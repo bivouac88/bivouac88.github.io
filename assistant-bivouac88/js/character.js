@@ -8,6 +8,12 @@ const CONFIG = {
   heightPx: 45,
   canvasHeightPx: 220,
   bottomOffsetPx: 6,
+
+  // Zone de clic du personnage
+  hitboxWidthPx: 130,
+  hitboxHeightPx: 145,
+  hitboxOffsetXPx: 0,
+  hitboxOffsetYPx: 0,
 };
 
 // --- Canvas pleine page ---
