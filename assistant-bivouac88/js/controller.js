@@ -1442,107 +1442,84 @@ refreshTriggerUI(true);
   stepMove.addEventListener('change', refreshStepUI);
   refreshStepUI();
 
-  const addStepBtn = makeButton('➕ Ajouter cette étape', { marginBottom: '8px', marginTop: '4px' });
+ 
+  const addStepBtn = makeButton('➕ Ajouter cette étape', {
+    marginBottom: '8px',
+    marginTop: '4px',
+  });
   secSteps.content.appendChild(addStepBtn);
 
   const stepsList = document.createElement('div');
   secSteps.content.appendChild(stepsList);
 
-let editingStepIndex = null;
+  let editingStepIndex = null;
 
-function resetStepEditor() {
-  editingStepIndex = null;
-  addStepBtn.textContent = '➕ Ajouter cette étape';
-}
-
-function loadStepIntoEditor(index) {
-  const step = draftSteps[index];
-  if (!step) return;
-
-  editingStepIndex = index;
-
-  // Animation
-  doPlay(step.animation);
-
-  // Point
-  stepPoint.value = step.at;
-
-  // Durée et pause
-  stepDuration.value = step.duration ?? '';
-  stepPause.value = step.pause ?? 0;
-
-  // Déplacement
-  stepMove.value = step.move?.type || 'instant';
-  stepSpeed.value = step.move?.speed ?? 200;
-  stepWalkAnim.value = step.move?.walkAnimation || 'Running';
-  stepAutoFace.checked = step.autoFace === true;
-  refreshStepUI();
-
-  // Orientation
-  currentRot = { ...(step.rotation || { x: 0, y: 0, z: 0 }) };
-  setSliders(currentRot);
-
-  if (typeof window.characterRotate === 'function') {
-    window.characterRotate(currentRot.x, currentRot.y, currentRot.z);
+  function resetStepEditor() {
+    editingStepIndex = null;
+    addStepBtn.textContent = '➕ Ajouter cette étape';
   }
 
-  // Positions des champs de dialogue
-  applyFieldOffsets({
-    bubble: step.bubble,
-    form: step.form,
-  });
+  function loadStepIntoEditor(index) {
+    const step = draftSteps[index];
+    if (!step) return;
 
-  addStepBtn.textContent = `💾 Enregistrer les modifications de l'étape ${index + 1}`;
+    editingStepIndex = index;
 
-  secAnim.open();
-  secRot.open();
-  secFields.open();
-}
+    // Animation
+    doPlay(step.animation);
 
-addStepBtn.addEventListener('click', () => {
-  const at = stepPoint.value;
+    // Point
+    stepPoint.value = step.at;
 
-  if (!at || !draftPoints[at]) {
-    alert('Crée d'abord un point (section POINTS).');
-    return;
+    // Durée et pause
+    stepDuration.value = step.duration ?? '';
+    stepPause.value = step.pause ?? 0;
+
+    // Déplacement
+    stepMove.value = step.move?.type || 'instant';
+    stepSpeed.value = step.move?.speed ?? 200;
+    stepWalkAnim.value = step.move?.walkAnimation || 'Running';
+    stepAutoFace.checked = step.autoFace === true;
+    refreshStepUI();
+
+    // Orientation
+    currentRot = {
+      ...(step.rotation || { x: 0, y: 0, z: 0 }),
+    };
+    setSliders(currentRot);
+
+    if (typeof window.characterRotate === 'function') {
+      window.characterRotate(
+        currentRot.x,
+        currentRot.y,
+        currentRot.z
+      );
+    }
+
+    // Positions des champs de dialogue
+    applyFieldOffsets({
+      bubble: step.bubble,
+      form: step.form,
+    });
+
+    addStepBtn.textContent =
+      `💾 Enregistrer les modifications de l'étape ${index + 1}`;
+
+    secAnim.open();
+    secRot.open();
+    secFields.open();
   }
 
-  const offsets = getFieldOffsets();
+  addStepBtn.addEventListener('click', () => {
+    const at = stepPoint.value;
 
-  const step = {
-    animation: currentAnim,
-    at,
-    duration: num(stepDuration.value),
-    pause: num(stepPause.value) || 0,
-    move: { type: stepMove.value },
-    rotation: { ...currentRot },
-    autoFace: false,
-    bubble: { x: offsets.bubble.x, y: offsets.bubble.y },
-    form: { x: offsets.form.x, y: offsets.form.y },
-  };
-
-  if (stepMove.value === 'walk') {
-    step.move.speed = num(stepSpeed.value) || 200;
-    step.move.walkAnimation = stepWalkAnim.value;
-    step.autoFace = stepAutoFace.checked;
-  }
-
-  if (editingStepIndex !== null) {
-    draftSteps[editingStepIndex] = step;
-    resetStepEditor();
-  } else {
-    draftSteps.push(step);
-  }
-
-  refreshStepsUI();
-});
-  const at = stepPoint.value;
     if (!at || !draftPoints[at]) {
       alert('Crée d\'abord un point (section POINTS).');
       return;
     }
 
     const offsets = getFieldOffsets();
+
     const step = {
       animation: currentAnim,
       at,
@@ -1561,64 +1538,65 @@ addStepBtn.addEventListener('click', () => {
       step.autoFace = stepAutoFace.checked;
     }
 
-    draftSteps.push(step);
+    if (editingStepIndex !== null) {
+      draftSteps[editingStepIndex] = step;
+      resetStepEditor();
+    } else {
+      draftSteps.push(step);
+    }
+
     refreshStepsUI();
   });
 
-function refreshStepsUI() {
-  stepsList.replaceChildren();
-
-  draftSteps.forEach((step, index) => {
-    const item = makeListItem();
-
-    const label = document.createElement('span');
-    label.style.flex = '1';
-    label.style.minWidth = '0';
-    label.style.overflow = 'hidden';
-    label.style.textOverflow = 'ellipsis';
-    label.style.whiteSpace = 'nowrap';
-
-    label.textContent =
-      `${index + 1}. ${step.animation.replace(/_/g, ' ')} @${step.at}` +
-      (step.move.type === 'walk' ? ' (marche)' : ' (instantané)');
-
-    const edit = makeMiniButton('✎', '#e58e26', 'Modifier cette étape');
-    edit.addEventListener('click', () => loadStepIntoEditor(index));
-
-    const del = makeMiniButton('✕', '#8a3b2e', 'Supprimer cette étape');
-    del.addEventListener('click', () => {
-      draftSteps.splice(index, 1);
-
-      if (editingStepIndex === index) {
-        resetStepEditor();
-      } else if (editingStepIndex !== null && editingStepIndex > index) {
-        editingStepIndex--;
-      }
-
-      refreshStepsUI();
-    });
-
-    item.append(label, edit, del);
-    stepsList.appendChild(item);
-  });
-}
-stepsList.replaceChildren();
+  function refreshStepsUI() {
+    stepsList.replaceChildren();
 
     draftSteps.forEach((step, index) => {
       const item = makeListItem();
+
       const label = document.createElement('span');
+      label.style.flex = '1';
+      label.style.minWidth = '0';
       label.style.overflow = 'hidden';
       label.style.textOverflow = 'ellipsis';
       label.style.whiteSpace = 'nowrap';
-      label.textContent = `${index + 1}. ${step.animation.replace(/_/g, ' ')} @${step.at}${step.move.type === 'walk' ? ' (marche)' : ''}`;
 
-      const del = makeMiniButton('✕', '#8a3b2e', 'Supprimer cette étape');
+      label.textContent =
+        `${index + 1}. ${step.animation.replace(/_/g, ' ')} @${step.at}` +
+        (step.move?.type === 'walk'
+          ? ' (marche)'
+          : ' (instantané)');
+
+      const edit = makeMiniButton(
+        '✎',
+        '#e58e26',
+        'Modifier cette étape'
+      );
+      edit.addEventListener('click', () => {
+        loadStepIntoEditor(index);
+      });
+
+      const del = makeMiniButton(
+        '✕',
+        '#8a3b2e',
+        'Supprimer cette étape'
+      );
       del.addEventListener('click', () => {
         draftSteps.splice(index, 1);
+
+        if (editingStepIndex === index) {
+          resetStepEditor();
+        } else if (
+          editingStepIndex !== null &&
+          editingStepIndex > index
+        ) {
+          editingStepIndex--;
+        }
+
         refreshStepsUI();
       });
 
-      item.append(label, del);
+      item.append(label, edit, del);
       stepsList.appendChild(item);
     });
   }
