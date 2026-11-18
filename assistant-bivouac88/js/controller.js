@@ -1384,13 +1384,46 @@ refreshTriggerUI(true);
   const secSteps = makeSection('ÉTAPES');
 
   secSteps.content.appendChild(makeLabel(
-    'Réglage de l\'étape = animation, orientation et champs actuels',
-    { fontSize: '10px' }
+    'CONSTRUIRE UNE ÉTAPE',
+    {
+      color: '#e58e26',
+      fontSize: '11px',
+      fontWeight: 'bold',
+      marginTop: '2px',
+    }
+  ));
+
+  secSteps.content.appendChild(makeLabel(
+    'Une étape définit ce que fait le personnage à un moment précis de la scène.',
+    { fontSize: '10px', lineHeight: '1.5', marginBottom: '8px' }
+  ));
+
+  secSteps.content.appendChild(makeLabel(
+    '1. Choisis l’animation du personnage.',
+    { fontSize: '10px', color: '#bbb', marginBottom: '5px' }
+  ));
+
+  secSteps.content.appendChild(animSelect);
+  secAnim.head.style.display = 'none';
+
+  secSteps.content.appendChild(makeLabel(
+    '2. Choisis le point où le personnage doit se rendre.',
+    { fontSize: '10px', color: '#bbb', marginBottom: '8px' }
+  ));
+
+  secSteps.content.appendChild(makeLabel(
+    '3. Règle le déplacement, le timing et les options complémentaires.',
+    { fontSize: '10px', color: '#bbb', marginBottom: '10px' }
   ));
 
   const stepPoint = makeSelect([]);
   secSteps.content.appendChild(makeRow('Point où se joue l\'étape', stepPoint));
 
+  secSteps.content.appendChild(makeLabel(
+    'Le personnage sera positionné à ce point. Crée d’abord tes points dans la section POINTS.',
+    { fontSize: '10px', lineHeight: '1.4' }
+  ));
+  
   const stepDuration = makeInput('number', 'vide = jusqu\'à la suite');
   secSteps.content.appendChild(makeRow('Durée (secondes)', stepDuration));
 
