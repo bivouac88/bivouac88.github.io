@@ -1,10 +1,10 @@
 {
   "version": 2,
-  "exportedAt": "2026-11-18T14:24:24.186Z",
+  "exportedAt": "2026-11-18T14:34:48.410Z",
   "scenes": [
     {
       "id": 2,
-      "name": "Scene Accueil V1",
+      "name": "Excited Permanente",
       "enabled": true,
       "priority": 0,
       "pages": [
@@ -23,7 +23,7 @@
         "interruptible": true
       },
       "points": {
-        "A": {
+        "B": {
           "selector": "#projet > div.test-section-heading:nth-of-type(1) > h2",
           "ax": 69.04,
           "ay": 8.94,
@@ -39,7 +39,7 @@
       "steps": [
         {
           "animation": "Excited",
-          "at": "A",
+          "at": "B",
           "duration": null,
           "pause": 0,
           "move": {
@@ -72,7 +72,7 @@
           "height": 1018
         },
         "scrollY": 0,
-        "date": "2026-11-17T23:31:18.880Z"
+        "date": "2026-11-18T14:34:41.514Z"
       }
     },
     {
@@ -96,7 +96,7 @@
         "interruptible": true
       },
       "points": {
-        "A": {
+        "B": {
           "selector": "#projet > div.test-section-heading:nth-of-type(1) > h2",
           "ax": 69.04,
           "ay": 8.94,
@@ -111,8 +111,8 @@
       },
       "steps": [
         {
-          "animation": "Thankfull",
-          "at": "A",
+          "animation": "Excited",
+          "at": "B",
           "duration": null,
           "pause": 0,
           "move": {
@@ -145,81 +145,7 @@
           "height": 1018
         },
         "scrollY": 0,
-        "date": "2026-11-17T23:32:59.480Z"
-      }
-    },
-    {
-      "id": 4,
-      "name": "Scène 4 : Excited",
-      "enabled": true,
-      "priority": 0,
-      "pages": [
-        "test"
-      ],
-      "devices": [
-        "pc"
-      ],
-      "trigger": {
-        "type": "event",
-        "delay": 0,
-        "eventName": "b88:dialogue-close"
-      },
-      "conditions": {
-        "frequency": "always",
-        "cooldownSeconds": 0,
-        "interruptible": true
-      },
-      "points": {
-        "A": {
-          "selector": "#projet > div.test-section-heading:nth-of-type(1) > h2",
-          "ax": 69.04,
-          "ay": 8.94,
-          "offsetX": 0,
-          "offsetY": 0,
-          "mode": "follow",
-          "fallback": {
-            "xPct": 56.4,
-            "yPct": 16.4
-          }
-        }
-      },
-      "steps": [
-        {
-          "animation": "Excited",
-          "at": "A",
-          "duration": null,
-          "pause": 0,
-          "move": {
-            "type": "instant"
-          },
-          "rotation": {
-            "x": 0,
-            "y": 0,
-            "z": 0
-          },
-          "autoFace": false,
-          "bubble": {
-            "x": 162.2222900390625,
-            "y": -183.33331298828125
-          },
-          "form": {
-            "x": 164.4444580078125,
-            "y": -70
-          }
-        }
-      ],
-      "end": {
-        "action": "hold",
-        "next": null,
-        "repeat": 1
-      },
-      "recorded": {
-        "viewport": {
-          "width": 1060,
-          "height": 987
-        },
-        "scrollY": 0,
-        "date": "2026-11-17T23:54:51.255Z"
+        "date": "2026-11-18T14:34:24.970Z"
       }
     }
   ]
