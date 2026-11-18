@@ -380,6 +380,7 @@
     overviewTab.classList.toggle('primary',which==='overview');editorTab.classList.toggle('primary',which==='editor');checkTab.classList.toggle('primary',which==='check');toolsTab.classList.toggle('primary',which==='tools');
     if(which==='overview')renderOverview();if(which==='editor')renderEditor();if(which==='check')renderCheck();if(which==='tools')renderTools();
   }
+  document.body.appendChild(panel);
   showView('overview');
 })();
 
