@@ -278,7 +278,16 @@
     color: '#eee',
     userSelect: 'none',
   });
+function setPanelPosition(x, y) {
+  const maxX = Math.max(0, window.innerWidth - panel.offsetWidth);
+  const maxY = Math.max(0, window.innerHeight - panel.offsetHeight);
 
+  const safeX = Math.max(0, Math.min(x, maxX));
+  const safeY = Math.max(0, Math.min(y, maxY));
+
+  panel.style.left = safeX + 'px';
+  panel.style.top = safeY + 'px';
+}
   // Titre + toggle
   const header = document.createElement('div');
   Object.assign(header.style, {
@@ -332,8 +341,7 @@
       }
       if (!dragged) return;
 
-      panel.style.left = (startLeft + dx) + 'px';
-      panel.style.top = (startTop + dy) + 'px';
+      setPanelPosition(startLeft + dx, startTop + dy);
     }
 
     function stopDragging() {
@@ -1771,5 +1779,14 @@ secHitbox.head.addEventListener('click', () => {
   refreshPointsUI();
   refreshStepsUI();
 
-  document.body.appendChild(panel);
+document.body.appendChild(panel);
+
+// Corrige une éventuelle position enregistrée hors écran.
+setPanelPosition(panel.offsetLeft, panel.offsetTop);
+
+// Maintient le panneau accessible si la fenêtre change de taille.
+window.addEventListener('resize', () => {
+  setPanelPosition(panel.offsetLeft, panel.offsetTop);
+  savePanelPosition(panel.offsetLeft, panel.offsetTop);
+});
 })();
