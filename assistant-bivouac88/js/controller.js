@@ -1627,11 +1627,19 @@
 
   // --- RESTAURÉ --- exporte toutes les scènes en mémoire vers un fichier sceneV2.json téléchargeable
   exportBtn.addEventListener('click', () => {
-    const data = {
-      version: 2,
-      exportedAt: new Date().toISOString(),
-      scenes,
-    };
+const data = {
+  version: 2,
+  exportedAt: new Date().toISOString(),
+  avatar: {
+    hitbox: {
+      width: hitboxSettings.width,
+      height: hitboxSettings.height,
+      offsetX: hitboxSettings.offsetX,
+      offsetY: hitboxSettings.offsetY,
+    },
+  },
+  scenes,
+};
 
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
