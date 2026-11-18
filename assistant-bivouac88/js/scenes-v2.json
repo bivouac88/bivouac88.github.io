@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "exportedAt": "2026-11-17T23:57:24.191Z",
+  "exportedAt": "2026-11-18T14:24:24.186Z",
   "scenes": [
     {
       "id": 2,
@@ -170,19 +170,19 @@
         "interruptible": true
       },
       "points": {
-  "A": {
-    "selector": "#projet > div.test-section-heading:nth-of-type(1) > h2",
-    "ax": 69.04,
-    "ay": 8.94,
-    "offsetX": 0,
-    "offsetY": 0,
-    "mode": "follow",
-    "fallback": {
-      "xPct": 56.4,
-      "yPct": 16.4
-    }
-  }
-},
+        "A": {
+          "selector": "#projet > div.test-section-heading:nth-of-type(1) > h2",
+          "ax": 69.04,
+          "ay": 8.94,
+          "offsetX": 0,
+          "offsetY": 0,
+          "mode": "follow",
+          "fallback": {
+            "xPct": 56.4,
+            "yPct": 16.4
+          }
+        }
+      },
       "steps": [
         {
           "animation": "Excited",
