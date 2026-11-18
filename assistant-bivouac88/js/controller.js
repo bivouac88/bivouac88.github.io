@@ -33,8 +33,7 @@
 
   const DEVICES = [
     ['mobile', 'Mobile (< 768 px)'],
-    ['tablet', 'Tablette (768 à 1023 px)'],
-    ['pc', 'PC (≥ 1024 px)'],
+    ['pc', 'PC (≥ 768 px)'],
   ];
 
   const TRIGGERS = [
@@ -1011,9 +1010,9 @@
 
   const endAction = makeSelect([
     ['hold', 'Rester en place à la fin'],
-    ['revert', 'Revenir à l\'état d\'avant'],
     ['chain', 'Enchaîner sur une autre scène'],
   ], 'hold');
+  
   secEnd.content.appendChild(makeRow('Fin de scène', endAction));
 
   const endNext = makeInput('number', 'ID de la scène suivante');
@@ -1376,7 +1375,14 @@
     const scene = buildSceneFromEditor();
     if (!scene) return;
 
-    scenes.push(scene);
+    const index = scenes.findIndex((s) => s.id === scene.id);
+
+    if (index !== -1) {
+      scenes[index] = scene;
+    } else {
+      scenes.push(scene);
+    }
+
     persistScenes();
     renderSceneList();
     resetDraft();
@@ -1427,10 +1433,6 @@
     draftSteps = clone(scene.steps);
     refreshPointsUI();
     refreshStepsUI();
-
-    scenes = scenes.filter((s) => s.id !== scene.id);
-    persistScenes();
-    renderSceneList();
   }
 
   function renderSceneList() {
