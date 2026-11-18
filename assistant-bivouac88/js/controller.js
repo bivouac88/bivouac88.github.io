@@ -1617,17 +1617,114 @@
     saveBtn.textContent = `💾 Mettre à jour la scène #${scene.id}`;
     renderSceneList();
 
-    alert(`Scène #${scene.id} sauvegardée en mémoire.\nPense à cliquer sur "Exporter JSON" pour la rendre permanente, puis remplace ton fichier sceneV2.json.`);
+    alert(`Scène #${scene.id} sauvegardée en mémoire.\nPense à cliquer sur "Exporter JSON" pour télécharger scenes-v2.json, puis remplace l'ancien fichier sur ton site.`);
   });
 
   newBtn.addEventListener('click', () => {
     if (!confirm('Vider le formulaire pour créer une nouvelle scène ? (les champs actuels seront perdus s\'ils ne sont pas sauvegardés)')) return;
     resetEditor();
   });
+  // Vérifie les scènes avant l'export
+  function validateScenes() {
+    const errors = [];
+    const warnings = [];
+    const ids = new Set();
 
-  // --- RESTAURÉ --- exporte toutes les scènes en mémoire vers un fichier sceneV2.json téléchargeable
+    scenes.forEach((scene) => {
+      const label = `Scène #${scene.id}`;
+
+      if (!Number.isInteger(Number(scene.id))) {
+        errors.push(`${label} : identifiant invalide.`);
+      } else if (ids.has(Number(scene.id))) {
+        errors.push(`${label} : identifiant en double.`);
+      } else {
+        ids.add(Number(scene.id));
+      }
+
+      if (!scene.name?.trim()) {
+        warnings.push(`${label} : aucun nom renseigné.`);
+      }
+
+      if (!scene.steps?.length) {
+        errors.push(`${label} : aucune étape.`);
+        return;
+      }
+
+      scene.steps.forEach((step, index) => {
+        const stepLabel = `${label}, étape ${index + 1}`;
+
+        if (!step.at || !scene.points?.[step.at]) {
+          errors.push(`${stepLabel} : point inexistant.`);
+        }
+
+        if (!step.animation) {
+          errors.push(`${stepLabel} : animation manquante.`);
+        } else if (ANIMATIONS.length && !ANIMATIONS.includes(step.animation)) {
+          warnings.push(`${stepLabel} : animation "${step.animation}" inconnue.`);
+        }
+
+        if (
+          step.duration !== null &&
+          step.duration !== undefined &&
+          (!Number.isFinite(Number(step.duration)) || Number(step.duration) < 0)
+        ) {
+          errors.push(`${stepLabel} : durée invalide.`);
+        }
+
+        if (
+          step.pause !== null &&
+          step.pause !== undefined &&
+          (!Number.isFinite(Number(step.pause)) || Number(step.pause) < 0)
+        ) {
+          errors.push(`${stepLabel} : pause invalide.`);
+        }
+
+        if (step.move?.type === 'walk' && step.move.walkAnimation) {
+          if (ANIMATIONS.length && !ANIMATIONS.includes(step.move.walkAnimation)) {
+            warnings.push(`${stepLabel} : animation de marche inconnue.`);
+          }
+        }
+      });
+
+      if (scene.end?.action === 'chain') {
+        const nextId = Number(scene.end.next);
+
+        if (!Number.isInteger(nextId) || !scenes.some(s => Number(s.id) === nextId)) {
+          errors.push(`${label} : scène suivante introuvable.`);
+        }
+      }
+
+      const repeat = Number(scene.end?.repeat ?? 1);
+      if (!Number.isInteger(repeat) || repeat < 0) {
+        errors.push(`${label} : nombre de répétitions invalide.`);
+      }
+    });
+
+    return { errors, warnings };
+  }
+  // Export avec vérification préalable
   exportBtn.addEventListener('click', () => {
-const data = {
+    const validation = validateScenes();
+
+    if (validation.errors.length) {
+      alert(
+        'Export impossible : des erreurs ont été détectées.\n\n' +
+        validation.errors.join('\n')
+      );
+      return;
+    }
+
+    if (validation.warnings.length) {
+      const continuer = confirm(
+        'Quelques avertissements ont été détectés :\n\n' +
+        validation.warnings.join('\n') +
+        '\n\nVeux-tu exporter quand même ?'
+      );
+
+      if (!continuer) return;
+    }
+
+    const data = {
   version: 2,
   exportedAt: new Date().toISOString(),
   avatar: {
@@ -1646,7 +1743,7 @@ const data = {
 
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'sceneV2.json';
+    a.download = 'scenes-v2.json';
     document.body.appendChild(a);
     a.click();
     a.remove();
