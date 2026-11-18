@@ -1690,6 +1690,46 @@ secHitbox.head.addEventListener('click', () => {
       if (!Number.isFinite(triggerDelay) || triggerDelay < 0) {
       errors.push(`${label} : délai du déclencheur invalide.`);
 }
+
+// Vérification du type de déclencheur
+const trigger = scene.trigger || {};
+
+if (!TRIGGERS.some(([type]) => type === trigger.type)) {
+  errors.push(`${label} : type de déclencheur inconnu.`);
+}
+
+// Vérification des paramètres propres à chaque déclencheur
+if (trigger.type === 'enter') {
+  const threshold = Number(trigger.threshold ?? 0.5);
+
+  if (!Number.isFinite(threshold) || threshold < 0 || threshold > 1) {
+    errors.push(`${label} : seuil de visibilité invalide (0 à 1).`);
+  }
+}
+
+if (trigger.type === 'scroll') {
+  const scrollPct = Number(trigger.scrollPct ?? 50);
+
+  if (!Number.isFinite(scrollPct) || scrollPct < 0 || scrollPct > 100) {
+    errors.push(`${label} : pourcentage de défilement invalide (0 à 100).`);
+  }
+}
+
+if (trigger.type === 'idle') {
+  const idleSeconds = Number(trigger.idleSeconds ?? 10);
+
+  if (!Number.isFinite(idleSeconds) || idleSeconds < 0) {
+    errors.push(`${label} : durée d'inactivité invalide.`);
+  }
+}
+
+if (trigger.type === 'after-scene') {
+  const afterScene = Number(trigger.afterScene);
+
+  if (!Number.isInteger(afterScene) || !scenes.some(s => Number(s.id) === afterScene)) {
+    errors.push(`${label} : scène déclencheuse introuvable.`);
+  }
+}
       
       if (!Number.isFinite(cooldown) || cooldown < 0) {
       errors.push(`${label} : délai d'attente invalide.`);
