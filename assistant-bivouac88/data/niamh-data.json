@@ -1,9 +1,9 @@
 {
-  "jour_actuel": "18",
-  "date_actuelle": "2026-11-19",
-  "region_actuelle": "Vallée de la Save, Slovénie",
-  "pays_actuel": "Slovénie",
-  "prochaine_etape": "Direction Zagreb, Croatie",
+  "jour_actuel": "Jeudi",
+  "date_actuelle": "11/19/2026",
+  "region_actuelle": "Eghezée",
+  "pays_actuel": "Belgique",
+  "prochaine_etape": "Direction la France",
   "km_total_parcouru": "1245",
   "denivele_cumule": "18400",
   "jours_velo": "11",
@@ -24,8 +24,8 @@
     ]
   },
   "_responses": {
-    "petit_dej": "Ce matin, j'ai mangé des Kellogg's !",
-    "boisson_matin": "Pour commencer la journée, rien de tel qu'un bon thé vert !"
+    "petit_dej": "Ce matin, j'ai mangé des Kellogg's",
+    "boisson_matin": "Pour commencer la journée, rien de tel qu'un bon thé vert"
   },
-  "_updatedAt": "2026-11-19T16:06:32.960Z"
+  "_updatedAt": "2026-11-19T16:39:46.001Z"
 }
