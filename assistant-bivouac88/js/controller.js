@@ -695,6 +695,16 @@
   walkOptionsHost.append(field('Vitesse (px/s)', walkSpeed), field('Animation de marche', walkAnimation), autoFaceLabel);
   movement.addEventListener('change', () => { walkOptionsHost.style.display = movement.value === 'walk' ? 'block' : 'none'; });
 
+      const bubbleSide = select([
+    ['top', 'Au-dessus de l’avatar'],
+    ['bottom', 'En dessous de l’avatar'],
+    ['left', 'À gauche de l’avatar'],
+    ['right', 'À droite de l’avatar'],
+  ], 'top');
+  bubbleSide.addEventListener('change', () => {
+    document.dispatchEvent(new CustomEvent('b88:dialogue-side', { detail: { side: bubbleSide.value } }));
+  });
+  
   function refreshAnimationsUI() {
     refreshAnimationBrowser();
     const old = walkAnimation.value;
@@ -807,6 +817,8 @@
     currentRotation = { ...(step.rotation || { x: 0, y: 0, z: 0 }) };
     doRotate();
     applyFieldOffsets({ bubble: step.bubble, form: step.form });
+    bubbleSide.value = step.bubbleSide || 'top';
+    document.dispatchEvent(new CustomEvent('b88:dialogue-side', { detail: { side: bubbleSide.value } }));
     addStepBtn.textContent = `💾 Enregistrer les modifications de l’étape ${index + 1}`;
     refreshStepsUI();
     setStatus(`Étape ${index + 1} chargée : ajuste puis clique sur « Enregistrer les modifications ».`);
@@ -867,6 +879,7 @@
       autoFace: false,
       bubble: offsets.bubble,
       form: offsets.form,
+      bubbleSide: bubbleSide.value,
     };
     if (movement.value === 'walk') {
       step.move.speed = num(walkSpeed.value) || 200;
@@ -1098,6 +1111,7 @@
     view.append(field('Déplacement vers le point', movement));
     view.append(walkOptionsHost);
     walkOptionsHost.style.display = movement.value === 'walk' ? 'block' : 'none';
+    view.append(field('Position de la bulle de dialogue', bubbleSide));
     view.append(testStepBtn, addStepBtn);
     view.append(timelineHost);
     view.append(stepsHost);

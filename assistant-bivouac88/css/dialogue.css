@@ -41,14 +41,45 @@
 .b88-dialogue-bubble::after {
   content: "";
   position: absolute;
-  left: 50%;
-  bottom: -11px;
   width: 16px;
   height: 16px;
   background: #fffdf7;
+}
+
+/* Pointe en bas (bulle au-dessus de l'avatar) — comportement actuel */
+.b88-dialogue-bubble.tail-bottom::after {
+  left: 50%;
+  bottom: -11px;
   border-right: 2px solid #e58e26;
   border-bottom: 2px solid #e58e26;
   transform: translateX(-50%) rotate(45deg);
+}
+
+/* Pointe en haut (bulle en dessous de l'avatar) */
+.b88-dialogue-bubble.tail-top::after {
+  left: 50%;
+  top: -11px;
+  border-left: 2px solid #e58e26;
+  border-top: 2px solid #e58e26;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+/* Pointe à gauche (bulle à droite de l'avatar) */
+.b88-dialogue-bubble.tail-left::after {
+  top: 50%;
+  left: -11px;
+  border-left: 2px solid #e58e26;
+  border-bottom: 2px solid #e58e26;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+/* Pointe à droite (bulle à gauche de l'avatar) */
+.b88-dialogue-bubble.tail-right::after {
+  top: 50%;
+  right: -11px;
+  border-right: 2px solid #e58e26;
+  border-top: 2px solid #e58e26;
+  transform: translateY(-50%) rotate(45deg);
 }
 
 .b88-dialogue-text {
