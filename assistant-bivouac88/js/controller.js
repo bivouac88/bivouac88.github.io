@@ -1295,6 +1295,14 @@ refreshTriggerUI(true);
   const pointsList = document.createElement('div');
   secPoints.content.appendChild(pointsList);
 
+  let activePointLetter = null;
+
+  const pointStatus = makeLabel(
+    'Crée un point, sélectionne-le, puis fais glisser l’avatar pour le positionner.',
+    { fontSize: '10px', lineHeight: '1.5', color: '#e58e26' }
+  );
+  secPoints.content.appendChild(pointStatus);
+  
   function nextPointLetter() {
     for (let i = 0; i < 26; i++) {
       const letter = String.fromCharCode(65 + i);
@@ -1341,12 +1349,56 @@ refreshTriggerUI(true);
     }
 
     draftPoints[letter] = point;
+    activePointLetter = letter;
     refreshPointsUI();
     stepPoint.value = letter;
+
+    pointStatus.textContent =
+      `Point ${letter} créé. Fais glisser l’avatar pour ajuster sa position.`;
   }
 
   addPointBtn.addEventListener('click', () => createPoint(null));
   addPointOnBtn.addEventListener('click', () => pickElement((el) => createPoint(el)));
+
+  document.addEventListener('b88:character-drag', () => {
+    if (!activePointLetter || !draftPoints[activePointLetter]) return;
+
+    const pos = getAvatarPos();
+    const clientX = pos.x;
+    const clientY = window.innerHeight - pos.y;
+
+    let el = elementAt(clientX, clientY);
+    if (el === document.body || el === document.documentElement) el = null;
+
+    const point = {
+      ...draftPoints[activePointLetter],
+      selector: null,
+      ax: null,
+      ay: null,
+      offsetX: 0,
+      offsetY: 0,
+      fallback: {
+        xPct: r2((pos.x / window.innerWidth) * 100),
+        yPct: r2((pos.y / window.innerHeight) * 100),
+      },
+    };
+
+    if (el) {
+      const rect = el.getBoundingClientRect();
+
+      if (rect.width > 0 && rect.height > 0) {
+        point.selector = cssPath(el);
+        point.ax = r2(((clientX - rect.left) / rect.width) * 100);
+        point.ay = r2(((clientY - rect.top) / rect.height) * 100);
+      }
+    }
+
+    draftPoints[activePointLetter] = point;
+    refreshPointsUI();
+
+    pointStatus.textContent =
+      `Position du point ${activePointLetter} mise à jour automatiquement.`;
+  });
 
   function refreshPointsUI() {
     pointsList.replaceChildren();
@@ -1360,17 +1412,35 @@ refreshTriggerUI(true);
       label.textContent = `${letter} — ${p.selector || 'écran'} (${p.mode === 'follow' ? 'suit' : 'écran'})`;
       label.title = p.selector || 'position écran uniquement';
 
+      const edit = makeMiniButton('↔', '#e58e26', 'Sélectionner et déplacer ce point');
+      edit.addEventListener('click', () => {
+        activePointLetter = letter;
+
+        const pos = resolvePoint(p);
+        doMove(pos.x, pos.y);
+
+        pointStatus.textContent =
+          `Point ${letter} sélectionné. Fais glisser l’avatar pour modifier sa position.`;
+      });
+
       const del = makeMiniButton('✕', '#8a3b2e', 'Supprimer ce point');
       del.addEventListener('click', () => {
         if (draftSteps.some((s) => s.at === letter)) {
           alert(`Le point ${letter} est utilisé par une étape : supprime d'abord cette étape.`);
           return;
         }
+
         delete draftPoints[letter];
+
+        if (activePointLetter === letter) {
+          activePointLetter = null;
+          pointStatus.textContent = 'Sélectionne un point pour le déplacer.';
+        }
+
         refreshPointsUI();
       });
 
-      item.append(label, del);
+      item.append(label, edit, del);
       pointsList.appendChild(item);
     });
 
