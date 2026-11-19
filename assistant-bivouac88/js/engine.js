@@ -48,6 +48,86 @@ export function createEngine(knowledge) {
   // --------------------------------------------------
 
 
+  function getTripDataAnswer(question) {
+    const text = normalizeText(question);
+    const trip = knowledge.tripData;
+
+    if (!trip || !trip.totaux || !Array.isArray(trip.etapes)) {
+      return null;
+    }
+
+    const t = trip.totaux;
+    const etapes = trip.etapes;
+    const fmt = n => Number(n || 0).toLocaleString("fr-FR");
+
+    // Prochaine étape
+    if (
+      text.includes("prochaine etape") ||
+      text.includes("etape suivante") ||
+      text.includes("ou allons nous ensuite")
+    ) {
+      const e = etapes.find(item => !item.fait);
+
+      if (!e) return "Toutes les étapes sont terminées !";
+
+      return `La prochaine étape est l'étape ${e.jour} : ${e.depart} vers ${e.arrivee}, ${fmt(e.km)} km et ${fmt(e.denivele)} m de dénivelé.`;
+    }
+
+    // Détails d'une étape précise
+    const numero = text.match(/\betape\s+(\d+)\b/);
+
+    if (numero) {
+      const e = etapes.find(item => Number(item.jour) === Number(numero[1]));
+
+      if (e) {
+        return `Étape ${e.jour} : ${e.depart} vers ${e.arrivee}, ${fmt(e.km)} km, ${fmt(e.denivele)} m de dénivelé. ${e.fait ? "Cette étape est réalisée." : "Cette étape est à venir."}`;
+      }
+    }
+
+    // Totaux du voyage
+    if (
+      text.includes("kilometres parcourus") ||
+      text.includes("km parcourus") ||
+      text.includes("distance parcourue")
+    ) {
+      return `Nous avons parcouru ${fmt(t.km_faits)} km sur ${fmt(t.km_total)} km prévus.`;
+    }
+
+    if (
+      text.includes("kilometres restants") ||
+      text.includes("km restants") ||
+      text.includes("distance restante")
+    ) {
+      return `Il reste ${fmt(t.km_restants)} km à parcourir.`;
+    }
+
+    if (
+      text.includes("denivele") &&
+      (text.includes("parcouru") || text.includes("fait") || text.includes("total"))
+    ) {
+      return `Le dénivelé réalisé est de ${fmt(t.denivele_fait)} m sur ${fmt(t.denivele_total)} m prévus.`;
+    }
+
+    if (
+      text.includes("avancement") ||
+      text.includes("pourcentage du voyage") ||
+      text.includes("progression du voyage")
+    ) {
+      return `Le voyage est réalisé à ${fmt(t.avancement)} %.`;
+    }
+
+    if (
+      text.includes("combien d etapes") ||
+      text.includes("nombre d etapes") ||
+      text.includes("etapes realisees")
+    ) {
+      return `${fmt(t.jours_faits)} étapes réalisées sur ${fmt(t.jours)} au total.`;
+    }
+
+    return null;
+  }
+
+  
   function getLiveDataAnswer(question) {
     const text = normalizeText(question);
     const data = knowledge.liveData || {};
@@ -347,6 +427,20 @@ return `Concernant ${label}, j'ai noté : ${value}.`;
       const response = {
         type: "liveData",
         text: liveDataAnswer
+      };
+
+      remember("user", cleanQuestion);
+      saveExchange(response);
+
+      return response;
+    }
+
+    const tripDataAnswer = getTripDataAnswer(cleanQuestion);
+
+    if (tripDataAnswer) {
+      const response = {
+        type: "tripData",
+        text: tripDataAnswer
       };
 
       remember("user", cleanQuestion);
