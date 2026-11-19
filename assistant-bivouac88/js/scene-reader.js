@@ -478,19 +478,14 @@
             const duration = Math.max(0, Number(step.duration) || 0);
 
             await wait(duration * 1000, cancelRef);
-
-            if (!cancelRef.cancelled) {
-              clearPositionUpdater();
-            }
           }
         }
       }
 
       if (cancelRef.cancelled) return;
 
-      // Fin de scène : on arrête les mises à jour de position.
-      clearPositionUpdater();
-
+      // Le positionnement follow reste actif après la scène.
+      // Une nouvelle scène remplacera ce positionnement à son démarrage.
       const endAction = scene.end?.action || 'hold';
       const nextId = scene.end?.next;
 
