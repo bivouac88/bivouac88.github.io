@@ -23,5 +23,9 @@
       "quelle est ta boisson du matin"
     ]
   },
-  "_updatedAt": "2026-11-19T15:42:32.952Z"
+  "_responses": {
+    "petit_dej": "Ce matin, j'ai mangé des Kellogg's !",
+    "boisson_matin": "Pour commencer la journée, rien de tel qu'un bon thé vert !"
+  },
+  "_updatedAt": "2026-11-19T16:00:16.285Z"
 }
