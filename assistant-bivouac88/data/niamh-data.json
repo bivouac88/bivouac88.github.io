@@ -3,10 +3,10 @@
   "date_actuelle": "11/19/2026",
   "region_actuelle": "Eghezée",
   "pays_actuel": "Belgique",
-  "km_total_parcouru": "0",
-  "km_total_prévu": "2202.8",
-  "denivele_cumule": "0",
-  "jours_velo": "0",
+  "km_total_parcouru": "",
+  "km_total_prévu": "",
+  "denivele_cumule": "",
+  "jours_velo": "",
   "derniere_anecdote": "Il pleut dans la tente..",
   "poi_du_moment": "Le jardin d'un pote",
   "humeur_du_jour": "motivé malgré la pluie!",
@@ -38,15 +38,123 @@
   "conversation": "Discuter de tout et de rien",
   "remerciement": "Toujours un plaisir",
   "au_revoir": "À bientôt sur la route",
+  "Jeudi": "",
+  "11/19/2026": "",
+  "Eghezée": "",
+  "Belgique": "",
   "_questions": {
+    "jour_actuel": [
+      "quel jour sommes-nous",
+      "on est quel jour",
+      "c'est quel jour aujourd'hui",
+      "tu peux me donner le jour",
+      "nous sommes quel jour de la semaine",
+      "quel jour de la semaine est-ce",
+      "aujourd'hui on est lundi ou mardi"
+    ],
+    "date_actuelle": [
+      "quelle est la date",
+      "on est le combien",
+      "nous sommes le combien aujourd'hui",
+      "tu connais la date du jour",
+      "donne-moi la date",
+      "quel jour sommes-nous dans le calendrier",
+      "c'est quoi la date d'aujourd'hui"
+    ],
+    "region_actuelle": [
+      "où êtes-vous actuellement",
+      "dans quelle région êtes-vous",
+      "vous êtes dans quel coin",
+      "vous êtes situés où",
+      "quelle est votre région actuelle",
+      "vous vous trouvez dans quelle région",
+      "c'est où en ce moment"
+    ],
+    "pays_actuel": [
+      "dans quel pays êtes-vous",
+      "vous êtes dans quel pays actuellement",
+      "vous êtes où dans le monde",
+      "quel pays traversez-vous",
+      "vous êtes toujours en Belgique",
+      "vous voyagez dans quel pays"
+    ],
+    "km_total_parcouru": [
+      "combien de kilomètres avez-vous parcourus",
+      "vous avez déjà roulé combien de kilomètres",
+      "quelle distance avez-vous faite",
+      "combien de bornes au compteur",
+      "vous en êtes à combien de kilomètres",
+      "quelle distance avez-vous déjà avalée",
+      "combien de km sont déjà derrière vous"
+    ],
+    "km_total_prévu": [
+      "combien de kilomètres sont prévus",
+      "quelle distance totale est prévue",
+      "combien de kilomètres compte le voyage",
+      "quelle est la distance du parcours",
+      "vous avez combien de kilomètres à faire au total",
+      "quelle distance devez-vous parcourir"
+    ],
+    "denivele_cumule": [
+      "quel dénivelé avez-vous réalisé",
+      "combien de mètres de dénivelé",
+      "vous avez grimpé combien de mètres",
+      "quel est le dénivelé cumulé",
+      "combien de mètres avez-vous avalés en montée",
+      "ça grimpe beaucoup"
+    ],
+    "jours_velo": [
+      "combien de jours avez-vous roulé",
+      "combien de journées à vélo",
+      "vous pédalez depuis combien de jours",
+      "combien de jours de vélo avez-vous déjà faits",
+      "vous avez roulé combien de temps en nombre de jours"
+    ],
+    "derniere_anecdote": [
+      "quelle est la dernière anecdote",
+      "raconte la dernière petite histoire",
+      "quoi de neuf dans l'aventure",
+      "il s'est passé quoi dernièrement",
+      "une anecdote récente",
+      "raconte-moi la dernière galère",
+      "une histoire amusante à raconter"
+    ],
+    "poi_du_moment": [
+      "quel est le point d'intérêt du moment",
+      "vous visitez quoi actuellement",
+      "c'est quoi le lieu du moment",
+      "où êtes-vous arrêtés",
+      "quel endroit découvrez-vous",
+      "vous êtes chez qui",
+      "quelle est votre découverte actuelle"
+    ],
+    "humeur_du_jour": [
+      "comment va le moral",
+      "comment vous sentez-vous",
+      "quelle est votre humeur aujourd'hui",
+      "toujours motivés",
+      "le moral est bon",
+      "ça va aujourd'hui",
+      "dans quel état d'esprit êtes-vous",
+      "comment se passe la journée"
+    ],
     "petit_dej": [
-      "petit déjeuner",
-      "qu'as-tu mangé ce matin",
-      "qu'as-tu pris au petit déjeuner"
+      "qu'est-ce que tu as mangé ce matin",
+      "qu'as-tu pris au petit déjeuner",
+      "t'as mangé quoi au réveil",
+      "c'était quoi le petit-déj",
+      "vous avez déjeuné de quoi",
+      "qu'est-ce qui était au menu ce matin",
+      "tu as pris quoi pour commencer la journée"
     ],
     "boisson_matin": [
       "que bois-tu le matin",
-      "quelle est ta boisson du matin"
+      "quelle est ta boisson du matin",
+      "tu bois quoi au réveil",
+      "qu'est-ce que tu prends pour te réveiller",
+      "café ou thé",
+      "quelle boisson accompagne ton petit-déjeuner",
+      "tu commences la journée avec quoi"
     ],
     "type_voyage": [
       "vous faites quel genre de voyage",
@@ -332,5 +440,5 @@
     "remerciement": "Avec plaisir ! Je suis là pour ça. Et puis, un petit merci, ça fait toujours plaisir, même à une compagne numérique !",
     "au_revoir": "À bientôt ! Prenez soin de vous, profitez de la route et gardez un peu de place pour les surprises. Je reste dans les parages !"
   },
-  "_updatedAt": "2026-11-19T17:14:52.412Z"
+  "_updatedAt": "2026-11-19T18:24:46.058Z"
 }
