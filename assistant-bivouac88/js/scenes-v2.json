@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "exportedAt": "2026-11-19T01:31:53.926Z",
+  "exportedAt": "2026-11-19T11:25:50.593Z",
   "avatar": {
     "hitbox": {
       "width": 76,
@@ -22,7 +22,7 @@
         "pc"
       ],
       "trigger": {
-        "type": "avatar-click",
+        "type": "load",
         "delay": 0
       },
       "conditions": {
@@ -67,11 +67,61 @@
             "x": 164.4444580078125,
             "y": -102.22216796875
           }
+        }
+      ],
+      "end": {
+        "action": "hold",
+        "next": null,
+        "repeat": 1
+      },
+      "recorded": {
+        "viewport": {
+          "width": 1064,
+          "height": 987
         },
+        "scrollY": 222.22222900390625,
+        "date": "2026-11-19T11:23:41.488Z"
+      }
+    },
+    {
+      "id": 3,
+      "name": "Thankfull",
+      "enabled": true,
+      "priority": 0,
+      "pages": [
+        "test"
+      ],
+      "devices": [
+        "pc"
+      ],
+      "trigger": {
+        "type": "avatar-click",
+        "delay": 0
+      },
+      "conditions": {
+        "frequency": "always",
+        "cooldownSeconds": 0,
+        "interruptible": false
+      },
+      "points": {
+        "A": {
+          "selector": "div.test-page:nth-of-type(1) > main.test-main",
+          "ax": 82.93,
+          "ay": 2.69,
+          "offsetX": 0,
+          "offsetY": 0,
+          "mode": "follow",
+          "fallback": {
+            "xPct": 82.29,
+            "yPct": 18.59
+          }
+        }
+      },
+      "steps": [
         {
           "animation": "Thankfull",
           "at": "A",
-          "duration": null,
+          "duration": 6,
           "pause": 0,
           "move": {
             "type": "instant"
@@ -93,17 +143,17 @@
         }
       ],
       "end": {
-        "action": "hold",
-        "next": null,
+        "action": "chain",
+        "next": 2,
         "repeat": 1
       },
       "recorded": {
         "viewport": {
-          "width": 1704,
-          "height": 987
+          "width": 2133,
+          "height": 1018
         },
-        "scrollY": 111.11111450195312,
-        "date": "2026-11-19T01:31:36.494Z"
+        "scrollY": 0,
+        "date": "2026-11-19T10:36:29.880Z"
       }
     }
   ]
