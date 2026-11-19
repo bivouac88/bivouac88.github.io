@@ -24,16 +24,21 @@
 //     "Enregistrer" pouvait le recréer avec les données encore dans le formulaire).
 //  7) Animation de marche par défaut ("Running") correctement réappliquée même
 //     si le <select> se construit avant que la liste d'animations soit prête.
-//  8) Les réglages de hitbox sont bridés (min/max) au moment de l'enregistrement,
-//     pas seulement pendant la frappe.
-//  9) Panneau déplaçable, borné à l'écran (y compris au redimensionnement de la
+//  8) Panneau déplaçable, borné à l'écran (y compris au redimensionnement de la
 //     fenêtre), avec position mémorisée dans localStorage.
-//  10) Filtre par page dans la liste des scénarios enregistrés.
-//  11) Vérifications supplémentaires avant export : nom vide, animation
+//  9) Filtre par page dans la liste des scénarios enregistrés.
+//  10) Vérifications supplémentaires avant export : nom vide, animation
 //     inconnue, pause invalide, répétitions invalides, délai de déclencheur
 //     invalide, type de déclencheur inconnu, bornes seuil/scroll/idle,
 //     scène "after-scene" introuvable ou auto-référencée, sélecteur CSS du
 //     déclencheur invalide, nom d'événement manquant, cooldown invalide.
+//  12) Hitbox, orientation et position des champs de dialogue sont réglées
+//     par étape (comme l'animation), capturées dans l'étape au clic sur
+//     « Ajouter/Enregistrer cette étape », et toutes regroupées dans
+//     l'onglet ② pour tout ajuster et enregistrer au même endroit. La
+//     hitbox est réellement cliquable côté visiteur (character.js,
+//     window.characterSetHitbox), appliquée par scene-reader.js à chaque
+//     étape jouée — ce n'est plus une prévisualisation admin seule.
 
 (function () {
   const params = new URLSearchParams(location.search);
