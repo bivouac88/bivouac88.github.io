@@ -266,45 +266,41 @@ const DRAG_THRESHOLD_PX = 5; // distance avant de considérer que c'est un drag,
 
 const ADMIN_MODE = new URLSearchParams(window.location.search).get('edit') === 'bivouac88admin';
 
+let currentHitbox = {
+  width: 140,
+  height: 145,
+  offsetX: 0,
+  offsetY: 0,
+};
+
+window.characterSetHitbox = (hitbox) => {
+  if (!hitbox || typeof hitbox !== 'object') return;
+
+  const width = Number(hitbox.width);
+  const height = Number(hitbox.height);
+  const offsetX = Number(hitbox.offsetX);
+  const offsetY = Number(hitbox.offsetY);
+
+  if (Number.isFinite(width) && width > 0) currentHitbox.width = width;
+  if (Number.isFinite(height) && height > 0) currentHitbox.height = height;
+  if (Number.isFinite(offsetX)) currentHitbox.offsetX = offsetX;
+  if (Number.isFinite(offsetY)) currentHitbox.offsetY = offsetY;
+};
+
 function isOverCharacter(mx, my) {
   if (!runner) return false;
 
   const bounds = window.characterGetScreenBounds();
   if (!bounds) return false;
 
-  let hitbox = {
-    width: 140,
-    height: 145,
-    offsetX: 0,
-    offsetY: 0,
-  };
-
-  try {
-    const saved = JSON.parse(
-      localStorage.getItem('b88-admin-hitbox-settings')
-    );
-
-    if (saved && typeof saved === 'object') {
-      const width = Number(saved.width);
-      const height = Number(saved.height);
-      const offsetX = Number(saved.offsetX);
-      const offsetY = Number(saved.offsetY);
-
-      if (Number.isFinite(width) && width > 0) hitbox.width = width;
-      if (Number.isFinite(height) && height > 0) hitbox.height = height;
-      if (Number.isFinite(offsetX)) hitbox.offsetX = offsetX;
-      if (Number.isFinite(offsetY)) hitbox.offsetY = offsetY;
-    }
-  } catch (e) {}
-
-  const centerX = (bounds.left + bounds.right) / 2 + hitbox.offsetX;
-  const centerY = (bounds.top + bounds.bottom) / 2 + hitbox.offsetY;
+  const centerX = (bounds.left + bounds.right) / 2 + currentHitbox.offsetX;
+  const centerY = (bounds.top + bounds.bottom) / 2 + currentHitbox.offsetY;
 
   return (
-    mx >= centerX - hitbox.width / 2 &&
-    mx <= centerX + hitbox.width / 2 &&
-    my >= centerY - hitbox.height / 2 &&
-    my <= centerY + hitbox.height / 2
+    mx >= centerX - currentHitbox.width / 2 &&
+    mx <= centerX + currentHitbox.width / 2 &&
+    my >= centerY - currentHitbox.height / 2 &&
+    my <= centerY + currentHitbox.height / 2
   );
 }
 
