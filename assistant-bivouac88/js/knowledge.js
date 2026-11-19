@@ -1,8 +1,7 @@
 
 export async function loadKnowledge() {
   const knowledgeUrl = new URL("../data/knowledge.json", import.meta.url);
-  const niamhDataUrl = new URL("../data/niamh-data.json", import.meta.url);
-
+  const voyageApiUrl = "https://script.google.com/macros/s/AKfycbyptX2-OXsxh8yXqk9Hi_ygvcxP1_4vD0AT-KzZPcTFzR9AfEKHbQnBvgi3Pvw5a-LL/exec?public=1";
   // Chargement de la base de connaissances habituelle
   const response = await fetch(knowledgeUrl, {
     cache: "no-store"
@@ -36,7 +35,35 @@ export async function loadKnowledge() {
 
     knowledge.liveData = {};
   }
+  // Chargement des totaux et des étapes depuis la source publique du site
+  try {
+    const voyageResponse = await fetch(voyageApiUrl, {
+      cache: "no-store"
+    });
 
+    if (!voyageResponse.ok) {
+      throw new Error(`Erreur HTTP ${voyageResponse.status}`);
+    }
+
+    const voyageData = await voyageResponse.json();
+
+    if (!voyageData.totaux || !Array.isArray(voyageData.etapes)) {
+      throw new Error("Format des données du voyage invalide");
+    }
+
+    knowledge.tripData = voyageData;
+
+  } catch (error) {
+    console.warn(
+      "[Niamh] Impossible de charger les totaux et étapes :",
+      error
+    );
+
+    knowledge.tripData = {
+      totaux: {},
+      etapes: []
+    };
+  }
   return knowledge;
 }
 
