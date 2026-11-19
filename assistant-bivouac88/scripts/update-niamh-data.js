@@ -1,7 +1,7 @@
 const fs = require("fs");
 
 const TSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTnGbWpwSh3bQG1tCT5qwNnDsqBeuIRSjRuRbPv62sh9TUwCe9x4z6Z5m58SH0V2Kez5l6Q8WoMt_Ol/pub?gid=634911152&single=true&output=tsv";
-const OUTPUT_PATH = "data/niamh-data.json";
+const OUTPUT_PATH = "assistant-bivouac88/data/niamh-data.json";
 
 async function run() {
   const response = await fetch(TSV_URL);
