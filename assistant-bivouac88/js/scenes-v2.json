@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "exportedAt": "2026-11-19T22:57:18.724Z",
+  "exportedAt": "2026-11-19T23:24:10.867Z",
   "avatar": {
     "hitbox": {
       "width": 76,
@@ -218,8 +218,8 @@
             "y": -209
           },
           "form": {
-            "x": 88,
-            "y": -72
+            "x": -18,
+            "y": -74
           },
           "bubbleSide": "left"
         }
@@ -235,7 +235,167 @@
           "height": 917
         },
         "scrollY": 0,
-        "date": "2026-11-19T22:57:02.644Z"
+        "date": "2026-11-19T23:16:50.339Z"
+      }
+    },
+    {
+      "id": 5,
+      "name": "Chill Resume",
+      "enabled": true,
+      "priority": 0,
+      "pages": [
+        "resume"
+      ],
+      "devices": [
+        "pc"
+      ],
+      "trigger": {
+        "type": "load",
+        "delay": 0
+      },
+      "conditions": {
+        "frequency": "always",
+        "cooldownSeconds": 0,
+        "interruptible": true
+      },
+      "points": {
+        "A": {
+          "selector": "#map",
+          "ax": 70.14,
+          "ay": 5.46,
+          "offsetX": 0,
+          "offsetY": 0,
+          "mode": "follow",
+          "fallback": {
+            "xPct": 43.23,
+            "yPct": 58.78
+          }
+        }
+      },
+      "steps": [
+        {
+          "animation": "Male Laying Pose",
+          "at": "A",
+          "duration": null,
+          "pause": 0,
+          "move": {
+            "type": "instant"
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "hitbox": {
+            "width": 194,
+            "height": 75,
+            "offsetX": -16,
+            "offsetY": -38
+          },
+          "autoFace": false,
+          "bubble": {
+            "x": 37,
+            "y": -65
+          },
+          "form": {
+            "x": 0,
+            "y": 0
+          },
+          "bubbleSide": "top"
+        }
+      ],
+      "end": {
+        "action": "hold",
+        "next": null,
+        "repeat": 1
+      },
+      "recorded": {
+        "viewport": {
+          "width": 1920,
+          "height": 917
+        },
+        "scrollY": 0,
+        "date": "2026-11-19T23:19:26.931Z"
+      }
+    },
+    {
+      "id": 6,
+      "name": "Cycle Stats",
+      "enabled": true,
+      "priority": 0,
+      "pages": [
+        "stats"
+      ],
+      "devices": [
+        "pc"
+      ],
+      "trigger": {
+        "type": "load",
+        "delay": 0
+      },
+      "conditions": {
+        "frequency": "always",
+        "cooldownSeconds": 0,
+        "interruptible": true
+      },
+      "points": {
+        "A": {
+          "selector": "main > section.section:nth-of-type(1) > div.progression > div.hero.revele:nth-of-type(1)",
+          "ax": 92.63,
+          "ay": 103.92,
+          "offsetX": 0,
+          "offsetY": 0,
+          "mode": "follow",
+          "fallback": {
+            "xPct": 54.06,
+            "yPct": 25.63
+          }
+        }
+      },
+      "steps": [
+        {
+          "animation": "Flying Bicycle Kick",
+          "at": "A",
+          "duration": null,
+          "pause": 0,
+          "move": {
+            "type": "instant"
+          },
+          "rotation": {
+            "x": 0,
+            "y": 301,
+            "z": 0
+          },
+          "hitbox": {
+            "width": 142,
+            "height": 113,
+            "offsetX": -14,
+            "offsetY": -174
+          },
+          "autoFace": false,
+          "bubble": {
+            "x": -36,
+            "y": -222
+          },
+          "form": {
+            "x": -240,
+            "y": -202
+          },
+          "bubbleSide": "top"
+        }
+      ],
+      "end": {
+        "action": "hold",
+        "next": null,
+        "repeat": 1
+      },
+      "recorded": {
+        "viewport": {
+          "width": 1920,
+          "height": 917
+        },
+        "scrollY": 0,
+        "date": "2026-11-19T23:23:31.691Z"
       }
     }
   ]
