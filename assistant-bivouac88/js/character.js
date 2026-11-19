@@ -96,6 +96,19 @@ let currentAction = null;
 let posX = width - 120;
 let posY = CONFIG.bottomOffsetPx;
 
+// Zone cliquable (hitbox) et dernière position connue de la souris —
+// déclarées ici, avant la boucle d'animation, car tick() les utilise dès
+// son tout premier appel (synchrone, avant le reste du fichier plus bas).
+let currentHitbox = {
+  width: 140,
+  height: 145,
+  offsetX: 0,
+  offsetY: 0,
+};
+
+let lastMouseX = -Infinity;
+let lastMouseY = -Infinity;
+
 // --- Gestion des animations ---
 
 function playAnimation(name) {
@@ -267,13 +280,6 @@ const DRAG_THRESHOLD_PX = 5; // distance avant de considérer que c'est un drag,
 
 const ADMIN_MODE = new URLSearchParams(window.location.search).get('edit') === 'bivouac88admin';
 
-let currentHitbox = {
-  width: 140,
-  height: 145,
-  offsetX: 0,
-  offsetY: 0,
-};
-
 window.characterSetHitbox = (hitbox) => {
   if (!hitbox || typeof hitbox !== 'object') return;
 
@@ -304,9 +310,6 @@ function isOverCharacter(mx, my) {
     my <= centerY + currentHitbox.height / 2
   );
 }
-
-let lastMouseX = -Infinity;
-let lastMouseY = -Infinity;
 
 function updatePointerEvents() {
   container.style.pointerEvents =
