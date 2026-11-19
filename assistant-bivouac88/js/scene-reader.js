@@ -13,6 +13,8 @@
   const STORAGE_KEY = 'b88-scenes-state';
   const MOBILE_BREAKPOINT = 768;
 
+  const hitboxDefaults = { width: 140, height: 145, offsetX: 0, offsetY: 0 };
+  
   function currentPage() {
     return document.body.dataset.page || '';
   }
@@ -184,7 +186,7 @@
       currentFieldOffsets.form
     );
   });
-
+  
   // ---------------------------------------------------------------
   // ÉTAT DU MOTEUR
   // ---------------------------------------------------------------
@@ -467,6 +469,11 @@
             );
           }
 
+          // Zone cliquable (hitbox), ajustée à la pose de cette étape
+          if (typeof window.characterSetHitbox === 'function') {
+            window.characterSetHitbox(step.hitbox || hitboxDefaults);
+          }
+
           // Champs de dialogue
           applyFieldOffsets(step.bubble, step.form);
 
@@ -478,19 +485,14 @@
             const duration = Math.max(0, Number(step.duration) || 0);
 
             await wait(duration * 1000, cancelRef);
-
-            if (!cancelRef.cancelled) {
-              clearPositionUpdater();
-            }
           }
         }
       }
 
       if (cancelRef.cancelled) return;
 
-      // Fin de scène : on arrête les mises à jour de position.
-      clearPositionUpdater();
-
+      // Le positionnement follow reste actif après la scène.
+      // Une nouvelle scène remplacera ce positionnement à son démarrage.
       const endAction = scene.end?.action || 'hold';
       const nextId = scene.end?.next;
 

@@ -53,11 +53,11 @@
 
   const PAGES = [
     ['test', 'Index'],
-    ['accueil', 'Résumé'],
+    ['resume', 'Résumé'],
     ['stats', 'Stats'],
     ['etapes', 'Étapes'],
     ['journal', 'Journal de bord'],
-    ['meteo-peche', 'Météo & pêche'],
+    ['meteo', 'Météo'],
     ['poi', 'POI'],
   ];
   const DEVICES = [
@@ -95,7 +95,7 @@
   };
 
   const PANEL_POSITION_KEY = 'b88-admin-panel-position';
-  const HITBOX_KEY = 'b88-admin-hitbox-settings';
+  const SCENES_DRAFT_KEY = 'b88-admin-scenes-draft';
   const PANEL_WIDTH = 360;
 
   // ---------------------------------------------------------------
@@ -297,10 +297,10 @@
   const tabs = el('div');
   tabs.className = 'row';
   tabs.style.margin = '10px 0';
-  const overviewTab = button('① Scénarios', () => showView('overview'), 'primary');
+  const overviewTab = button('① Scénarios', () => { if (confirmLeaveEditorIfDirty()) showView('overview'); }, 'primary');
   const editorTab = button('② Éditeur', () => showView('editor'));
-  const checkTab = button('③ Vérifier / exporter', () => showView('check'));
-  const toolsTab = button('④ Outils personnage', () => showView('tools'));
+  const checkTab = button('③ Vérifier / exporter', () => { if (confirmLeaveEditorIfDirty()) showView('check'); });
+  const toolsTab = button('④ Outils personnage', () => { if (confirmLeaveEditorIfDirty()) showView('tools'); });
   tabs.append(overviewTab, editorTab, checkTab, toolsTab);
   body.append(tabs);
   const view = el('div');
@@ -308,6 +308,15 @@
 
   let currentView = 'overview';
   let toolsIntervalId = 0;
+
+  // Toute saisie (champ texte, case, <select>) pendant qu'on est dans
+  // l'éditeur marque la scène en cours comme modifiée et relance la
+  // validation en direct. Les actions qui ne passent pas par un champ
+  // (créer/supprimer un point, ajouter/réordonner une étape…) appellent
+  // markEditorDirty() explicitement à l'endroit où elles sont gérées.
+  function handleEditorFieldChange() { markEditorDirty(); }
+  view.addEventListener('input', handleEditorFieldChange);
+  view.addEventListener('change', handleEditorFieldChange);
 
   function showView(which) {
     currentView = which;
@@ -505,29 +514,6 @@
   }
   triggerType.addEventListener('change', () => refreshTriggerUI(true));
 
-  function buildTrigger() {
-    const type = triggerType.value;
-    const trigger = { type, delay: num(triggerDelay.value) ?? 0 };
-    if (['enter', 'element-click', 'hover'].includes(type)) {
-      const selector = triggerSelector.value.trim();
-      if (!selector) { setStatus('Ce déclencheur nécessite un élément CSS : choisis-le ou saisis un sélecteur.'); return null; }
-      trigger.selector = selector;
-    }
-    if (type === 'enter') trigger.threshold = num(triggerValue.value) ?? 0.5;
-    if (type === 'scroll') trigger.scrollPct = num(triggerValue.value) ?? 50;
-    if (type === 'idle') trigger.idleSeconds = num(triggerValue.value) ?? 10;
-    if (type === 'after-scene') {
-      if (!triggerAfterScene.value) { setStatus('Choisis la scène qui doit se terminer avant celle-ci.'); return null; }
-      trigger.afterScene = Number(triggerAfterScene.value);
-    }
-    if (type === 'event') {
-      const eventName = triggerValue.value.trim();
-      if (!eventName) { setStatus('Indique le nom de l’événement.'); return null; }
-      trigger.eventName = eventName;
-    }
-    if (['enter', 'scroll', 'hover'].includes(type)) trigger.leave = triggerLeave.value;
-    return trigger;
-  }
   function applyTriggerToUI(trigger) {
     triggerType.value = trigger.type || 'load';
     refreshTriggerUI(false);
@@ -628,6 +614,7 @@
     activePointKey = key;
     refreshPointsUI();
     stepPoint.value = key;
+    markEditorDirty();
     setStatus(`Point ${key} créé et sélectionné. Fais glisser l’avatar sur la page pour ajuster sa position.`);
   }
 
@@ -638,6 +625,7 @@
     if (!activePointKey || !draftPoints[activePointKey]) return;
     draftPoints[activePointKey] = { ...capturePointAt(getAvatarPos()), mode: draftPoints[activePointKey].mode };
     refreshPointsUI();
+    markEditorDirty();
     setStatus(`Position du point ${activePointKey} mise à jour.`);
   });
 
@@ -664,6 +652,7 @@
         delete draftPoints[key];
         if (activePointKey === key) activePointKey = null;
         refreshPointsUI();
+        markEditorDirty();
       });
       const wrap = el('div');
       wrap.append(edit, del);
@@ -816,6 +805,8 @@
     autoFace.checked = step.autoFace === true;
     currentRotation = { ...(step.rotation || { x: 0, y: 0, z: 0 }) };
     doRotate();
+    currentHitbox = { ...hitboxDefaults, ...(step.hitbox || {}) };
+    updateHitboxPreview();
     applyFieldOffsets({ bubble: step.bubble, form: step.form });
     bubbleSide.value = step.bubbleSide || 'top';
     document.dispatchEvent(new CustomEvent('b88:dialogue-side', { detail: { side: bubbleSide.value } }));
@@ -844,6 +835,7 @@
           if (editingStepIndex === index) editingStepIndex = index - 1;
           else if (editingStepIndex === index - 1) editingStepIndex = index;
           refreshStepsUI();
+          markEditorDirty();
         }),
         button('↓', () => {
           if (index >= draftSteps.length - 1) return;
@@ -851,6 +843,7 @@
           if (editingStepIndex === index) editingStepIndex = index + 1;
           else if (editingStepIndex === index + 1) editingStepIndex = index;
           refreshStepsUI();
+          markEditorDirty();
         }),
         button('✎', () => loadStepIntoEditor(index)),
         button('Supprimer', () => {
@@ -858,6 +851,7 @@
           if (editingStepIndex === index) resetStepEditor();
           else if (editingStepIndex !== null && editingStepIndex > index) editingStepIndex--;
           refreshStepsUI();
+          markEditorDirty();
         }, 'danger')
       );
       card.append(actions);
@@ -876,6 +870,7 @@
       pause: num(pause.value) ?? 0,
       move: { type: movement.value },
       rotation: { ...currentRotation },
+      hitbox: { ...currentHitbox },
       autoFace: false,
       bubble: offsets.bubble,
       form: offsets.form,
@@ -895,6 +890,7 @@
       setStatus(`Étape ${draftSteps.length} ajoutée au scénario.`);
     }
     refreshStepsUI();
+    markEditorDirty();
   }
 
   // ---------------------------------------------------------------
@@ -925,6 +921,8 @@
 
   function resetEditor() {
     editingId = null;
+    editingSnapshot = null;
+    editorDirty = false;
     nameInput.value = '';
     priorityInput.value = '0';
     Object.keys(pageChecks).forEach((k) => { pageChecks[k] = k === 'test'; });
@@ -945,10 +943,14 @@
     refreshStepsUI();
     currentRotation = { x: 0, y: 0, z: 0 };
     doRotate();
+    currentHitbox = { ...hitboxDefaults };
+    updateHitboxPreview();
   }
 
   function loadScene(scene) {
     editingId = scene.id;
+    editingSnapshot = clone(scene);
+    editorDirty = false;
     activePointKey = null;
     resetStepEditor();
     nameInput.value = scene.name || '';
@@ -971,30 +973,144 @@
     if (lastStep) {
       currentRotation = { ...(lastStep.rotation || { x: 0, y: 0, z: 0 }) };
       applyFieldOffsets({ bubble: lastStep.bubble, form: lastStep.form });
+      currentHitbox = { ...hitboxDefaults, ...(lastStep.hitbox || {}) };
     } else {
       currentRotation = { x: 0, y: 0, z: 0 };
+      currentHitbox = { ...hitboxDefaults };
     }
     doRotate();
+    updateHitboxPreview();
     showView('editor');
   }
 
+  // Construit la scène à partir du formulaire et la valide avec EXACTEMENT
+  // la même logique que les badges de l'onglet ① et l'export de l'onglet
+  // ③ (validateOneScene) : un seul endroit définit ce qu'est une scène
+  // valide. En cas d'erreur bloquante, on affiche la première.
   function collectScene() {
+    const draft = buildDraftScene();
+    const { errors } = validateOneScene(draft, draftValidationScenes(draft));
+    if (errors.length) { setStatus(errors[0]); return null; }
+    draft.recorded = { viewport: { width: innerWidth, height: innerHeight }, scrollY: scrollY, date: new Date().toISOString() };
+    return draft;
+  }
+
+  // ---------------------------------------------------------------
+  // Validation — une seule logique, par scène, réutilisée partout :
+  // export (toutes les scènes), badges de la liste (une scène déjà
+  // enregistrée), panneau en direct de l'éditeur (une scène en cours de
+  // rédaction, pas encore enregistrée).
+  // ---------------------------------------------------------------
+  function validateOneScene(s, allScenes) {
+    const errors = [], warnings = [];
+    const label = s.name?.trim() ? s.name : `Scénario #${s.id}`;
+
+    if (!Number.isInteger(Number(s.id))) errors.push(`${label} : identifiant invalide.`);
+    else if (allScenes.some((other) => other !== s && Number(other.id) === Number(s.id))) errors.push(`${label} : identifiant en doublon avec une autre scène.`);
+    if (!s.name?.trim()) warnings.push(`${label} : aucun nom renseigné.`);
+    if (!(s.pages || []).length) errors.push(`${label} : aucune page sélectionnée.`);
+    if (!(s.devices || []).length) errors.push(`${label} : aucun appareil sélectionné.`);
+    if (!Object.keys(s.points || {}).length) errors.push(`${label} : aucun point défini.`);
+
+    const trigger = s.trigger || {};
+    if (!TRIGGERS.some(([t]) => t === trigger.type)) errors.push(`${label} : type de déclencheur inconnu.`);
+    const triggerDelayValue = Number(trigger.delay ?? 0);
+    if (!Number.isFinite(triggerDelayValue) || triggerDelayValue < 0) errors.push(`${label} : délai du déclencheur invalide.`);
+    if (trigger.type === 'enter') {
+      const threshold = Number(trigger.threshold ?? 0.5);
+      if (!Number.isFinite(threshold) || threshold < 0 || threshold > 1) errors.push(`${label} : seuil de visibilité invalide (0 à 1).`);
+    }
+    if (trigger.type === 'scroll') {
+      const scrollPct = Number(trigger.scrollPct ?? 50);
+      if (!Number.isFinite(scrollPct) || scrollPct < 0 || scrollPct > 100) errors.push(`${label} : pourcentage de défilement invalide (0 à 100).`);
+    }
+    if (trigger.type === 'idle') {
+      const idleSeconds = Number(trigger.idleSeconds ?? 10);
+      if (!Number.isFinite(idleSeconds) || idleSeconds < 0) errors.push(`${label} : durée d’inactivité invalide.`);
+    }
+    if (trigger.type === 'after-scene') {
+      const afterScene = Number(trigger.afterScene);
+      if (!Number.isInteger(afterScene) || !allScenes.some((x) => Number(x.id) === afterScene)) errors.push(`${label} : scène déclencheuse introuvable.`);
+      else if (afterScene === Number(s.id)) errors.push(`${label} : une scène ne peut pas attendre sa propre fin.`);
+    }
+    if (['enter', 'element-click', 'hover'].includes(trigger.type)) {
+      const selector = typeof trigger.selector === 'string' ? trigger.selector.trim() : '';
+      if (!selector) errors.push(`${label} : sélecteur CSS du déclencheur manquant.`);
+      else { try { document.querySelector(selector); } catch (e) { errors.push(`${label} : sélecteur CSS du déclencheur invalide.`); } }
+    }
+    if (trigger.type === 'event' && !trigger.eventName?.trim()) errors.push(`${label} : nom de l’événement manquant.`);
+    const cooldownValue = Number(s.conditions?.cooldownSeconds ?? 0);
+    if (!Number.isFinite(cooldownValue) || cooldownValue < 0) errors.push(`${label} : délai d’attente (cooldown) invalide.`);
+
+    if (!s.steps?.length) { errors.push(`${label} : aucune étape.`); return { errors, warnings }; }
+    s.steps.forEach((step, i) => {
+      const stepLabel = `${label}, étape ${i + 1}`;
+      if (!step.at || !s.points?.[step.at]) {
+        errors.push(`${stepLabel} : point absent.`);
+      } else {
+        const point = s.points[step.at];
+        if (point.selector) { try { document.querySelector(point.selector); } catch (e) { warnings.push(`${stepLabel} : sélecteur CSS invalide.`); } }
+      }
+      if (!step.animation) errors.push(`${stepLabel} : animation absente.`);
+      else if (ANIMATIONS.length && !ANIMATIONS.includes(step.animation)) warnings.push(`${stepLabel} : animation « ${step.animation} » inconnue.`);
+      if (step.duration != null && (!Number.isFinite(Number(step.duration)) || Number(step.duration) < 0)) errors.push(`${stepLabel} : durée invalide.`);
+      if (step.pause != null && (!Number.isFinite(Number(step.pause)) || Number(step.pause) < 0)) errors.push(`${stepLabel} : pause invalide.`);
+      if (step.move?.type === 'walk' && step.move.walkAnimation && ANIMATIONS.length && !ANIMATIONS.includes(step.move.walkAnimation)) {
+        warnings.push(`${stepLabel} : animation de marche inconnue.`);
+      }
+    });
+    if (s.end?.action === 'chain') {
+      const next = allScenes.find((x) => Number(x.id) === Number(s.end.next));
+      if (!next) errors.push(`${label} : la scène suivante n’existe plus.`);
+      else {
+        if (!(s.pages || []).some((p) => (next.pages || []).includes(p))) errors.push(`${label} : la scène suivante ne partage aucune page avec elle.`);
+        if (!(s.devices || []).some((d) => (next.devices || []).includes(d))) errors.push(`${label} : la scène suivante ne partage aucun appareil avec elle.`);
+      }
+    }
+    const repeatValue = Number(s.end?.repeat ?? 1);
+    if (!Number.isInteger(repeatValue) || repeatValue < 0) errors.push(`${label} : nombre de répétitions invalide.`);
+    if (s.trigger?.type === 'manual' && !allScenes.some((source) => source !== s && source.end?.action === 'chain' && Number(source.end.next) === Number(s.id))) {
+      warnings.push(`${label} : mode « appelée uniquement » mais aucun scénario ne l’appelle.`);
+    }
+    if (allScenes.some((source) => source !== s && source.end?.action === 'chain' && Number(source.end.next) === Number(s.id)) && s.trigger?.type !== 'manual') {
+      warnings.push(`${label} : elle est appelée par une autre scène mais garde aussi un déclencheur indépendant.`);
+    }
+    if (s.end?.action === 'chain' && Number(s.end.next) === Number(s.id)) warnings.push(`${label} : s’enchaîne vers elle-même (boucle).`);
+    if (s.trigger?.type === 'load') warnings.push(`${label} : démarre automatiquement au chargement.`);
+
+    return { errors, warnings };
+  }
+
+  // Valide toutes les scènes enregistrées (utilisé par l'onglet ③ et les
+  // badges de l'onglet ①).
+  function validate() {
+    const errors = [], warnings = [], perScene = [];
+    scenes.forEach((s) => {
+      const r = validateOneScene(s, scenes);
+      perScene.push({ scene: s, errors: r.errors, warnings: r.warnings });
+      errors.push(...r.errors);
+      warnings.push(...r.warnings);
+    });
+    return { errors, warnings, perScene };
+  }
+
+  // Construit un objet "scène" à partir de l'état actuel du formulaire,
+  // sans bloquer sur les champs manquants (contrairement à collectScene) :
+  // sert uniquement à la validation en direct pendant la rédaction.
+  function buildDraftScene() {
     const pages = PAGES.filter(([v]) => pageChecks[v]).map(([v]) => v);
     const devices = DEVICES.filter(([v]) => deviceChecks[v]).map(([v]) => v);
-    if (!nameInput.value.trim()) { setStatus('Donne un nom à ce scénario.'); return null; }
-    if (!pages.length) { setStatus('Sélectionne au moins une page.'); return null; }
-    if (!devices.length) { setStatus('Sélectionne au moins un appareil.'); return null; }
-    if (!Object.keys(draftPoints).length) { setStatus('Crée au moins un point (section « Points »).'); return null; }
-    if (!draftSteps.length) { setStatus('Ajoute au moins une étape.'); return null; }
-    const trigger = buildTrigger();
-    if (!trigger) return null;
+    const type = triggerType.value;
+    const trigger = { type, delay: num(triggerDelay.value) ?? 0 };
+    if (['enter', 'element-click', 'hover'].includes(type)) trigger.selector = triggerSelector.value.trim();
+    if (type === 'enter') trigger.threshold = num(triggerValue.value) ?? 0.5;
+    if (type === 'scroll') trigger.scrollPct = num(triggerValue.value) ?? 50;
+    if (type === 'idle') trigger.idleSeconds = num(triggerValue.value) ?? 10;
+    if (type === 'after-scene') trigger.afterScene = triggerAfterScene.value ? Number(triggerAfterScene.value) : null;
+    if (type === 'event') trigger.eventName = triggerValue.value.trim();
+    if (['enter', 'scroll', 'hover'].includes(type)) trigger.leave = triggerLeave.value;
     const chain = endAction.value === 'chain';
-    if (chain && !endNext.value) { setStatus('Choisis la scène qui suit.'); return null; }
-
-    // editingId peut être nul (nouveau scénario) : on ne réutilise jamais
-    // Number(null)===0 pour aller chercher un id existant par erreur.
     const id = editingId != null ? editingId : nextSceneId();
-
     return {
       id,
       name: nameInput.value.trim(),
@@ -1006,9 +1122,84 @@
       conditions: { frequency: frequency.value, cooldownSeconds: num(cooldown.value) ?? 0, interruptible: interruptible.checked },
       points: clone(draftPoints),
       steps: clone(draftSteps),
-      end: { action: chain ? 'chain' : 'hold', next: chain ? Number(endNext.value) : null, repeat: num(repeat.value) ?? 1 },
-      recorded: { viewport: { width: innerWidth, height: innerHeight }, scrollY: scrollY, date: new Date().toISOString() },
+      end: { action: chain ? 'chain' : 'hold', next: chain && endNext.value ? Number(endNext.value) : null, repeat: num(repeat.value) ?? 1 },
     };
+  }
+
+  // Liste à utiliser pour valider un brouillon : toutes les scènes déjà
+  // enregistrées SAUF celle en cours d'édition (remplacée par le brouillon
+  // lui-même), afin que les vérifications croisées (doublon d'id, scène
+  // suivante introuvable, auto-référence…) restent correctes à l'identique
+  // pour une scène nouvelle ou déjà existante.
+  function draftValidationScenes(draft) {
+    return scenes.filter((x) => editingId == null || Number(x.id) !== Number(editingId)).concat([draft]);
+  }
+
+  // ---------------------------------------------------------------
+  // Suivi des modifications non enregistrées dans l'éditeur (une scène en
+  // cours d'édition) et validation en direct — pas besoin d'attendre
+  // l'onglet ③ pour voir ce qui cloche.
+  // ---------------------------------------------------------------
+  let editingSnapshot = null; // clone de la scène telle que chargée, pour "Annuler mes modifications"
+  let editorDirty = false;
+  const liveValidationHost = el('div');
+  let liveValidationTimer = 0;
+
+  function markEditorDirty() {
+    if (currentView !== 'editor') return;
+    editorDirty = true;
+    scheduleLiveValidation();
+  }
+  function scheduleLiveValidation() {
+    clearTimeout(liveValidationTimer);
+    liveValidationTimer = setTimeout(refreshLiveValidation, 120);
+  }
+  function refreshLiveValidation() {
+    liveValidationHost.replaceChildren();
+    if (currentView !== 'editor') return;
+    const draft = buildDraftScene();
+    const { errors, warnings } = validateOneScene(draft, draftValidationScenes(draft));
+    const box = el('div', undefined, 'card');
+    box.style.borderColor = errors.length ? '#8a3b2e' : '#3c6e4a';
+    const statusLine = el('div', errors.length ? `✕ ${errors.length} point(s) à corriger avant d’enregistrer` : '✓ Prête à être enregistrée');
+    statusLine.style.fontWeight = 'bold';
+    statusLine.style.color = errors.length ? '#ffb3a8' : '#9fe3b4';
+    box.append(statusLine);
+    if (editorDirty) box.append(el('div', '● Modifications non enregistrées dans ce scénario.', 'muted'));
+    errors.forEach((x) => box.append(el('div', '✕ ' + x, 'muted')));
+    warnings.forEach((x) => box.append(el('div', '⚠ ' + x, 'muted')));
+    liveValidationHost.append(box);
+  }
+
+  // Empêche de perdre des modifications non enregistrées en quittant
+  // l'éditeur (changement d'onglet, ouverture d'une autre scène…).
+  function confirmLeaveEditorIfDirty() {
+    if (currentView !== 'editor' || !editorDirty) return true;
+    const ok = confirm('Tu as des modifications non enregistrées dans l’éditeur. Les abandonner ?');
+    if (ok) editorDirty = false;
+    return ok;
+  }
+
+  // ---------------------------------------------------------------
+  // Sauvegarde automatique des scénarios (localStorage) + indicateur
+  // "modifications non exportées", pour ne plus jamais perdre un travail
+  // non exporté si la page se recharge.
+  // ---------------------------------------------------------------
+  let exportedBaselineJSON = JSON.stringify(scenes);
+  function scenesChangedSinceExport() {
+    return JSON.stringify(scenes) !== exportedBaselineJSON;
+  }
+  function refreshHeaderBadge() {
+    title.textContent = '🧭 Éditeur de scénarios' + (scenesChangedSinceExport() ? ' ● non exporté' : '');
+  }
+  function persistScenesDraft() {
+    try { localStorage.setItem(SCENES_DRAFT_KEY, JSON.stringify({ scenes, savedAt: new Date().toISOString() })); } catch (e) {}
+  }
+  // À appeler après toute modification de la liste des scénarios en
+  // mémoire (enregistrement, suppression, import).
+  function onScenesChanged() {
+    persistScenesDraft();
+    refreshHeaderBadge();
   }
 
   // ---------------------------------------------------------------
@@ -1040,6 +1231,12 @@
           el('strong', scene.name || `Scénario #${scene.id}`),
           el('div', `${start} · ${(scene.pages || []).map((p) => PAGES.find((x) => x[0] === p)?.[1] || p).join(', ')}`, 'muted')
         );
+        // Badge de validation : visible sans avoir à aller dans l'onglet ③.
+        const { errors: sceneErrors, warnings: sceneWarnings } = validateOneScene(scene, scenes);
+        const validationPill = el('div', sceneErrors.length ? `✕ ${sceneErrors.length} erreur(s)` : (sceneWarnings.length ? `⚠ ${sceneWarnings.length} avertissement(s)` : '✓ Validée'), 'pill');
+        validationPill.style.background = sceneErrors.length ? '#5a2a22' : (sceneWarnings.length ? '#4a3a1a' : '#1f3a28');
+        validationPill.style.color = sceneErrors.length ? '#ffb3a8' : (sceneWarnings.length ? '#e9bd7c' : '#9fe3b4');
+        card.append(validationPill);
         if (incoming.length) card.append(el('div', 'Reçoit un enchaînement depuis : ' + incoming.map((x) => x.name || 'Scénario #' + x.id).join(', '), 'muted'));
         if (incoming.length && scene.trigger?.type !== 'manual') card.append(el('div', '⚠ Possède aussi son propre déclencheur : elle peut démarrer indépendamment.', 'muted'));
         card.append(el('div', `${(scene.steps || []).length} étape(s) · ${scene.end?.action === 'chain' ? 'Enchaîne vers ' + nameOf(scene.end.next) : 'Termine ici'}`, 'pill'));
@@ -1051,13 +1248,14 @@
             if (typeof window.b88PlayScene === 'function') window.b88PlayScene(clone(scene));
             else setStatus('scene-reader.js (b88PlayScene) n’est pas chargé sur cette page.');
           }),
-          button('Modifier', () => loadScene(scene)),
+          button('Modifier', () => { if (confirmLeaveEditorIfDirty()) loadScene(scene); }),
           button('Supprimer', () => {
             if (!confirm(`Supprimer « ${scene.name || 'Scénario #' + scene.id} » ?`)) return;
             scenes = scenes.filter((s) => s.id !== scene.id);
             // La scène supprimée était en cours d'édition : on vide le
             // formulaire pour ne pas la recréer au prochain "Enregistrer".
             if (editingId === scene.id) resetEditor();
+            onScenesChanged();
             renderList();
           }, 'danger')
         );
@@ -1077,6 +1275,7 @@
   function renderEditor() {
     view.replaceChildren();
     view.append(heading(editingId == null ? 'Créer un scénario' : 'Modifier : ' + (nameInput.value || 'scénario')));
+    view.append(liveValidationHost);
     view.append(field('Nom du scénario', nameInput));
     view.append(field('Priorité (si plusieurs départs concurrents)', priorityInput));
 
@@ -1135,105 +1334,61 @@
         const index = scenes.findIndex((s) => Number(s.id) === Number(scene.id));
         if (index < 0) scenes.push(scene); else scenes[index] = scene;
         editingId = scene.id;
+        editingSnapshot = clone(scene);
+        editorDirty = false;
         refreshChainOptions(scene.end.next ?? '');
+        onScenesChanged();
         setStatus(`« ${scene.name} » enregistré en mémoire. Pense à exporter le JSON (onglet ③) pour mettre le site à jour.`);
         showView('overview');
-      }, 'primary'),
-      button('Nouveau / vider', () => {
-        if (confirm('Abandonner les modifications non enregistrées ?')) { resetEditor(); showView('editor'); }
-      })
+      }, 'primary')
     );
+    if (editingId != null && editingSnapshot) {
+      actions.append(button('↩ Annuler mes modifications', () => {
+        if (!editorDirty || confirm('Rétablir cette scène telle qu’elle était avant tes modifications ?')) {
+          loadScene(clone(editingSnapshot));
+          setStatus('Modifications annulées : scène rétablie telle qu’enregistrée.');
+        }
+      }));
+    }
+    actions.append(button('Nouveau / vider', () => {
+      if (!editorDirty || confirm('Abandonner les modifications non enregistrées ?')) { resetEditor(); showView('editor'); }
+    }));
     view.append(actions);
+    refreshLiveValidation();
   }
 
   // ---------------------------------------------------------------
   // Onglet ③ Vérifier / exporter
   // ---------------------------------------------------------------
-  function validate() {
-    const errors = [], warnings = [];
-    const ids = new Set();
-    scenes.forEach((s) => {
-      const label = s.name || `Scénario #${s.id}`;
-      if (!Number.isInteger(Number(s.id)) || ids.has(Number(s.id))) errors.push(`${label} : identifiant invalide ou doublon.`);
-      ids.add(Number(s.id));
-      if (!s.name?.trim()) warnings.push(`${label} : aucun nom renseigné.`);
-
-      const trigger = s.trigger || {};
-      if (!TRIGGERS.some(([t]) => t === trigger.type)) errors.push(`${label} : type de déclencheur inconnu.`);
-      const triggerDelayValue = Number(trigger.delay ?? 0);
-      if (!Number.isFinite(triggerDelayValue) || triggerDelayValue < 0) errors.push(`${label} : délai du déclencheur invalide.`);
-      if (trigger.type === 'enter') {
-        const threshold = Number(trigger.threshold ?? 0.5);
-        if (!Number.isFinite(threshold) || threshold < 0 || threshold > 1) errors.push(`${label} : seuil de visibilité invalide (0 à 1).`);
-      }
-      if (trigger.type === 'scroll') {
-        const scrollPct = Number(trigger.scrollPct ?? 50);
-        if (!Number.isFinite(scrollPct) || scrollPct < 0 || scrollPct > 100) errors.push(`${label} : pourcentage de défilement invalide (0 à 100).`);
-      }
-      if (trigger.type === 'idle') {
-        const idleSeconds = Number(trigger.idleSeconds ?? 10);
-        if (!Number.isFinite(idleSeconds) || idleSeconds < 0) errors.push(`${label} : durée d’inactivité invalide.`);
-      }
-      if (trigger.type === 'after-scene') {
-        const afterScene = Number(trigger.afterScene);
-        if (!Number.isInteger(afterScene) || !scenes.some((x) => Number(x.id) === afterScene)) errors.push(`${label} : scène déclencheuse introuvable.`);
-        else if (afterScene === Number(s.id)) errors.push(`${label} : une scène ne peut pas attendre sa propre fin.`);
-      }
-      if (['enter', 'element-click', 'hover'].includes(trigger.type)) {
-        const selector = typeof trigger.selector === 'string' ? trigger.selector.trim() : '';
-        if (!selector) errors.push(`${label} : sélecteur CSS du déclencheur manquant.`);
-        else { try { document.querySelector(selector); } catch (e) { errors.push(`${label} : sélecteur CSS du déclencheur invalide.`); } }
-      }
-      if (trigger.type === 'event' && !trigger.eventName?.trim()) errors.push(`${label} : nom de l’événement manquant.`);
-      const cooldownValue = Number(s.conditions?.cooldownSeconds ?? 0);
-      if (!Number.isFinite(cooldownValue) || cooldownValue < 0) errors.push(`${label} : délai d’attente (cooldown) invalide.`);
-
-      if (!s.steps?.length) { errors.push(`${label} : aucune étape.`); return; }
-      s.steps.forEach((step, i) => {
-        const stepLabel = `${label}, étape ${i + 1}`;
-        if (!step.at || !s.points?.[step.at]) {
-          errors.push(`${stepLabel} : point absent.`);
-        } else {
-          const point = s.points[step.at];
-          if (point.selector) { try { document.querySelector(point.selector); } catch (e) { warnings.push(`${stepLabel} : sélecteur CSS invalide.`); } }
-        }
-        if (!step.animation) errors.push(`${stepLabel} : animation absente.`);
-        else if (ANIMATIONS.length && !ANIMATIONS.includes(step.animation)) warnings.push(`${stepLabel} : animation « ${step.animation} » inconnue.`);
-        if (step.duration != null && (!Number.isFinite(Number(step.duration)) || Number(step.duration) < 0)) errors.push(`${stepLabel} : durée invalide.`);
-        if (step.pause != null && (!Number.isFinite(Number(step.pause)) || Number(step.pause) < 0)) errors.push(`${stepLabel} : pause invalide.`);
-        if (step.move?.type === 'walk' && step.move.walkAnimation && ANIMATIONS.length && !ANIMATIONS.includes(step.move.walkAnimation)) {
-          warnings.push(`${stepLabel} : animation de marche inconnue.`);
-        }
-      });
-      if (s.end?.action === 'chain') {
-        const next = scenes.find((x) => Number(x.id) === Number(s.end.next));
-        if (!next) errors.push(`${label} : la scène suivante n’existe plus.`);
-        else {
-          if (!(s.pages || []).some((p) => (next.pages || []).includes(p))) errors.push(`${label} : la scène suivante ne partage aucune page avec elle.`);
-          if (!(s.devices || []).some((d) => (next.devices || []).includes(d))) errors.push(`${label} : la scène suivante ne partage aucun appareil avec elle.`);
-        }
-      }
-      const repeatValue = Number(s.end?.repeat ?? 1);
-      if (!Number.isInteger(repeatValue) || repeatValue < 0) errors.push(`${label} : nombre de répétitions invalide.`);
-      if (s.trigger?.type === 'manual' && !scenes.some((source) => source.end?.action === 'chain' && Number(source.end.next) === Number(s.id))) {
-        warnings.push(`${label} : mode « appelée uniquement » mais aucun scénario ne l’appelle.`);
-      }
-      if (scenes.some((source) => source.end?.action === 'chain' && Number(source.end.next) === Number(s.id)) && s.trigger?.type !== 'manual') {
-        warnings.push(`${label} : elle est appelée par une autre scène mais garde aussi un déclencheur indépendant.`);
-      }
-      if (s.end?.action === 'chain' && Number(s.end.next) === Number(s.id)) warnings.push(`${label} : s’enchaîne vers elle-même (boucle).`);
-      if (s.trigger?.type === 'load') warnings.push(`${label} : démarre automatiquement au chargement.`);
-    });
-    return { errors, warnings };
-  }
-
   function renderCheck() {
     view.replaceChildren();
     view.append(heading('Vérification du JSON v2'));
     const result = validate();
-    if (!result.errors.length) view.append(el('div', '✓ Aucune erreur bloquante.', 'pill'));
-    else { view.append(el('strong', `${result.errors.length} erreur(s)`)); result.errors.forEach((x) => view.append(el('div', '✕ ' + x, 'muted'))); }
-    if (result.warnings.length) { view.append(heading('À vérifier')); result.warnings.forEach((x) => view.append(el('div', '⚠ ' + x, 'muted'))); }
+
+    const summary = el('div');
+    summary.className = 'row';
+    const errorPill = el('div', `✕ ${result.errors.length} erreur(s)`, 'pill');
+    errorPill.style.background = result.errors.length ? '#5a2a22' : '#1f3a28';
+    errorPill.style.color = result.errors.length ? '#ffb3a8' : '#9fe3b4';
+    const warningPill = el('div', `⚠ ${result.warnings.length} avertissement(s)`, 'pill');
+    warningPill.style.background = result.warnings.length ? '#4a3a1a' : '#1f3a28';
+    warningPill.style.color = result.warnings.length ? '#e9bd7c' : '#9fe3b4';
+    summary.append(errorPill, warningPill);
+    view.append(summary);
+
+    if (!result.errors.length && !result.warnings.length) {
+      view.append(help('Tout est en ordre : aucune erreur ni avertissement sur les ' + scenes.length + ' scénario(s) enregistré(s).'));
+    } else {
+      // Détail par scène, avec un bouton direct pour aller corriger.
+      result.perScene.filter((r) => r.errors.length || r.warnings.length).forEach(({ scene, errors, warnings }) => {
+        const card = el('div', undefined, 'card');
+        card.append(el('strong', scene.name || `Scénario #${scene.id}`));
+        errors.forEach((x) => card.append(el('div', '✕ ' + x, 'muted')));
+        warnings.forEach((x) => card.append(el('div', '⚠ ' + x, 'muted')));
+        card.append(button('✎ Corriger cette scène', () => { if (confirmLeaveEditorIfDirty()) loadScene(scene); }));
+        view.append(card);
+      });
+    }
 
     view.append(heading('Chaînes détectées'));
     scenes.forEach((s) => view.append(el('div', `${s.name || '#' + s.id}  →  ${s.end?.action === 'chain' ? nameOf(s.end.next) : 'Fin'}`, 'card')));
@@ -1242,13 +1397,15 @@
       const v = validate();
       if (v.errors.length) { alert('Export annulé :\n\n' + v.errors.join('\n')); return; }
       if (v.warnings.length && !confirm('Avertissements :\n\n' + v.warnings.join('\n') + '\n\nExporter quand même ?')) return;
-      const data = { version: 2, exportedAt: new Date().toISOString(), avatar: { ...(savedData.avatar || {}), hitbox: { ...hitbox } }, scenes };
+      const data = { version: 2, exportedAt: new Date().toISOString(), avatar: { ...(savedData.avatar || {}) }, scenes };
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url; a.download = 'scenes-v2.json';
       document.body.append(a); a.click(); a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
+      exportedBaselineJSON = JSON.stringify(scenes);
+      refreshHeaderBadge();
       setStatus('JSON exporté. Remplace le fichier scenes-v2.json sur ton site.');
     }, 'primary');
     view.append(exportBtn);
@@ -1264,9 +1421,12 @@
         if (!confirm(`Remplacer les ${scenes.length} scénarios en mémoire par les ${data.scenes.length} du fichier ?`)) return;
         scenes = clone(data.scenes);
         savedData.avatar = data.avatar || {};
-        if (data.avatar?.hitbox) Object.assign(hitbox, data.avatar.hitbox);
         editingId = null;
+        editingSnapshot = null;
+        editorDirty = false;
         refreshChainOptions();
+        exportedBaselineJSON = JSON.stringify(scenes);
+        onScenesChanged();
         setStatus('JSON importé en mémoire.');
         showView('overview');
       } catch (e) { alert('Import impossible : ' + e.message); }
@@ -1278,9 +1438,8 @@
   // Onglet ④ Outils personnage
   // ---------------------------------------------------------------
   const hitboxDefaults = { width: 140, height: 145, offsetX: 0, offsetY: 0 };
-  let hitbox = { ...hitboxDefaults };
-  try { hitbox = { ...hitboxDefaults, ...JSON.parse(localStorage.getItem(HITBOX_KEY) || '{}') }; } catch (e) {}
-
+  let currentHitbox = { ...hitboxDefaults };
+  
   const hitboxPreview = el('div');
   Object.assign(hitboxPreview.style, { position: 'fixed', display: 'none', pointerEvents: 'none', zIndex: 10000, boxSizing: 'border-box', border: '2px dashed #ff3333', background: 'rgba(255,50,50,.12)', borderRadius: '3px' });
   document.body.append(hitboxPreview);
@@ -1294,8 +1453,8 @@
       if (bounds) {
         const cx = (bounds.left + bounds.right) / 2, cy = (bounds.top + bounds.bottom) / 2;
         Object.assign(hitboxPreview.style, {
-          display: 'block', width: hitbox.width + 'px', height: hitbox.height + 'px',
-          left: (cx + hitbox.offsetX - hitbox.width / 2) + 'px', top: (cy + hitbox.offsetY - hitbox.height / 2) + 'px',
+          display: 'block', width: currentHitbox.width + 'px', height: currentHitbox.height + 'px',
+          left: (cx + currentHitbox.offsetX - currentHitbox.width / 2) + 'px', top: (cy + currentHitbox.offsetY - currentHitbox.height / 2) + 'px',
         });
       } else hitboxPreview.style.display = 'none';
       hitboxRaf = requestAnimationFrame(tick);
@@ -1315,29 +1474,14 @@
     }, 250);
 
     view.append(heading('Hitbox — zone de clic'));
-    view.append(help('Prévisualisation admin uniquement, non exportée dans le comportement du site.'));
-    const hitFields = {}, hitBounds = {};
+    view.append(help('Réglage propre à l’étape en cours : il sera repris quand tu ajoutes ou mets à jour cette étape (onglet ②).'));
     [['width', 'Largeur (px)', 20, 1000], ['height', 'Hauteur (px)', 20, 1000], ['offsetX', 'Décalage horizontal', -500, 500], ['offsetY', 'Décalage vertical', -500, 500]].forEach(([key, label, min, max]) => {
-      hitBounds[key] = [min, max];
-      const i = input('number', String(hitbox[key]));
+      const i = input('number', String(currentHitbox[key]));
       i.min = min; i.max = max;
-      i.addEventListener('input', () => { const n = num(i.value); if (n !== null) hitbox[key] = Math.max(min, Math.min(max, n)); });
-      hitFields[key] = i;
+      i.addEventListener('input', () => { const n = num(i.value); if (n !== null) currentHitbox[key] = Math.max(min, Math.min(max, n)); });
       view.append(field(label, i));
     });
     view.append(button(hitboxPreviewEnabled ? 'Masquer l’aperçu de hitbox' : 'Afficher l’aperçu de hitbox', () => { hitboxPreviewEnabled = !hitboxPreviewEnabled; updateHitboxPreview(); renderTools(); }));
-    view.append(button('Enregistrer les réglages de hitbox', () => {
-      // Le clamp [min,max] est réappliqué ici : la saisie en direct bride déjà
-      // hitbox[key], mais le champ affiché peut encore contenir une valeur
-      // hors bornes qui serait sinon reprise telle quelle à l'enregistrement.
-      Object.keys(hitFields).forEach((k) => {
-        const [min, max] = hitBounds[k];
-        const n = num(hitFields[k].value);
-        hitbox[k] = n === null ? hitboxDefaults[k] : Math.max(min, Math.min(max, n));
-      });
-      try { localStorage.setItem(HITBOX_KEY, JSON.stringify(hitbox)); setStatus('Réglages de hitbox enregistrés dans ce navigateur.'); }
-      catch (e) { setStatus('Impossible d’enregistrer la hitbox.'); }
-    }, 'primary'));
 
     view.append(heading('Orientation manuelle'));
     doRotate();
@@ -1364,6 +1508,29 @@
       setStatus('Positions des champs réinitialisées.');
     }));
   }
+
+  // Si la page a été rechargée sans avoir exporté, propose de reprendre là
+  // où on en était plutôt que de perdre le travail en mémoire.
+  (function maybeRestoreAutosavedDraft() {
+    try {
+      const raw = localStorage.getItem(SCENES_DRAFT_KEY);
+      if (!raw) return;
+      const draft = JSON.parse(raw);
+      if (!draft || !Array.isArray(draft.scenes)) return;
+      if (JSON.stringify(draft.scenes) === JSON.stringify(scenes)) return; // rien à restaurer
+      const when = draft.savedAt ? new Date(draft.savedAt).toLocaleString('fr-FR') : 'une session précédente';
+      const restore = confirm(
+        `Des modifications non exportées de ${when} ont été trouvées dans ce navigateur ` +
+        `(${draft.scenes.length} scénario(s), contre ${scenes.length} actuellement publié(s)).\n\n` +
+        `Les restaurer ? (Annuler = garder les données publiées sur le site)`
+      );
+      if (restore) {
+        scenes = clone(draft.scenes);
+        setStatus('Modifications précédentes restaurées depuis ce navigateur. Vérifie (onglet ③) puis exporte.');
+      }
+    } catch (e) {}
+  })();
+  refreshHeaderBadge();
 
   updateHitboxPreview();
   refreshAnimationsUI();
