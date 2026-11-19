@@ -82,9 +82,17 @@ export function createEngine(knowledge) {
         return "Je n'ai pas encore cette information dans mes données de voyage.";
       }
 
-      const label = key.replace(/_/g, " ");
+// Réponse personnalisée complète (colonne D)
+const customResponse = data._responses?.[key];
 
-      return `Concernant ${label}, j'ai noté : ${value}.`;
+if (customResponse) {
+  return customResponse;
+}
+
+// Réponse générique si aucune personnalisation n'existe
+const label = key.replace(/_/g, " ");
+
+return `Concernant ${label}, j'ai noté : ${value}.`;
     }
 
     // 2. Conservation des anciennes questions
