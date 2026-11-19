@@ -534,6 +534,10 @@
             );
           }
 
+          // Zone cliquable (hitbox), ajustée à la pose de cette étape
+          setCurrentHitbox(step.hitbox);
+          startHitboxTracking();
+
           // Champs de dialogue
           applyFieldOffsets(step.bubble, step.form);
 
@@ -871,6 +875,14 @@
 
     cancelCurrentScene();
     clearPositionUpdater();
+
+    if (hitboxIntervalId) {
+      clearInterval(hitboxIntervalId);
+      hitboxIntervalId = null;
+    }
+
+    setCurrentHitbox(hitboxDefaults);
+    startHitboxTracking();
 
     const page = currentPage();
     const device = currentDevice();
