@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "exportedAt": "2026-11-19T11:25:50.593Z",
+  "exportedAt": "2026-11-19T11:30:27.663Z",
   "avatar": {
     "hitbox": {
       "width": 76,
@@ -26,8 +26,8 @@
         "delay": 0
       },
       "conditions": {
-        "frequency": "load",
-        "cooldownSeconds": 30,
+        "frequency": "always",
+        "cooldownSeconds": 0,
         "interruptible": true
       },
       "points": {
@@ -80,7 +80,7 @@
           "height": 987
         },
         "scrollY": 222.22222900390625,
-        "date": "2026-11-19T11:23:41.488Z"
+        "date": "2026-11-19T11:30:22.551Z"
       }
     },
     {
