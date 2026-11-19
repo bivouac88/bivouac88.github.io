@@ -191,7 +191,7 @@
     Object.assign(b.style, { background: bg || '#e58e26', border: 'none', borderRadius: '3px', color: '#12100e', cursor: 'pointer', padding: '2px 7px', fontSize: '10px', flexShrink: '0' });
     return b;
   };
-
+  
   const panel = document.createElement('aside');
   panel.id = 'ctrl-panel';
   Object.assign(panel.style, {
@@ -320,6 +320,7 @@
     if (which === 'editor') renderEditor();
     if (which === 'check') renderCheck();
     if (which === 'tools') renderTools();
+    refreshPointBadges();
   }
 
   // ---------------------------------------------------------------
@@ -557,6 +558,31 @@
   let draftSteps = [];
   let activePointKey = null;
 
+      const pointBadgesHost = el('div');
+  Object.assign(pointBadgesHost.style, { position: 'fixed', inset: '0', pointerEvents: 'none', zIndex: 9999 });
+  document.body.append(pointBadgesHost);
+
+  function refreshPointBadges() {
+    pointBadgesHost.replaceChildren();
+    if (currentView !== 'editor') return;
+    Object.entries(draftPoints).forEach(([key, p]) => {
+      const pos = resolvePoint(p);
+      const badge = el('div', key);
+      Object.assign(badge.style, {
+        position: 'fixed',
+        left: pos.x + 'px',
+        top: (innerHeight - pos.y) + 'px',
+        transform: 'translate(-50%, -50%)',
+        width: '22px', height: '22px', borderRadius: '50%',
+        background: key === activePointKey ? '#ffd27a' : '#e58e26',
+        color: '#17120c', fontWeight: 'bold', fontSize: '11px',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        border: '2px solid #17120c', boxShadow: '0 2px 6px #0007',
+      });
+      pointBadgesHost.append(badge);
+    });
+  }
+  
   const pointMode = select([['screen', 'Collé à l’écran (position fixe)'], ['follow', 'Suit l’élément pendant le scroll']], 'screen');
   const pointsHost = el('div');
   const stepPoint = select([]);
@@ -652,12 +678,14 @@
       stepPoint.append(opt);
     });
     if (draftPoints[previous]) stepPoint.value = previous;
+        if (stepPoint._lastRefresh !== undefined) {} // (ligne neutre, ignore)
+    refreshPointBadges();
   }
 
   // ---------------------------------------------------------------
   // Formulaire : étapes (création et modification)
   // ---------------------------------------------------------------
-  const duration = input('number', '', 'Vide = durée illimitée / jusqu’à la suite');
+  const duration = input('number', '', '∞ (jusqu’à la suite)');
   const pause = input('number', '0');
   const movement = select([['instant', 'Déplacement instantané'], ['walk', 'Marcher jusqu’au point']], 'instant');
   const walkSpeed = input('number', '200');
@@ -681,8 +709,29 @@
   }
 
   const stepsHost = el('div');
-  const addStepBtn = button('+ Ajouter cette étape à la séquence', () => addStep(), 'primary');
+    const timelineHost = el('div');
+  Object.assign(timelineHost.style, { display: 'flex', gap: '6px', flexWrap: 'wrap', margin: '8px 0' });
 
+  function refreshTimeline() {
+    timelineHost.replaceChildren();
+    draftSteps.forEach((step, index) => {
+      const pill = el('div', `${index + 1}. ${step.animation.replace(/_/g, ' ')}`, 'pill');
+      pill.style.cursor = 'pointer';
+      pill.title = `Point ${step.at}`;
+      pill.addEventListener('click', () => loadStepIntoEditor(index));
+      timelineHost.append(pill);
+    });
+  }
+  const addStepBtn = button('+ Ajouter cette étape à la séquence', () => addStep(), 'primary');
+  const testStepBtn = button('▶ Tester cette étape maintenant', () => {
+  const at = stepPoint.value;
+  if (!at || !draftPoints[at]) { setStatus('Crée d’abord un point (section « Points »).'); return; }
+  const pos = resolvePoint(draftPoints[at]);
+  doMove(pos.x, pos.y);
+  doPlay(currentAnimation);
+  setStatus(`Test : « ${currentAnimation.replace(/_/g, ' ')} » au point ${at}.`);
+});
+  
   const dialogueSelectors = ['.b88-dialogue-bubble', '.b88-dialogue-form'];
   function dialogueElements() { return dialogueSelectors.map((sel) => document.querySelector(sel)).filter(Boolean); }
   function readFieldOffsets() {
@@ -764,6 +813,7 @@
   }
 
   function refreshStepsUI() {
+        refreshTimeline();
     stepsHost.replaceChildren();
     if (!draftSteps.length) { stepsHost.append(help('Aucune étape pour le moment.')); return; }
     draftSteps.forEach((step, index) => {
@@ -1037,7 +1087,7 @@
       button('🎯 Créer un point sur un élément', () => pickElement((node) => createPoint(node)))
     );
     view.append(pointActions, pointsHost);
-
+    
     view.append(heading('3. Construire le déroulement'));
     view.append(field('Point où se joue l’étape', stepPoint));
     view.append(field('Animation', animWidget));
@@ -1048,7 +1098,8 @@
     view.append(field('Déplacement vers le point', movement));
     view.append(walkOptionsHost);
     walkOptionsHost.style.display = movement.value === 'walk' ? 'block' : 'none';
-    view.append(addStepBtn);
+    view.append(testStepBtn, addStepBtn);
+    view.append(timelineHost);
     view.append(stepsHost);
 
     view.append(heading('4. Fin du scénario'));
