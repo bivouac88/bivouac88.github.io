@@ -1,8 +1,10 @@
 
 export async function loadKnowledge() {
-  const url = new URL("../data/knowledge.json", import.meta.url);
+  const knowledgeUrl = new URL("../data/knowledge.json", import.meta.url);
+  const niamhDataUrl = new URL("../data/niamh-data.json", import.meta.url);
 
-  const response = await fetch(url, {
+  // Chargement de la base de connaissances habituelle
+  const response = await fetch(knowledgeUrl, {
     cache: "no-store"
   });
 
@@ -12,7 +14,30 @@ export async function loadKnowledge() {
     );
   }
 
-  return await response.json();
+  const knowledge = await response.json();
+
+  // Chargement des données provenant de l'onglet Google Sheets autorisé
+  try {
+    const dataResponse = await fetch(niamhDataUrl, {
+      cache: "no-store"
+    });
+
+    if (!dataResponse.ok) {
+      throw new Error(`Erreur HTTP ${dataResponse.status}`);
+    }
+
+    knowledge.liveData = await dataResponse.json();
+
+  } catch (error) {
+    console.warn(
+      "[Niamh] Impossible de charger les données du voyage :",
+      error
+    );
+
+    knowledge.liveData = {};
+  }
+
+  return knowledge;
 }
 
 export function pickAnswer(intent) {
