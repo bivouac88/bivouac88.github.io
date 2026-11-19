@@ -41,6 +41,42 @@ function b88Geo(callback) {
   );
 }
 window.B88 = Object.freeze({ DON_URL: DON_URL, racine: dossier, esc: esc, cache: b88Cache, geo: b88Geo });
+
+   
+// ---- Conserver le mode admin pendant la navigation interne ----
+document.addEventListener('click', function (event) {
+  if (
+    event.defaultPrevented ||
+    event.button !== 0 ||
+    event.metaKey ||
+    event.ctrlKey ||
+    event.shiftKey ||
+    event.altKey
+  ) return;
+
+  const lien = event.target.closest('a[href]');
+  if (!lien || lien.hasAttribute('download')) return;
+  if (lien.target && lien.target !== '_self') return;
+
+  const paramsActuels = new URLSearchParams(window.location.search);
+
+  if (paramsActuels.get('edit') !== 'bivouac88admin') return;
+
+  let destination;
+
+  try {
+    destination = new URL(lien.href, window.location.href);
+  } catch (error) {
+    return;
+  }
+
+  // Ne transmettre le mode admin qu'aux pages du même site.
+  if (destination.origin !== window.location.origin) return;
+
+  destination.searchParams.set('edit', 'bivouac88admin');
+  lien.href = destination.href;
+}, true);
+
    
 // ---- Bivouaciste : chargement des scènes publiques et admin ----
 var b88Loader = document.createElement('script');
