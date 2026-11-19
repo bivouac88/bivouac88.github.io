@@ -81,6 +81,21 @@ async function initDialogue(character) {
 
   // --- Positionnement dynamique sur le personnage ---
 
+  let dialogueSide = "top"; // top = bulle au-dessus de l'avatar (comportement d'origine)
+
+  document.addEventListener("b88:dialogue-side", (event) => {
+    dialogueSide = event.detail?.side || "top";
+    bubble.classList.remove("tail-top", "tail-bottom", "tail-left", "tail-right");
+    bubble.classList.add(
+      dialogueSide === "top" ? "tail-bottom" :
+      dialogueSide === "bottom" ? "tail-top" :
+      dialogueSide === "left" ? "tail-right" :
+      "tail-left"
+    );
+  });
+  // Classe par défaut au démarrage (bulle au-dessus, pointe en bas)
+  bubble.classList.add("tail-bottom");
+
   function updateDialoguePosition() {
     const bounds = window.characterGetScreenBounds?.();
 
@@ -88,22 +103,44 @@ async function initDialogue(character) {
       const gap = 14;
       const margin = 10;
       const dialogueWidth = dialogue.offsetWidth;
+      const bubbleHeight = bubble.offsetHeight;
+      const formHeight = form.offsetHeight;
 
-      let left =
-        (bounds.left + bounds.right) / 2 - dialogueWidth / 2;
+      let bubbleLeft, bubbleTop, formLeft, formTop;
 
-      left = Math.max(
-        margin,
-        Math.min(left, window.innerWidth - dialogueWidth - margin)
-      );
+      if (dialogueSide === "top") {
+        bubbleLeft = (bounds.left + bounds.right) / 2 - dialogueWidth / 2;
+        bubbleTop = bounds.top - bubbleHeight - gap;
+        formLeft = bubbleLeft;
+        formTop = bounds.bottom + gap;
+      } else if (dialogueSide === "bottom") {
+        bubbleLeft = (bounds.left + bounds.right) / 2 - dialogueWidth / 2;
+        bubbleTop = bounds.bottom + gap;
+        formLeft = bubbleLeft;
+        formTop = bounds.top - formHeight - gap;
+      } else if (dialogueSide === "left") {
+        bubbleLeft = bounds.left - dialogueWidth - gap;
+        bubbleTop = (bounds.top + bounds.bottom) / 2 - bubbleHeight / 2;
+        formLeft = bubbleLeft;
+        formTop = bubbleTop + bubbleHeight + 8;
+      } else {
+        // "right"
+        bubbleLeft = bounds.right + gap;
+        bubbleTop = (bounds.top + bounds.bottom) / 2 - bubbleHeight / 2;
+        formLeft = bubbleLeft;
+        formTop = bubbleTop + bubbleHeight + 8;
+      }
+
+      bubbleLeft = Math.max(margin, Math.min(bubbleLeft, window.innerWidth - dialogueWidth - margin));
+      formLeft = Math.max(margin, Math.min(formLeft, window.innerWidth - dialogueWidth - margin));
 
       bubble.style.width = `${dialogueWidth}px`;
-      bubble.style.left = `${left}px`;
-      bubble.style.top = `${bounds.top - bubble.offsetHeight - gap}px`;
+      bubble.style.left = `${bubbleLeft}px`;
+      bubble.style.top = `${bubbleTop}px`;
 
       form.style.width = `${dialogueWidth}px`;
-      form.style.left = `${left}px`;
-      form.style.top = `${bounds.bottom + gap}px`;
+      form.style.left = `${formLeft}px`;
+      form.style.top = `${formTop}px`;
     }
 
     requestAnimationFrame(updateDialoguePosition);
