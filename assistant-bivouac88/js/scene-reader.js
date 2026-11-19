@@ -13,6 +13,8 @@
   const STORAGE_KEY = 'b88-scenes-state';
   const MOBILE_BREAKPOINT = 768;
 
+  const hitboxDefaults = { width: 140, height: 145, offsetX: 0, offsetY: 0 };
+  
   function currentPage() {
     return document.body.dataset.page || '';
   }
@@ -465,6 +467,11 @@
               Number(rotation.y) || 0,
               Number(rotation.z) || 0
             );
+          }
+
+          // Zone cliquable (hitbox), ajustée à la pose de cette étape
+          if (typeof window.characterSetHitbox === 'function') {
+            window.characterSetHitbox(step.hitbox || hitboxDefaults);
           }
 
           // Champs de dialogue
