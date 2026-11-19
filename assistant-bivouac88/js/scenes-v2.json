@@ -1,0 +1,77 @@
+{
+  "version": 2,
+  "exportedAt": "2026-11-19T12:08:00.279Z",
+  "avatar": {
+    "hitbox": { "width": 76, "height": 257, "offsetX": 3, "offsetY": -126 }
+  },
+  "scenes": [
+    {
+      "id": 2,
+      "name": "Excited Permanente",
+      "enabled": true,
+      "priority": 0,
+      "pages": ["test"],
+      "devices": ["pc"],
+      "trigger": { "type": "load", "delay": 0 },
+      "conditions": { "frequency": "always", "cooldownSeconds": 0, "interruptible": false },
+      "points": {
+        "A": {
+          "selector": "div.test-page:nth-of-type(1) > main.test-main",
+          "ax": 82.93, "ay": 2.69, "offsetX": 0, "offsetY": 0,
+          "mode": "screen",
+          "fallback": { "xPct": 82.14, "yPct": 16.03 }
+        }
+      },
+      "steps": [
+        {
+          "animation": "Excited",
+          "at": "A",
+          "duration": null,
+          "pause": 0,
+          "move": { "type": "instant" },
+          "rotation": { "x": 0, "y": 0, "z": 0 },
+          "autoFace": false,
+          "bubble": { "x": 21.1112060546875, "y": -217.7777099609375 },
+          "form": { "x": -117.7777099609375, "y": -81.11102294921875 },
+          "bubbleSide": "right"
+        }
+      ],
+      "end": { "action": "hold", "next": null, "repeat": 1 },
+      "recorded": { "viewport": { "width": 2133, "height": 1018 }, "scrollY": 0, "date": "2026-11-19T12:07:05.574Z" }
+    },
+    {
+      "id": 3,
+      "name": "Thankfull",
+      "enabled": true,
+      "priority": 0,
+      "pages": ["test"],
+      "devices": ["pc"],
+      "trigger": { "type": "avatar-click", "delay": 0 },
+      "conditions": { "frequency": "always", "cooldownSeconds": 0, "interruptible": false },
+      "points": {
+        "A": {
+          "selector": "div.test-page:nth-of-type(1) > main.test-main",
+          "ax": 82.93, "ay": 2.69, "offsetX": 0, "offsetY": 0,
+          "mode": "follow",
+          "fallback": { "xPct": 82.29, "yPct": 18.59 }
+        }
+      },
+      "steps": [
+        {
+          "animation": "Thankfull",
+          "at": "A",
+          "duration": 6,
+          "pause": 0,
+          "move": { "type": "instant" },
+          "rotation": { "x": 0, "y": 0, "z": 0 },
+          "autoFace": false,
+          "bubble": { "x": 21.1112060546875, "y": -217.7777099609375 },
+          "form": { "x": -117.7777099609375, "y": -81.11102294921875 },
+          "bubbleSide": "right"
+        }
+      ],
+      "end": { "action": "chain", "next": 2, "repeat": 1 },
+      "recorded": { "viewport": { "width": 2133, "height": 1018 }, "scrollY": 0, "date": "2026-11-19T12:07:47.318Z" }
+    }
+  ]
+}
