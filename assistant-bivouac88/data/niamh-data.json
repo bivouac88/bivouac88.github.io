@@ -11,12 +11,17 @@
   "poi_du_moment": "Grottes de Postojna, à visiter si tu passes par là",
   "humeur_du_jour": "motivé malgré la pluie",
   "petit_dej": "Kellogg's",
+  "boisson_matin": "Thé vert",
   "_questions": {
     "petit_dej": [
       "petit déjeuner",
       "qu'as-tu mangé ce matin",
       "qu'as-tu pris au petit déjeuner"
+    ],
+    "boisson_matin": [
+      "que bois-tu le matin",
+      "quelle est ta boisson du matin"
     ]
   },
-  "_updatedAt": "2026-11-19T15:04:09.405Z"
+  "_updatedAt": "2026-11-19T15:42:32.952Z"
 }
