@@ -95,7 +95,6 @@
   };
 
   const PANEL_POSITION_KEY = 'b88-admin-panel-position';
-  const HITBOX_KEY = 'b88-admin-hitbox-settings';
   const SCENES_DRAFT_KEY = 'b88-admin-scenes-draft';
   const PANEL_WIDTH = 360;
 
@@ -806,6 +805,8 @@
     autoFace.checked = step.autoFace === true;
     currentRotation = { ...(step.rotation || { x: 0, y: 0, z: 0 }) };
     doRotate();
+    currentHitbox = { ...hitboxDefaults, ...(step.hitbox || {}) };
+    updateHitboxPreview();
     applyFieldOffsets({ bubble: step.bubble, form: step.form });
     bubbleSide.value = step.bubbleSide || 'top';
     document.dispatchEvent(new CustomEvent('b88:dialogue-side', { detail: { side: bubbleSide.value } }));
@@ -869,6 +870,7 @@
       pause: num(pause.value) ?? 0,
       move: { type: movement.value },
       rotation: { ...currentRotation },
+      hitbox: { ...currentHitbox },
       autoFace: false,
       bubble: offsets.bubble,
       form: offsets.form,
@@ -941,6 +943,8 @@
     refreshStepsUI();
     currentRotation = { x: 0, y: 0, z: 0 };
     doRotate();
+    currentHitbox = { ...hitboxDefaults };
+    updateHitboxPreview();
   }
 
   function loadScene(scene) {
@@ -969,10 +973,13 @@
     if (lastStep) {
       currentRotation = { ...(lastStep.rotation || { x: 0, y: 0, z: 0 }) };
       applyFieldOffsets({ bubble: lastStep.bubble, form: lastStep.form });
+      currentHitbox = { ...hitboxDefaults, ...(lastStep.hitbox || {}) };
     } else {
       currentRotation = { x: 0, y: 0, z: 0 };
+      currentHitbox = { ...hitboxDefaults };
     }
     doRotate();
+    updateHitboxPreview();
     showView('editor');
   }
 
@@ -1390,7 +1397,7 @@
       const v = validate();
       if (v.errors.length) { alert('Export annulé :\n\n' + v.errors.join('\n')); return; }
       if (v.warnings.length && !confirm('Avertissements :\n\n' + v.warnings.join('\n') + '\n\nExporter quand même ?')) return;
-      const data = { version: 2, exportedAt: new Date().toISOString(), avatar: { ...(savedData.avatar || {}), hitbox: { ...hitbox } }, scenes };
+      const data = { version: 2, exportedAt: new Date().toISOString(), avatar: { ...(savedData.avatar || {}) }, scenes };
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -1414,7 +1421,6 @@
         if (!confirm(`Remplacer les ${scenes.length} scénarios en mémoire par les ${data.scenes.length} du fichier ?`)) return;
         scenes = clone(data.scenes);
         savedData.avatar = data.avatar || {};
-        if (data.avatar?.hitbox) Object.assign(hitbox, data.avatar.hitbox);
         editingId = null;
         editingSnapshot = null;
         editorDirty = false;
@@ -1432,9 +1438,8 @@
   // Onglet ④ Outils personnage
   // ---------------------------------------------------------------
   const hitboxDefaults = { width: 140, height: 145, offsetX: 0, offsetY: 0 };
-  let hitbox = { ...hitboxDefaults };
-  try { hitbox = { ...hitboxDefaults, ...JSON.parse(localStorage.getItem(HITBOX_KEY) || '{}') }; } catch (e) {}
-
+  let currentHitbox = { ...hitboxDefaults };
+  
   const hitboxPreview = el('div');
   Object.assign(hitboxPreview.style, { position: 'fixed', display: 'none', pointerEvents: 'none', zIndex: 10000, boxSizing: 'border-box', border: '2px dashed #ff3333', background: 'rgba(255,50,50,.12)', borderRadius: '3px' });
   document.body.append(hitboxPreview);
@@ -1448,8 +1453,8 @@
       if (bounds) {
         const cx = (bounds.left + bounds.right) / 2, cy = (bounds.top + bounds.bottom) / 2;
         Object.assign(hitboxPreview.style, {
-          display: 'block', width: hitbox.width + 'px', height: hitbox.height + 'px',
-          left: (cx + hitbox.offsetX - hitbox.width / 2) + 'px', top: (cy + hitbox.offsetY - hitbox.height / 2) + 'px',
+          display: 'block', width: currentHitbox.width + 'px', height: currentHitbox.height + 'px',
+          left: (cx + currentHitbox.offsetX - currentHitbox.width / 2) + 'px', top: (cy + currentHitbox.offsetY - currentHitbox.height / 2) + 'px',
         });
       } else hitboxPreview.style.display = 'none';
       hitboxRaf = requestAnimationFrame(tick);
@@ -1469,29 +1474,14 @@
     }, 250);
 
     view.append(heading('Hitbox — zone de clic'));
-    view.append(help('Prévisualisation admin uniquement, non exportée dans le comportement du site.'));
-    const hitFields = {}, hitBounds = {};
+    view.append(help('Réglage propre à l’étape en cours : il sera repris quand tu ajoutes ou mets à jour cette étape (onglet ②).'));
     [['width', 'Largeur (px)', 20, 1000], ['height', 'Hauteur (px)', 20, 1000], ['offsetX', 'Décalage horizontal', -500, 500], ['offsetY', 'Décalage vertical', -500, 500]].forEach(([key, label, min, max]) => {
-      hitBounds[key] = [min, max];
-      const i = input('number', String(hitbox[key]));
+      const i = input('number', String(currentHitbox[key]));
       i.min = min; i.max = max;
-      i.addEventListener('input', () => { const n = num(i.value); if (n !== null) hitbox[key] = Math.max(min, Math.min(max, n)); });
-      hitFields[key] = i;
+      i.addEventListener('input', () => { const n = num(i.value); if (n !== null) currentHitbox[key] = Math.max(min, Math.min(max, n)); });
       view.append(field(label, i));
     });
     view.append(button(hitboxPreviewEnabled ? 'Masquer l’aperçu de hitbox' : 'Afficher l’aperçu de hitbox', () => { hitboxPreviewEnabled = !hitboxPreviewEnabled; updateHitboxPreview(); renderTools(); }));
-    view.append(button('Enregistrer les réglages de hitbox', () => {
-      // Le clamp [min,max] est réappliqué ici : la saisie en direct bride déjà
-      // hitbox[key], mais le champ affiché peut encore contenir une valeur
-      // hors bornes qui serait sinon reprise telle quelle à l'enregistrement.
-      Object.keys(hitFields).forEach((k) => {
-        const [min, max] = hitBounds[k];
-        const n = num(hitFields[k].value);
-        hitbox[k] = n === null ? hitboxDefaults[k] : Math.max(min, Math.min(max, n));
-      });
-      try { localStorage.setItem(HITBOX_KEY, JSON.stringify(hitbox)); setStatus('Réglages de hitbox enregistrés dans ce navigateur.'); }
-      catch (e) { setStatus('Impossible d’enregistrer la hitbox.'); }
-    }, 'primary'));
 
     view.append(heading('Orientation manuelle'));
     doRotate();
