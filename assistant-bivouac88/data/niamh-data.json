@@ -10,6 +10,13 @@
   "derniere_anecdote": "Une famille nous a offert le café à Postojna",
   "poi_du_moment": "Grottes de Postojna, à visiter si tu passes par là",
   "humeur_du_jour": "motivé malgré la pluie",
-  "_questions": {},
-  "_updatedAt": "2026-11-19T14:50:55.252Z"
+  "petit_dej": "Kellogg's",
+  "_questions": {
+    "petit_dej": [
+      "petit déjeuner",
+      "qu'as-tu mangé ce matin",
+      "qu'as-tu pris au petit déjeuner"
+    ]
+  },
+  "_updatedAt": "2026-11-19T14:56:12.886Z"
 }
