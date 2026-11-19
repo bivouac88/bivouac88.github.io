@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "exportedAt": "2026-11-19T01:25:41.559Z",
+  "exportedAt": "2026-11-19T01:31:53.926Z",
   "avatar": {
     "hitbox": {
       "width": 76,
@@ -22,12 +22,12 @@
         "pc"
       ],
       "trigger": {
-        "type": "load",
+        "type": "avatar-click",
         "delay": 0
       },
       "conditions": {
-        "frequency": "always",
-        "cooldownSeconds": 0,
+        "frequency": "load",
+        "cooldownSeconds": 30,
         "interruptible": true
       },
       "points": {
@@ -67,6 +67,29 @@
             "x": 164.4444580078125,
             "y": -102.22216796875
           }
+        },
+        {
+          "animation": "Thankfull",
+          "at": "A",
+          "duration": null,
+          "pause": 0,
+          "move": {
+            "type": "instant"
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "autoFace": false,
+          "bubble": {
+            "x": 166.666748046875,
+            "y": -85.55548095703125
+          },
+          "form": {
+            "x": 164.4444580078125,
+            "y": -102.22216796875
+          }
         }
       ],
       "end": {
@@ -79,104 +102,8 @@
           "width": 1704,
           "height": 987
         },
-        "scrollY": 0,
-        "date": "2026-11-19T01:16:46.375Z"
-      }
-    },
-    {
-      "id": 3,
-      "name": "Welcome",
-      "enabled": true,
-      "priority": 0,
-      "pages": [
-        "test"
-      ],
-      "devices": [
-        "pc"
-      ],
-      "trigger": {
-        "type": "avatar-click",
-        "delay": 0
-      },
-      "conditions": {
-        "frequency": "load",
-        "cooldownSeconds": 0,
-        "interruptible": true
-      },
-      "points": {
-        "B": {
-          "selector": "div.test-page:nth-of-type(1) > main.test-main",
-          "ax": 82.93,
-          "ay": 2.69,
-          "offsetX": 0,
-          "offsetY": 0,
-          "mode": "screen",
-          "fallback": {
-            "xPct": 82.14,
-            "yPct": 16.04
-          }
-        }
-      },
-      "steps": [
-        {
-          "animation": "Thankfull",
-          "at": "B",
-          "duration": null,
-          "pause": 0,
-          "move": {
-            "type": "instant"
-          },
-          "rotation": {
-            "x": 0,
-            "y": 0,
-            "z": 0
-          },
-          "autoFace": false,
-          "bubble": {
-            "x": 166.666748046875,
-            "y": -85.55548095703125
-          },
-          "form": {
-            "x": 164.4444580078125,
-            "y": -102.22216796875
-          }
-        },
-        {
-          "animation": "Excited",
-          "at": "B",
-          "duration": null,
-          "pause": 0,
-          "move": {
-            "type": "instant"
-          },
-          "rotation": {
-            "x": 0,
-            "y": 0,
-            "z": 0
-          },
-          "autoFace": false,
-          "bubble": {
-            "x": 166.666748046875,
-            "y": -85.55548095703125
-          },
-          "form": {
-            "x": 164.4444580078125,
-            "y": -102.22216796875
-          }
-        }
-      ],
-      "end": {
-        "action": "hold",
-        "next": null,
-        "repeat": 2
-      },
-      "recorded": {
-        "viewport": {
-          "width": 1704,
-          "height": 987
-        },
-        "scrollY": 0,
-        "date": "2026-11-19T01:25:36.215Z"
+        "scrollY": 111.11111450195312,
+        "date": "2026-11-19T01:31:36.494Z"
       }
     }
   ]
