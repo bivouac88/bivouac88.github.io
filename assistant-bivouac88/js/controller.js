@@ -1499,6 +1499,14 @@ refreshTriggerUI(true);
   function resetStepEditor() {
     editingStepIndex = null;
     addStepBtn.textContent = '➕ Ajouter cette étape';
+
+    Object.assign(addStepBtn.style, {
+      background: '#2a2520',
+      border: '1px solid #38332b',
+      color: '#ccc',
+    });
+
+    refreshStepsUI();
   }
 
   function loadStepIntoEditor(index) {
@@ -1547,6 +1555,12 @@ refreshTriggerUI(true);
 
     addStepBtn.textContent =
       `💾 Enregistrer les modifications de l'étape ${index + 1}`;
+
+    Object.assign(addStepBtn.style, {
+      background: '#e58e26',
+      border: '1px solid #e58e26',
+      color: '#12100e',
+    });
 
     secAnim.open();
     secRot.open();
