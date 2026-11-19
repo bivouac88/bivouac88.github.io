@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "exportedAt": "2026-11-19T12:08:00.279Z",
+  "exportedAt": "2026-11-19T22:57:18.724Z",
   "avatar": {
     "hitbox": {
       "width": 76,
@@ -160,80 +160,6 @@
     },
     {
       "id": 4,
-      "name": "Laying Resume",
-      "enabled": true,
-      "priority": 0,
-      "pages": [
-        "accueil"
-      ],
-      "devices": [
-        "pc"
-      ],
-      "trigger": {
-        "type": "load",
-        "delay": 0
-      },
-      "conditions": {
-        "frequency": "always",
-        "cooldownSeconds": 0,
-        "interruptible": true
-      },
-      "points": {
-        "B": {
-          "selector": "#map",
-          "ax": 69.64,
-          "ay": 6.29,
-          "offsetX": 0,
-          "offsetY": 0,
-          "mode": "follow",
-          "fallback": {
-            "xPct": 42.97,
-            "yPct": 58.34
-          }
-        }
-      },
-      "steps": [
-        {
-          "animation": "Male Laying Pose",
-          "at": "B",
-          "duration": null,
-          "pause": 0,
-          "move": {
-            "type": "instant"
-          },
-          "rotation": {
-            "x": 0,
-            "y": 0,
-            "z": 0
-          },
-          "autoFace": false,
-          "bubble": {
-            "x": 0,
-            "y": 0
-          },
-          "form": {
-            "x": 0,
-            "y": 0
-          },
-          "bubbleSide": "top"
-        }
-      ],
-      "end": {
-        "action": "hold",
-        "next": null,
-        "repeat": 1
-      },
-      "recorded": {
-        "viewport": {
-          "width": 1920,
-          "height": 917
-        },
-        "scrollY": 0,
-        "date": "2026-11-19T20:09:40.055Z"
-      }
-    },
-    {
-      "id": 4,
       "name": "Shy Etape",
       "enabled": true,
       "priority": 0,
@@ -261,8 +187,8 @@
           "offsetY": 0,
           "mode": "screen",
           "fallback": {
-            "xPct": 94.74,
-            "yPct": 28.9
+            "xPct": 94.69,
+            "yPct": 29.34
           }
         }
       },
@@ -280,14 +206,20 @@
             "y": 0,
             "z": 0
           },
+          "hitbox": {
+            "width": 66,
+            "height": 239,
+            "offsetX": 2,
+            "offsetY": -124
+          },
           "autoFace": false,
           "bubble": {
-            "x": 0,
-            "y": 0
+            "x": -24,
+            "y": -209
           },
           "form": {
-            "x": 0,
-            "y": 0
+            "x": 88,
+            "y": -72
           },
           "bubbleSide": "left"
         }
@@ -303,7 +235,7 @@
           "height": 917
         },
         "scrollY": 0,
-        "date": "2026-11-19T19:33:13.264Z"
+        "date": "2026-11-19T22:57:02.644Z"
       }
     }
   ]
