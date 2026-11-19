@@ -47,66 +47,64 @@ export function createEngine(knowledge) {
   // DONNÉES DYNAMIQUES DU VOYAGE
   // --------------------------------------------------
 
+
   function getLiveDataAnswer(question) {
     const text = normalizeText(question);
     const data = knowledge.liveData || {};
 
-    const answers = [
+    console.log("[Niamh diagnostic]", {
+      question,
+      normalized: text,
+      liveDataLoaded: Object.keys(data).length,
+      region: data.region_actuelle
+    });
+
+    const checks = [
       {
-        patterns: [
-          /ou sommes nous/,
-          /quelle est notre region/,
-          /dans quelle region sommes nous/,
-          /ou est ce qu on se trouve/
-        ],
+        test: text.includes("ou sommes nous") ||
+              text.includes("dans quelle region"),
         key: "region_actuelle",
         label: "Nous sommes actuellement dans la région suivante :"
       },
       {
-        patterns: [
-          /dans quel pays sommes nous/,
-          /quel pays traversons nous/,
-          /quel est le pays actuel/
-        ],
+        test: text.includes("dans quel pays") ||
+              text.includes("quel pays traversons"),
         key: "pays_actuel",
         label: "Nous sommes actuellement en"
       },
       {
-        patterns: [
-          /combien de kilometres/,
-          /combien de km/,
-          /quelle distance avons nous parcouru/
-        ],
+        test: text.includes("combien de kilometres") ||
+              text.includes("combien de km") ||
+              text.includes("quelle distance avons nous parcouru"),
         key: "km_total_parcouru",
         label: "Nous avons parcouru"
       },
       {
-        patterns: [
-          /quel jour sommes nous/,
-          /combien de jours/,
-          /jour du voyage/
-        ],
+        test: text.includes("quel jour sommes nous") ||
+              text.includes("combien de jours") ||
+              text.includes("jour du voyage"),
         key: "jour_actuel",
         label: "Nous sommes au jour"
       },
       {
-        patterns: [
-          /quelle est la prochaine etape/,
-          /ou allons nous ensuite/,
-          /quelle est notre prochaine destination/
-        ],
+        test: text.includes("quelle est la prochaine etape") ||
+              text.includes("ou allons nous ensuite") ||
+              text.includes("quelle est notre prochaine destination"),
         key: "prochaine_etape",
         label: "Notre prochaine étape est :"
       }
     ];
 
-    const match = answers.find(item =>
-      item.patterns.some(pattern => pattern.test(text))
-    );
+    const match = checks.find(item => item.test);
 
-    if (!match) return null;
+    if (!match) {
+      console.log("[Niamh diagnostic] Aucune question reconnue.");
+      return null;
+    }
 
     const value = data[match.key];
+
+    console.log("[Niamh diagnostic] Correspondance :", match.key, value);
 
     if (value === undefined || value === null || value === "") {
       return "Je n'ai pas encore cette information dans mes données de voyage.";
@@ -114,6 +112,7 @@ export function createEngine(knowledge) {
 
     return `${match.label} ${value}.`;
   }
+
   
   // --------------------------------------------------
   // GESTION DES INTENTIONS
