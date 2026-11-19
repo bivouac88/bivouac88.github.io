@@ -19,13 +19,19 @@ async function run() {
     .split("\n")
     .filter(line => line.trim());
 
-  const data = {};
-  const questions = {};
+const data = {};
+const questions = {};
+const responses = {};
 
   // Première ligne = en-têtes du tableau
   for (const line of lines.slice(1)) {
-    const [rawKey, rawValue = "", rawQuestions = ""] = line.split("\t");
-
+const [
+  rawKey,
+  rawValue = "",
+  rawQuestions = "",
+  rawResponse = ""
+] = line.split("\t");
+    
     const key = rawKey?.trim();
     const value = rawValue.trim();
 
@@ -42,10 +48,19 @@ async function run() {
     if (formulations.length) {
       questions[key] = formulations;
     }
+    // Réponse personnalisée complète (colonne D)
+const responseText = rawResponse.trim();
+
+if (responseText) {
+  responses[key] = responseText;
+}
   }
 
-  // Catalogue des formulations reconnues par Niamh
-  data._questions = questions;
+// Catalogue des formulations reconnues par Niamh
+data._questions = questions;
+
+// Réponses personnalisées complètes
+data._responses = responses;
 
   data._updatedAt = new Date().toISOString();
 
