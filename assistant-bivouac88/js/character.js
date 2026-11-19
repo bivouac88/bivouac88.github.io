@@ -349,7 +349,9 @@ const my = event.clientY;
     document.removeEventListener('pointerup', stopPointer);
     document.removeEventListener('pointercancel', stopPointer);
 
-    if (!dragged) {
+    if (dragged) {
+      document.dispatchEvent(new CustomEvent('b88:character-drag'));
+    } else {
       document.dispatchEvent(new CustomEvent('b88:character-click'));
     }
   }
