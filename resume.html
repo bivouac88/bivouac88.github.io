@@ -4,8 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <!-- CSP : si une ressource externe est ajoutée un jour (police, API…), il faut l'autoriser ici -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://tile.openstreetmap.org https://*.tile.openstreetmap.org; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'self'; form-action 'none'">
-<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cdn.jsdelivr.net; worker-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://tile.openstreetmap.org https://*.tile.openstreetmap.org blob:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://cdn.jsdelivr.net https://www.gstatic.com blob:; object-src 'none'; base-uri 'self'; form-action 'none'"><meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Bivouac88 • Suivi en direct</title>
 <meta name="description" content="Suivi en direct d'un tour d'Europe à vélo : étapes, kilomètres, dénivelé et carte du parcours.">
 <link rel="canonical" href="https://bivouac88.github.io/resume.html">
@@ -169,7 +168,7 @@ main{padding:14px 12px 64px}
 @media(prefers-reduced-motion:reduce){.flip-carte.tourne b{animation:none}}
 </style>
 </head>
-<body>
+<body data-page="resume">
 <main>
 <h1 class="sr-only">Bivouac88 · Suivi en direct du tour d'Europe à vélo</h1>
 <noscript>
