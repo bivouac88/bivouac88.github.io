@@ -56,9 +56,38 @@ export function createEngine(knowledge) {
       question,
       normalized: text,
       liveDataLoaded: Object.keys(data).length,
-      region: data.region_actuelle
+      questionsLoaded: Object.keys(data._questions || {}).length
     });
 
+    // 1. Recherche dans le catalogue dynamique Google Sheets
+    const questionCatalog = data._questions || {};
+
+    for (const [key, formulations] of Object.entries(questionCatalog)) {
+      if (!Array.isArray(formulations)) continue;
+
+      const matched = formulations.some(formulation => {
+        const normalizedFormulation = normalizeText(formulation);
+
+        return normalizedFormulation &&
+          text.includes(normalizedFormulation);
+      });
+
+      if (!matched) continue;
+
+      const value = data[key];
+
+      console.log("[Niamh diagnostic] Correspondance dynamique :", key, value);
+
+      if (value === undefined || value === null || value === "") {
+        return "Je n'ai pas encore cette information dans mes données de voyage.";
+      }
+
+      const label = key.replace(/_/g, " ");
+
+      return `Concernant ${label}, j'ai noté : ${value}.`;
+    }
+
+    // 2. Conservation des anciennes questions
     const checks = [
       {
         test: text.includes("ou sommes nous") ||
@@ -104,15 +133,12 @@ export function createEngine(knowledge) {
 
     const value = data[match.key];
 
-    console.log("[Niamh diagnostic] Correspondance :", match.key, value);
-
     if (value === undefined || value === null || value === "") {
       return "Je n'ai pas encore cette information dans mes données de voyage.";
     }
 
     return `${match.label} ${value}.`;
   }
-
   
   // --------------------------------------------------
   // GESTION DES INTENTIONS
