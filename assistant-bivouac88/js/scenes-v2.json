@@ -164,7 +164,7 @@
       "enabled": true,
       "priority": 0,
       "pages": [
-        "accueil"
+        "resume"
       ],
       "devices": [
         "pc"
