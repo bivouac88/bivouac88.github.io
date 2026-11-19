@@ -812,9 +812,9 @@
     document.dispatchEvent(new CustomEvent('b88:dialogue-side', { detail: { side: bubbleSide.value } }));
     addStepBtn.textContent = `💾 Enregistrer les modifications de l’étape ${index + 1}`;
     refreshStepsUI();
+    renderEditor();
     setStatus(`Étape ${index + 1} chargée : ajuste puis clique sur « Enregistrer les modifications ».`);
   }
-
   function refreshStepsUI() {
         refreshTimeline();
     stepsHost.replaceChildren();
@@ -1311,6 +1311,42 @@
     view.append(walkOptionsHost);
     walkOptionsHost.style.display = movement.value === 'walk' ? 'block' : 'none';
     view.append(field('Position de la bulle de dialogue', bubbleSide));
+
+    view.append(heading('Orientation du personnage pour cette étape'));
+    doRotate();
+    ['x', 'y', 'z'].forEach((axis) => {
+      const wrap = el('div');
+      const label = el('label', axis.toUpperCase() + ' — ' + (currentRotation[axis] || 0) + '°');
+      const slider = input('range', String(currentRotation[axis] || 0));
+      slider.min = '0'; slider.max = '360';
+      slider.addEventListener('input', () => { currentRotation[axis] = Number(slider.value); label.textContent = axis.toUpperCase() + ' — ' + slider.value + '°'; doRotate(); });
+      wrap.append(label, slider);
+      view.append(wrap);
+    });
+    view.append(button('Réinitialiser orientation', () => { currentRotation = { x: 0, y: 0, z: 0 }; doRotate(); renderEditor(); }));
+
+    view.append(heading('Hitbox — zone de clic pour cette étape'));
+    view.append(help('Les visiteurs pourront cliquer sur cette zone (invisible), ajustée à la pose de l’avatar dans cette étape.'));
+    [['width', 'Largeur (px)', 20, 1000], ['height', 'Hauteur (px)', 20, 1000], ['offsetX', 'Décalage horizontal', -500, 500], ['offsetY', 'Décalage vertical', -500, 500]].forEach(([key, label, min, max]) => {
+      const i = input('number', String(currentHitbox[key]));
+      i.min = min; i.max = max;
+      i.addEventListener('input', () => { const n = num(i.value); if (n !== null) currentHitbox[key] = Math.max(min, Math.min(max, n)); });
+      view.append(field(label, i));
+    });
+    view.append(button(hitboxPreviewEnabled ? 'Masquer l’aperçu de hitbox' : 'Afficher l’aperçu de hitbox', () => { hitboxPreviewEnabled = !hitboxPreviewEnabled; updateHitboxPreview(); renderEditor(); }));
+
+    view.append(heading('Champs de dialogue pour cette étape'));
+    view.append(help('Active le mode puis fais glisser la bulle ou le champ de saisie sur la page.'));
+    view.append(button(fieldMoveState.enabled ? 'Désactiver le déplacement' : 'Activer le déplacement des champs', () => {
+      fieldMoveState.enabled = !fieldMoveState.enabled;
+      dialogueElements().forEach((node) => { attachDialogueDrag(node); node.style.cursor = fieldMoveState.enabled ? 'move' : ''; node.style.outline = fieldMoveState.enabled ? '2px dashed #e58e26' : ''; });
+      renderEditor();
+    }));
+    view.append(button('Réinitialiser les positions des champs', () => {
+      dialogueElements().forEach((node) => { node.dataset.dragX = '0'; node.dataset.dragY = '0'; node.style.translate = '0px 0px'; });
+      setStatus('Positions des champs réinitialisées.');
+    }));
+
     view.append(testStepBtn, addStepBtn);
     view.append(timelineHost);
     view.append(stepsHost);
@@ -1473,40 +1509,6 @@
       coords.textContent = `x: ${Math.round(p.x)}  y: ${Math.round(p.y)}`;
     }, 250);
 
-    view.append(heading('Hitbox — zone de clic'));
-    view.append(help('Réglage propre à l’étape en cours : il sera repris quand tu ajoutes ou mets à jour cette étape (onglet ②).'));
-    [['width', 'Largeur (px)', 20, 1000], ['height', 'Hauteur (px)', 20, 1000], ['offsetX', 'Décalage horizontal', -500, 500], ['offsetY', 'Décalage vertical', -500, 500]].forEach(([key, label, min, max]) => {
-      const i = input('number', String(currentHitbox[key]));
-      i.min = min; i.max = max;
-      i.addEventListener('input', () => { const n = num(i.value); if (n !== null) currentHitbox[key] = Math.max(min, Math.min(max, n)); });
-      view.append(field(label, i));
-    });
-    view.append(button(hitboxPreviewEnabled ? 'Masquer l’aperçu de hitbox' : 'Afficher l’aperçu de hitbox', () => { hitboxPreviewEnabled = !hitboxPreviewEnabled; updateHitboxPreview(); renderTools(); }));
-
-    view.append(heading('Orientation manuelle'));
-    doRotate();
-    ['x', 'y', 'z'].forEach((axis) => {
-      const wrap = el('div');
-      const label = el('label', axis.toUpperCase() + ' — ' + (currentRotation[axis] || 0) + '°');
-      const slider = input('range', String(currentRotation[axis] || 0));
-      slider.min = '0'; slider.max = '360';
-      slider.addEventListener('input', () => { currentRotation[axis] = Number(slider.value); label.textContent = axis.toUpperCase() + ' — ' + slider.value + '°'; doRotate(); });
-      wrap.append(label, slider);
-      view.append(wrap);
-    });
-    view.append(button('Réinitialiser orientation', () => { currentRotation = { x: 0, y: 0, z: 0 }; doRotate(); renderTools(); }));
-
-    view.append(heading('Champs de dialogue'));
-    view.append(help('Active le mode puis fais glisser la bulle ou le champ de saisie. Les décalages sont mémorisés dans chaque étape ajoutée ensuite.'));
-    view.append(button(fieldMoveState.enabled ? 'Désactiver le déplacement' : 'Activer le déplacement des champs', () => {
-      fieldMoveState.enabled = !fieldMoveState.enabled;
-      dialogueElements().forEach((node) => { attachDialogueDrag(node); node.style.cursor = fieldMoveState.enabled ? 'move' : ''; node.style.outline = fieldMoveState.enabled ? '2px dashed #e58e26' : ''; });
-      renderTools();
-    }));
-    view.append(button('Réinitialiser les positions des champs', () => {
-      dialogueElements().forEach((node) => { node.dataset.dragX = '0'; node.dataset.dragY = '0'; node.style.translate = '0px 0px'; });
-      setStatus('Positions des champs réinitialisées.');
-    }));
   }
 
   // Si la page a été rechargée sans avoir exporté, propose de reprendre là
