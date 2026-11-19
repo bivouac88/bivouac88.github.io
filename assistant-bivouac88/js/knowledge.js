@@ -1,6 +1,7 @@
 
 export async function loadKnowledge() {
   const knowledgeUrl = new URL("../data/knowledge.json", import.meta.url);
+  const niamhDataUrl = new URL("../data/niamh-data.json", import.meta.url);
   const voyageApiUrl = "https://script.google.com/macros/s/AKfycbyptX2-OXsxh8yXqk9Hi_ygvcxP1_4vD0AT-KzZPcTFzR9AfEKHbQnBvgi3Pvw5a-LL/exec?public=1";
   // Chargement de la base de connaissances habituelle
   const response = await fetch(knowledgeUrl, {
