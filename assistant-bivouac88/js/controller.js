@@ -1506,6 +1506,7 @@ refreshTriggerUI(true);
     if (!step) return;
 
     editingStepIndex = index;
+    refreshStepsUI();
 
     // Animation
     doPlay(step.animation);
@@ -1595,6 +1596,14 @@ refreshTriggerUI(true);
 
     draftSteps.forEach((step, index) => {
       const item = makeListItem();
+
+      if (index === editingStepIndex) {
+        Object.assign(item.style, {
+          background: '#514027',
+          border: '1px solid #e58e26',
+          color: '#fff',
+        });
+      }
 
       const label = document.createElement('span');
       label.style.flex = '1';
