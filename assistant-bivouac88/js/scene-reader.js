@@ -184,73 +184,6 @@
       currentFieldOffsets.form
     );
   });
-
-  // ---------------------------------------------------------------
-  // ZONE CLIQUABLE DE L'AVATAR (HITBOX) — invisible pour les visiteurs,
-  // suit la position de l'avatar et change de forme selon l'étape en cours.
-  // ---------------------------------------------------------------
-
-  const hitboxDefaults = { width: 140, height: 145, offsetX: 0, offsetY: 0 };
-  let currentHitbox = { ...hitboxDefaults };
-  let hitboxEl = null;
-  let hitboxIntervalId = null;
-
-  function ensureHitboxElement() {
-    if (hitboxEl) return hitboxEl;
-
-    hitboxEl = document.createElement('div');
-    Object.assign(hitboxEl.style, {
-      position: 'fixed',
-      zIndex: '9998',
-      background: 'transparent',
-      display: 'none'
-    });
-
-    hitboxEl.addEventListener('click', () => {
-      document.dispatchEvent(new CustomEvent('b88:character-click'));
-    });
-
-    document.body.appendChild(hitboxEl);
-
-    return hitboxEl;
-  }
-
-  function updateHitboxPosition() {
-    if (!hitboxEl) return;
-
-    const bounds = typeof window.characterGetScreenBounds === 'function'
-      ? window.characterGetScreenBounds()
-      : null;
-
-    if (!bounds) {
-      hitboxEl.style.display = 'none';
-      return;
-    }
-
-    const cx = (bounds.left + bounds.right) / 2;
-    const cy = (bounds.top + bounds.bottom) / 2;
-
-    Object.assign(hitboxEl.style, {
-      display: 'block',
-      width: currentHitbox.width + 'px',
-      height: currentHitbox.height + 'px',
-      left: (cx + currentHitbox.offsetX - currentHitbox.width / 2) + 'px',
-      top: (cy + currentHitbox.offsetY - currentHitbox.height / 2) + 'px'
-    });
-  }
-
-  function startHitboxTracking() {
-    ensureHitboxElement();
-
-    if (hitboxIntervalId) return;
-
-    hitboxIntervalId = setInterval(updateHitboxPosition, 100);
-  }
-
-  function setCurrentHitbox(hitbox) {
-    currentHitbox = { ...hitboxDefaults, ...(hitbox || {}) };
-    updateHitboxPosition();
-  }
   
   // ---------------------------------------------------------------
   // ÉTAT DU MOTEUR
@@ -533,10 +466,6 @@
               Number(rotation.z) || 0
             );
           }
-
-          // Zone cliquable (hitbox), ajustée à la pose de cette étape
-          setCurrentHitbox(step.hitbox);
-          startHitboxTracking();
 
           // Champs de dialogue
           applyFieldOffsets(step.bubble, step.form);
@@ -875,14 +804,6 @@
 
     cancelCurrentScene();
     clearPositionUpdater();
-
-    if (hitboxIntervalId) {
-      clearInterval(hitboxIntervalId);
-      hitboxIntervalId = null;
-    }
-
-    setCurrentHitbox(hitboxDefaults);
-    startHitboxTracking();
 
     const page = currentPage();
     const device = currentDevice();
