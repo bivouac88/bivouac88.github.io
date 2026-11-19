@@ -53,11 +53,11 @@
 
   const PAGES = [
     ['test', 'Index'],
-    ['accueil', 'Résumé'],
+    ['resume', 'Résumé'],
     ['stats', 'Stats'],
     ['etapes', 'Étapes'],
     ['journal', 'Journal de bord'],
-    ['meteo-peche', 'Météo & pêche'],
+    ['meteo', 'Météo'],
     ['poi', 'POI'],
   ];
   const DEVICES = [
