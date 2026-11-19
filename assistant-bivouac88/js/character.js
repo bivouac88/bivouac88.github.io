@@ -190,6 +190,7 @@ function tick() {
 
   if (mixer) mixer.update(dt);
   if (runner) runner.position.set(posX, posY, 0);
+  updatePointerEvents();
 
   renderer.render(scene, camera);
 }
@@ -304,12 +305,18 @@ function isOverCharacter(mx, my) {
   );
 }
 
-window.addEventListener('mousemove', (event) => {
-  const mx = event.clientX;
-  const my = event.clientY;
+let lastMouseX = -Infinity;
+let lastMouseY = -Infinity;
 
+function updatePointerEvents() {
   container.style.pointerEvents =
-    isOverCharacter(mx, my) ? 'auto' : 'none';
+    isOverCharacter(lastMouseX, lastMouseY) ? 'auto' : 'none';
+}
+
+window.addEventListener('mousemove', (event) => {
+  lastMouseX = event.clientX;
+  lastMouseY = event.clientY;
+  updatePointerEvents();
 });
 
 renderer.domElement.addEventListener('pointerdown', (event) => {
