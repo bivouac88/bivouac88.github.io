@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "exportedAt": "2026-11-19T01:19:14.647Z",
+  "exportedAt": "2026-11-19T01:23:09.231Z",
   "avatar": {
     "hitbox": {
       "width": 76,
@@ -99,85 +99,12 @@
         "delay": 0
       },
       "conditions": {
-        "frequency": "always",
+        "frequency": "load",
         "cooldownSeconds": 0,
         "interruptible": true
       },
       "points": {
-        "A": {
-          "selector": "#projet > div.test-section-heading:nth-of-type(1) > h2",
-          "ax": 69.04,
-          "ay": 8.94,
-          "offsetX": 0,
-          "offsetY": 0,
-          "mode": "follow",
-          "fallback": {
-            "xPct": 62.84,
-            "yPct": 13.78
-          }
-        }
-      },
-      "steps": [
-        {
-          "animation": "Thankfull",
-          "at": "A",
-          "duration": null,
-          "pause": 0,
-          "move": {
-            "type": "instant"
-          },
-          "rotation": {
-            "x": 0,
-            "y": 0,
-            "z": 0
-          },
-          "autoFace": false,
-          "bubble": {
-            "x": 166.666748046875,
-            "y": -85.55548095703125
-          },
-          "form": {
-            "x": 164.4444580078125,
-            "y": -102.22216796875
-          }
-        }
-      ],
-      "end": {
-        "action": "hold",
-        "next": null,
-        "repeat": 1
-      },
-      "recorded": {
-        "viewport": {
-          "width": 1704,
-          "height": 987
-        },
-        "scrollY": 0,
-        "date": "2026-11-19T01:17:14.335Z"
-      }
-    },
-    {
-      "id": 4,
-      "name": "Excited after thx",
-      "enabled": true,
-      "priority": 0,
-      "pages": [
-        "test"
-      ],
-      "devices": [
-        "pc"
-      ],
-      "trigger": {
-        "type": "avatar-click",
-        "delay": 6
-      },
-      "conditions": {
-        "frequency": "always",
-        "cooldownSeconds": 25,
-        "interruptible": true
-      },
-      "points": {
-        "A": {
+        "B": {
           "selector": "div.test-page:nth-of-type(1) > main.test-main",
           "ax": 82.93,
           "ay": 2.69,
@@ -186,14 +113,14 @@
           "mode": "screen",
           "fallback": {
             "xPct": 82.14,
-            "yPct": 16.03
+            "yPct": 16.04
           }
         }
       },
       "steps": [
         {
-          "animation": "Excited",
-          "at": "A",
+          "animation": "Thankfull",
+          "at": "B",
           "duration": null,
           "pause": 0,
           "move": {
@@ -218,7 +145,7 @@
       "end": {
         "action": "hold",
         "next": null,
-        "repeat": 0
+        "repeat": 2
       },
       "recorded": {
         "viewport": {
@@ -226,7 +153,7 @@
           "height": 987
         },
         "scrollY": 0,
-        "date": "2026-11-19T01:18:54.055Z"
+        "date": "2026-11-19T01:23:02.790Z"
       }
     }
   ]
