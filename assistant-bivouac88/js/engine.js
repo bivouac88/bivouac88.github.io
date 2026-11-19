@@ -44,6 +44,78 @@ export function createEngine(knowledge) {
   }
 
   // --------------------------------------------------
+  // DONNÉES DYNAMIQUES DU VOYAGE
+  // --------------------------------------------------
+
+  function getLiveDataAnswer(question) {
+    const text = normalizeText(question);
+    const data = knowledge.liveData || {};
+
+    const answers = [
+      {
+        patterns: [
+          /ou sommes nous/,
+          /quelle est notre region/,
+          /dans quelle region sommes nous/,
+          /ou est ce qu on se trouve/
+        ],
+        key: "region_actuelle",
+        label: "Nous sommes actuellement dans la région suivante :"
+      },
+      {
+        patterns: [
+          /dans quel pays sommes nous/,
+          /quel pays traversons nous/,
+          /quel est le pays actuel/
+        ],
+        key: "pays_actuel",
+        label: "Nous sommes actuellement en"
+      },
+      {
+        patterns: [
+          /combien de kilometres/,
+          /combien de km/,
+          /quelle distance avons nous parcouru/
+        ],
+        key: "km_total_parcouru",
+        label: "Nous avons parcouru"
+      },
+      {
+        patterns: [
+          /quel jour sommes nous/,
+          /combien de jours/,
+          /jour du voyage/
+        ],
+        key: "jour_actuel",
+        label: "Nous sommes au jour"
+      },
+      {
+        patterns: [
+          /quelle est la prochaine etape/,
+          /ou allons nous ensuite/,
+          /quelle est notre prochaine destination/
+        ],
+        key: "prochaine_etape",
+        label: "Notre prochaine étape est :"
+      }
+    ];
+
+    const match = answers.find(item =>
+      item.patterns.some(pattern => pattern.test(text))
+    );
+
+    if (!match) return null;
+
+    const value = data[match.key];
+
+    if (value === undefined || value === null || value === "") {
+      return "Je n'ai pas encore cette information dans mes données de voyage.";
+    }
+
+    return `${match.label} ${value}.`;
+  }
+  
+  // --------------------------------------------------
   // GESTION DES INTENTIONS
   // --------------------------------------------------
 
@@ -236,6 +308,20 @@ export function createEngine(knowledge) {
       };
     }
 
+    const liveDataAnswer = getLiveDataAnswer(cleanQuestion);
+
+    if (liveDataAnswer) {
+      const response = {
+        type: "liveData",
+        text: liveDataAnswer
+      };
+
+      remember("user", cleanQuestion);
+      saveExchange(response);
+
+      return response;
+    }
+    
     // La personnalité traite uniquement les questions qui la concernent.
     // Les autres questions continuent vers le moteur de compréhension.
     const personalityAnswer = getPersonalityAnswer(cleanQuestion);
