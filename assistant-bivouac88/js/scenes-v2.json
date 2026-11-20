@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "exportedAt": "2026-11-19T23:24:10.867Z",
+  "exportedAt": "2026-11-20T13:57:07.698Z",
   "avatar": {
     "hitbox": {
       "width": 76,
@@ -305,8 +305,8 @@
         }
       ],
       "end": {
-        "action": "hold",
-        "next": null,
+        "action": "chain",
+        "next": 7,
         "repeat": 1
       },
       "recorded": {
@@ -314,8 +314,8 @@
           "width": 1920,
           "height": 917
         },
-        "scrollY": 0,
-        "date": "2026-11-19T23:19:26.931Z"
+        "scrollY": 93,
+        "date": "2026-11-20T13:41:05.305Z"
       }
     },
     {
@@ -396,6 +396,181 @@
         },
         "scrollY": 0,
         "date": "2026-11-19T23:23:31.691Z"
+      }
+    },
+    {
+      "id": 7,
+      "name": "Visite_tour_Resume",
+      "enabled": true,
+      "priority": 0,
+      "pages": [
+        "resume"
+      ],
+      "devices": [
+        "pc"
+      ],
+      "trigger": {
+        "type": "manual",
+        "delay": 0
+      },
+      "conditions": {
+        "frequency": "always",
+        "cooldownSeconds": 0,
+        "interruptible": true
+      },
+      "points": {
+        "A": {
+          "selector": "main > div:nth-of-type(6)",
+          "ax": 79.71,
+          "ay": 58.23,
+          "offsetX": 0,
+          "offsetY": 0,
+          "mode": "screen",
+          "fallback": {
+            "xPct": 57.65,
+            "yPct": 14.29
+          }
+        }
+      },
+      "steps": [
+        {
+          "animation": "Happy",
+          "at": "A",
+          "duration": null,
+          "pause": 0,
+          "move": {
+            "type": "instant"
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "hitbox": {
+            "width": 89,
+            "height": 222,
+            "offsetX": 0,
+            "offsetY": -125
+          },
+          "autoFace": false,
+          "bubble": {
+            "x": 18,
+            "y": -220
+          },
+          "form": {
+            "x": -134,
+            "y": -59
+          },
+          "bubbleSide": "right"
+        }
+      ],
+      "end": {
+        "action": "hold",
+        "next": null,
+        "repeat": 1
+      },
+      "recorded": {
+        "viewport": {
+          "width": 1920,
+          "height": 917
+        },
+        "scrollY": 0,
+        "date": "2026-11-20T13:50:06.617Z"
+      }
+    },
+    {
+      "id": 8,
+      "name": "Visite_Tour_#2",
+      "enabled": true,
+      "priority": 0,
+      "pages": [
+        "resume"
+      ],
+      "devices": [
+        "pc"
+      ],
+      "trigger": {
+        "type": "enter",
+        "delay": 0,
+        "selector": "main > div.ligne-haut:nth-of-type(1)",
+        "threshold": 0.5,
+        "leave": "stop"
+      },
+      "conditions": {
+        "frequency": "always",
+        "cooldownSeconds": 0,
+        "interruptible": true
+      },
+      "points": {
+        "B": {
+          "selector": "main > div.ligne-haut:nth-of-type(1)",
+          "ax": 70.57,
+          "ay": 344.45,
+          "offsetX": 0,
+          "offsetY": 0,
+          "mode": "screen",
+          "fallback": {
+            "xPct": 67.39,
+            "yPct": 51.25
+          }
+        },
+        "A": {
+          "selector": "main > div.zone-carte-etapes:nth-of-type(4) > section.section-journal:nth-of-type(2) > div.journal-en-tete",
+          "ax": 22.77,
+          "ay": 246.69,
+          "offsetX": 0,
+          "offsetY": 0,
+          "mode": "screen",
+          "fallback": {
+            "xPct": 67.39,
+            "yPct": 51.25
+          }
+        }
+      },
+      "steps": [
+        {
+          "animation": "Classique_Pose",
+          "at": "A",
+          "duration": null,
+          "pause": 0,
+          "move": {
+            "type": "instant"
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "hitbox": {
+            "width": 113,
+            "height": 254,
+            "offsetX": 8,
+            "offsetY": -142
+          },
+          "autoFace": false,
+          "bubble": {
+            "x": 64,
+            "y": -169
+          },
+          "form": {
+            "x": -134,
+            "y": -59
+          },
+          "bubbleSide": "right"
+        }
+      ],
+      "end": {
+        "action": "hold",
+        "next": null,
+        "repeat": 1
+      },
+      "recorded": {
+        "viewport": {
+          "width": 1920,
+          "height": 917
+        },
+        "scrollY": 0,
+        "date": "2026-11-20T13:56:27.938Z"
       }
     }
   ]
