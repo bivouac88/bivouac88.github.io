@@ -3,7 +3,8 @@ import { detectIntent, normalizeText } from "./intent.js";
 import { pickAnswer } from "./knowledge.js";
 import {
   getPersonalityAnswer,
-  personalizeIntentAnswer
+  personalizeIntentAnswer,
+  getWelcomeMessage as defaultWelcomeMessage
 } from "./personality.js";
 
 export function createEngine(knowledge) {
@@ -227,6 +228,60 @@ return `Concernant ${label}, j'ai noté : ${value}.`;
 
     return `${match.label} ${value}.`;
   }
+
+  // --------------------------------------------------
+  // MESSAGES SPÉCIFIQUES À LA PAGE COURANTE
+  // --------------------------------------------------
+
+  function currentPageKey() {
+    return (
+      (typeof document !== "undefined" && document.body?.dataset?.page) ||
+      ""
+    );
+  }
+
+  function liveDataValue(key) {
+    const data = knowledge.liveData || {};
+    const customResponse = data._responses?.[key];
+
+    if (customResponse) return customResponse;
+
+    const value = data[key];
+
+    if (value === undefined || value === null || value === "") {
+      return null;
+    }
+
+    return value;
+  }
+
+  function getPageWelcomeMessage() {
+    const page = currentPageKey();
+    if (!page) return null;
+
+    return liveDataValue(`message_ouverture_${page}`);
+  }
+
+  function getPageDescriptionAnswer(question) {
+    const text = normalizeText(question);
+
+    const asksAboutPage =
+      /\b(cette page|cette rubrique|cet onglet)\b/.test(text) &&
+      /\b(c est quoi|qu est ce que|ca sert a quoi|a quoi sert|c est quoi ca)\b/.test(text);
+
+    if (!asksAboutPage) return null;
+
+    const page = currentPageKey();
+    if (!page) return null;
+
+    const description = liveDataValue(`description_page_${page}`);
+    if (!description) return null;
+
+    return {
+      type: "pageDescription",
+      text: description
+    };
+  }
   
   // --------------------------------------------------
   // GESTION DES INTENTIONS
@@ -421,9 +476,19 @@ return `Concernant ${label}, j'ai noté : ${value}.`;
       };
     }
 
+    const pageDescriptionAnswer = getPageDescriptionAnswer(cleanQuestion);
+
+    if (pageDescriptionAnswer) {
+      remember("user", cleanQuestion);
+      saveExchange(pageDescriptionAnswer);
+
+      return pageDescriptionAnswer;
+    }
+
     const liveDataAnswer = getLiveDataAnswer(cleanQuestion);
 
     if (liveDataAnswer) {
+      
       const response = {
         type: "liveData",
         text: liveDataAnswer
@@ -540,11 +605,16 @@ return `Concernant ${label}, j'ai noté : ${value}.`;
     };
   }
 
+  function getWelcomeMessage() {
+    return getPageWelcomeMessage() || defaultWelcomeMessage();
+  }
+
   return {
     ask,
     askIntent,
     getIntent,
     getHistory,
-    getContext
+    getContext,
+    getWelcomeMessage
   };
 }
