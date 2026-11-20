@@ -99,13 +99,18 @@ let posY = CONFIG.bottomOffsetPx;
 // Zone cliquable (hitbox) et dernière position connue de la souris —
 // déclarées ici, avant la boucle d'animation, car tick() les utilise dès
 // son tout premier appel (synchrone, avant le reste du fichier plus bas).
-let currentHitbox = {
-  width: 140,
-  height: 145,
-  offsetX: 0,
-  offsetY: 0,
-};
+const initialHitbox = window.B88_INITIAL_HITBOX || {};
 
+let currentHitbox = {
+  width: Number(initialHitbox.width) > 0
+    ? Number(initialHitbox.width) : 140,
+  height: Number(initialHitbox.height) > 0
+    ? Number(initialHitbox.height) : 145,
+  offsetX: Number.isFinite(Number(initialHitbox.offsetX))
+    ? Number(initialHitbox.offsetX) : 0,
+  offsetY: Number.isFinite(Number(initialHitbox.offsetY))
+    ? Number(initialHitbox.offsetY) : 0,
+};
 let lastMouseX = -Infinity;
 let lastMouseY = -Infinity;
 
