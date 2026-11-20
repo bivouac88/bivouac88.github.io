@@ -189,13 +189,19 @@
   // ---------------------------------------------------------------
   // ÉTAT DU MOTEUR
   // ---------------------------------------------------------------
-
   let scenes = [];
   let runningScene = null;
   let positionCleanup = null;
   let tourActive = false;
 
-  const triggerCleanups = [];
+// Identification des scènes de visite guidée
+function isTourScene(scene) {
+  const trigger = scene?.trigger || {};
+  return trigger.type === 'event'
+    && /^b88:[1-9]sur9$/.test(String(trigger.eventName || ''));
+}
+
+const triggerCleanups = [];
 
   document.addEventListener('b88:tour-start', () => {
     tourActive = true;
@@ -353,8 +359,10 @@
       return;
     }
 
-    if (tourActive && !preview) return;
-    if (!preview && !canRun(scene)) return;
+// Pendant la visite, seules les scènes de visite sont autorisées.
+// Hors visite, les scènes de visite restent inactives.
+if (!preview && tourActive !== isTourScene(scene)) return;
+if (!preview && !canRun(scene)) return;
 
     // Une scène non interruptible bloque les autres scènes.
     if (runningScene) {
@@ -540,9 +548,9 @@
   // DÉCLENCHEURS
   // ---------------------------------------------------------------
 
-  function tryRun(scene) {
-    if (!tourActive) runScene(scene);
-  }
+function tryRun(scene) {
+  runScene(scene);
+}
 
   function addTriggerCleanup(cleanup) {
     triggerCleanups.push(cleanup);
