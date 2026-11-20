@@ -333,11 +333,14 @@
     }
 
     .test-card {
+      display: block;
       min-height: 235px;
       padding: 30px 27px;
       border: 1px solid var(--trait, #342a22);
       border-radius: 5px;
       background: var(--carte, #1b1612);
+      color: inherit;
+      text-decoration: none;
       transition: border-color .2s ease, transform .2s ease, background .2s ease;
     }
 
@@ -369,6 +372,61 @@
       color: var(--discret, #9c907b);
       font-size: 13px;
       line-height: 1.8;
+    }
+
+    /* Bouton de visite guidée */
+    .test-guided-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 38px;
+      text-align: center;
+    }
+
+    .test-guided-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      min-width: 270px;
+      padding: 17px 28px;
+      border: 1px solid var(--accent, #e58e26);
+      border-radius: 4px;
+      background: var(--accent, #e58e26);
+      color: #17120d;
+      font-family: var(--mono, monospace);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      cursor: pointer;
+      transition: transform .25s ease, background .25s ease, box-shadow .25s ease;
+    }
+
+    .test-guided-button:hover,
+    .test-guided-button:focus-visible {
+      transform: translateY(-3px);
+      background: var(--accent-hover, #f39c38);
+      box-shadow: 0 8px 25px rgba(229, 142, 38, .2);
+    }
+
+    .test-guided-icon {
+      font-size: 13px;
+    }
+
+    .test-guided-arrow {
+      font-size: 19px;
+      transition: transform .25s ease;
+    }
+
+    .test-guided-button:hover .test-guided-arrow {
+      transform: translateX(5px);
+    }
+
+    .test-guided-wrapper p {
+      margin: 13px 0 0;
+      color: var(--discret, #9c907b);
+      font-size: 12px;
+      letter-spacing: .04em;
     }
 
     /* Bandeau éditorial */
@@ -504,6 +562,9 @@
 
       .test-card {
         min-height: auto;
+        display: block;
+        color: inherit;
+        text-decoration: none;
       }
 
       .test-story-inner {
@@ -578,32 +639,44 @@ Un espace pour raconter l'aventure, suivre le parcours et partager ce qui se pas
           </p>
         </div>
 
-        <div class="test-cards">
-          <article class="test-card" id="voyage">
-            <span class="test-card-number">01 / L'AVENTURE</span>
-            <h3>Le voyage</h3>
-            <p>
-              Un itinéraire qui se construit au fil des kilomètres, des découvertes,
-              des rencontres et des détours. Pas besoin que tout soit prévu à l'avance
-            </p>
-          </article>
 
-          <article class="test-card" id="suivi">
-            <span class="test-card-number">02 / LE PARCOURS</span>
-            <h3>Les étapes</h3>
-            <p>
-              Les journées de route, les distances, le dénivelé et la progression :
-              garder une trace concrète du chemin parcouru
-            </p>
-          </article>
+<div class="test-cards">
 
-          <article class="test-card" id="outils">
-            <span class="test-card-number">03 / LE JOURNAL DE BORD</span>
-            <h3>Le journal de bord</h3>
-            <p>
-              Le quotidien de la route en photos et en mots : les anecdotes, les rencontres, et les bons coins repérés en chemin pour boire, dormir ou réparer
-            </p>
-          </article>
+  <a class="test-card" id="voyage" href="/resume.html">
+    <span class="test-card-number">01 / L'AVENTURE</span>
+    <h3>Le voyage</h3>
+    <p>
+      Un itinéraire qui se construit au fil des kilomètres, des découvertes,
+      des rencontres et des détours. Pas besoin que tout soit prévu à l'avance
+    </p>
+  </a>
+
+  <a class="test-card" id="suivi" href="/etapes.html">
+    <span class="test-card-number">02 / LE PARCOURS</span>
+    <h3>Les étapes</h3>
+    <p>
+      Les journées de route, les distances, le dénivelé et la progression :
+      garder une trace concrète du chemin parcouru
+    </p>
+  </a>
+
+  <a class="test-card" id="outils" href="/journal.html">
+    <span class="test-card-number">03 / LE JOURNAL</span>
+    <h3>Le journal de bord</h3>
+    <p>
+      Le quotidien de la route en photos et en mots : les anecdotes, les rencontres,
+      et les bons coins repérés en chemin pour boire, dormir ou réparer
+    </p>
+  </a>
+</div>
+
+        <div class="test-guided-wrapper">
+          <button class="test-guided-button" id="start-guided-tour" type="button">
+            <span class="test-guided-icon" aria-hidden="true">▶</span>
+            <span>VISITE GUIDÉE</span>
+            <span class="test-guided-arrow" aria-hidden="true">→</span>
+          </button>
+          <p>Découvrez Bivouac88 pas à pas</p>
         </div>
       </section>
 
@@ -652,12 +725,18 @@ Un espace pour raconter l'aventure, suivre le parcours et partager ce qui se pas
       burger.setAttribute('aria-expanded', open);
       burger.setAttribute('aria-label', open ? 'Fermer le menu' : 'Ouvrir le menu');
     }
-
     burger.addEventListener('click', () => setMenu(!menu.classList.contains('open')));
     document.addEventListener('click', (e) => { if (!e.target.closest('.test-nav')) setMenu(false); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setMenu(false); });
-  </script>
 
+    // Lancer la visite guidée de la page d'accueil
+    const guidedButton = document.getElementById('start-guided-tour');
+    if (guidedButton) {
+      guidedButton.addEventListener('click', () => {
+        document.dispatchEvent(new Event('b88:start-tour'));
+      });
+    }
+  </script>
   <script type="module" src="./assistant-bivouac88/js/widget.js"></script>
 </body>
 </html>
