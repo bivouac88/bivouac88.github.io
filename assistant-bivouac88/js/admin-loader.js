@@ -30,6 +30,18 @@
       scene.devices.includes(device)
     );
 
+// Hitbox initiale : définie avant le chargement du personnage.
+const initialScene = [...matchingScenes]
+  .sort((a, b) => (Number(b.priority) || 0) - (Number(a.priority) || 0))
+  .find(scene => scene.trigger?.type === 'load')
+  || matchingScenes[0];
+
+window.B88_INITIAL_HITBOX =
+  initialScene?.steps?.[0]?.hitbox
+  || initialScene?.hitbox
+  || data.avatar?.hitbox
+  || { width: 140, height: 145, offsetX: 0, offsetY: 0 };
+    
     // Visiteur : aucun personnage si aucune scène n'est prévue ici.
     if (!isAdmin && matchingScenes.length === 0) return;
 

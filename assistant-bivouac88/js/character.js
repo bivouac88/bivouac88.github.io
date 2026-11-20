@@ -1,4 +1,3 @@
-
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/+esm';
 import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js/+esm';
 import { DRACOLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/DRACOLoader.js/+esm';
@@ -17,10 +16,8 @@ const CONFIG = {
 };
 
 // --- Canvas pleine page ---
-
 const container = document.createElement('div');
 container.id = 'b88-character';
-
 Object.assign(container.style, {
   position: 'fixed',
   inset: '0',
@@ -29,7 +26,6 @@ Object.assign(container.style, {
   pointerEvents: 'none',
   zIndex: '9999',
 });
-
 document.body.appendChild(container);
 
 const renderer = new THREE.WebGLRenderer({
@@ -99,18 +95,22 @@ let posY = CONFIG.bottomOffsetPx;
 // Zone cliquable (hitbox) et dernière position connue de la souris —
 // déclarées ici, avant la boucle d'animation, car tick() les utilise dès
 // son tout premier appel (synchrone, avant le reste du fichier plus bas).
-let currentHitbox = {
-  width: 140,
-  height: 145,
-  offsetX: 0,
-  offsetY: 0,
-};
+const initialHitbox = window.B88_INITIAL_HITBOX || {};
 
+let currentHitbox = {
+  width: Number(initialHitbox.width) > 0
+    ? Number(initialHitbox.width) : 140,
+  height: Number(initialHitbox.height) > 0
+    ? Number(initialHitbox.height) : 145,
+  offsetX: Number.isFinite(Number(initialHitbox.offsetX))
+    ? Number(initialHitbox.offsetX) : 0,
+  offsetY: Number.isFinite(Number(initialHitbox.offsetY))
+    ? Number(initialHitbox.offsetY) : 0,
+};
 let lastMouseX = -Infinity;
 let lastMouseY = -Infinity;
 
 // --- Gestion des animations ---
-
 function playAnimation(name) {
   if (!actions[name]) {
     console.warn('[character] animation introuvable :', name);
@@ -118,19 +118,16 @@ function playAnimation(name) {
   }
 
   if (currentAction === actions[name]) return;
-
   if (currentAction) {
     currentAction.fadeOut(0.3);
   }
 
   actions[name].reset().fadeIn(0.3).play();
   currentAction = actions[name];
-
   console.info('[character] animation :', name);
 }
 
 // --- Chargement du modèle GLB ---
-
 const dracoLoader = new DRACOLoader();
 dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
 
@@ -176,7 +173,6 @@ loader.load(
       action.setLoop(THREE.LoopRepeat, Infinity);
       actions[clip.name] = action;
     }
-
     playAnimation('Angry');
 
     window.characterAnimations = gltf.animations.map(a => a.name);
@@ -186,32 +182,24 @@ loader.load(
   },
 
   undefined,
-
   (error) => {
     console.error('[character] chargement impossible :', error);
   }
 );
 
 // --- Boucle d'animation ---
-
 const clock = new THREE.Clock();
-
 function tick() {
   requestAnimationFrame(tick);
-
   const dt = Math.min(clock.getDelta(), 0.1);
-
   if (mixer) mixer.update(dt);
   if (runner) runner.position.set(posX, posY, 0);
   updatePointerEvents();
-
   renderer.render(scene, camera);
 }
-
 tick();
 
 // --- API publique ---
-
 window.characterPlay = (name) => {
   playAnimation(name);
 };
@@ -237,18 +225,13 @@ window.characterGetPosition = () => ({
 });
 
 // --- Limites du personnage à l'écran ---
-
 window.characterGetScreenBounds = () => {
   if (!runner) return null;
-
   runner.updateWorldMatrix(true, true);
   camera.updateMatrixWorld(true);
-
   const rect = renderer.domElement.getBoundingClientRect();
-
   const halfWidth = (window.__charWidth || 40) / 2;
   const charHeight = window.__charHeight || CONFIG.heightPx;
-
   const corners = [
     new THREE.Vector3(-halfWidth, 0, 0),
     new THREE.Vector3(halfWidth, 0, 0),
@@ -259,7 +242,6 @@ window.characterGetScreenBounds = () => {
   const projected = corners.map(point => {
     point.applyMatrix4(runner.matrixWorld);
     point.project(camera);
-
     return {
       x: rect.left + (point.x + 1) * rect.width / 2,
       y: rect.top + (1 - point.y) * rect.height / 2,
@@ -277,17 +259,13 @@ window.characterGetScreenBounds = () => {
 // --- Détection des clics et du drag (admin) sur le personnage ---
 const CLICK_PADDING_PX = 50; // marge ajoutée autour du perso pour la zone cliquable
 const DRAG_THRESHOLD_PX = 5; // distance avant de considérer que c'est un drag, pas un clic
-
 const ADMIN_MODE = new URLSearchParams(window.location.search).get('edit') === 'bivouac88admin';
-
 window.characterSetHitbox = (hitbox) => {
   if (!hitbox || typeof hitbox !== 'object') return;
-
   const width = Number(hitbox.width);
   const height = Number(hitbox.height);
   const offsetX = Number(hitbox.offsetX);
   const offsetY = Number(hitbox.offsetY);
-
   if (Number.isFinite(width) && width > 0) currentHitbox.width = width;
   if (Number.isFinite(height) && height > 0) currentHitbox.height = height;
   if (Number.isFinite(offsetX)) currentHitbox.offsetX = offsetX;
@@ -296,13 +274,10 @@ window.characterSetHitbox = (hitbox) => {
 
 function isOverCharacter(mx, my) {
   if (!runner) return false;
-
   const bounds = window.characterGetScreenBounds();
   if (!bounds) return false;
-
   const centerX = (bounds.left + bounds.right) / 2 + currentHitbox.offsetX;
   const centerY = (bounds.top + bounds.bottom) / 2 + currentHitbox.offsetY;
-
   return (
     mx >= centerX - currentHitbox.width / 2 &&
     mx <= centerX + currentHitbox.width / 2 &&
@@ -312,8 +287,9 @@ function isOverCharacter(mx, my) {
 }
 
 function updatePointerEvents() {
-  container.style.pointerEvents =
-    isOverCharacter(lastMouseX, lastMouseY) ? 'auto' : 'none';
+  // Le canvas ne bloque jamais les clics de la page.
+  // La détection du personnage est faite au niveau du document.
+  container.style.pointerEvents = 'none';
 }
 
 window.addEventListener('mousemove', (event) => {
@@ -322,14 +298,17 @@ window.addEventListener('mousemove', (event) => {
   updatePointerEvents();
 });
 
-renderer.domElement.addEventListener('pointerdown', (event) => {
+document.addEventListener('pointerdown', (event) => {
 const rect = renderer.domElement.getBoundingClientRect();
-
 const mx = event.clientX;
 const my = event.clientY;
 
   if (!isOverCharacter(mx, my)) return;
 
+  // Le clic concerne le personnage : on évite
+  // qu'il soit transmis à l'élément situé dessous.
+  event.preventDefault();
+  event.stopPropagation();
   const startClientX = event.clientX;
   const startClientY = event.clientY;
   const startPosX = posX;
@@ -365,4 +344,4 @@ const my = event.clientY;
   document.addEventListener('pointermove', movePointer);
   document.addEventListener('pointerup', stopPointer);
   document.addEventListener('pointercancel', stopPointer);
-});
+}, true);

@@ -1,4 +1,3 @@
-
 // scene-reader.js — moteur de scènes Bivouac88
 // Format JSON v2 — PC et Mobile
 // Déclencheurs, conditions, déplacements, animations et enchaînements.
@@ -14,7 +13,7 @@
   const MOBILE_BREAKPOINT = 768;
 
   const hitboxDefaults = { width: 140, height: 145, offsetX: 0, offsetY: 0 };
-  
+  let pageHitbox = hitboxDefaults;
   function currentPage() {
     return document.body.dataset.page || '';
   }
@@ -471,8 +470,13 @@
 
           // Zone cliquable (hitbox), ajustée à la pose de cette étape
           if (typeof window.characterSetHitbox === 'function') {
-            window.characterSetHitbox(step.hitbox || hitboxDefaults);
-          }
+          window.characterSetHitbox(
+          step.hitbox
+          || scene.hitbox
+          || scene.steps?.[0]?.hitbox
+          || pageHitbox
+        );          
+  }
 
           // Champs de dialogue
           applyFieldOffsets(step.bubble, step.form);
@@ -804,7 +808,8 @@
       console.warn('[scene-reader] JSON invalide ou version incorrecte.');
       return;
     }
-
+    pageHitbox = data.avatar?.hitbox || hitboxDefaults;
+    
     // Nettoyage d'une éventuelle initialisation précédente.
     triggerCleanups.forEach(cleanup => cleanup());
     triggerCleanups.length = 0;
