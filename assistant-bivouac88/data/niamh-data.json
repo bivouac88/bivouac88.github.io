@@ -1,6 +1,6 @@
 {
-  "jour_actuel": "Jeudi",
-  "date_actuelle": "11/19/2026",
+  "jour_actuel": "Vendredi",
+  "date_actuelle": "11/20/2026",
   "region_actuelle": "Eghezée",
   "pays_actuel": "Belgique",
   "km_total_parcouru": "",
@@ -38,16 +38,16 @@
   "conversation": "Discuter de tout et de rien",
   "remerciement": "Toujours un plaisir",
   "au_revoir": "À bientôt sur la route",
-  "message_ouverture_test": "",
-  "description_page_test": "",
-  "message_ouverture_resume": "",
-  "description_page_resume": "",
-  "message_ouverture_stats": "Rappel du rôle de chaque ligne, pour t’y retrouver quand tu rempliras :",
-  "description_page_stats": "",
-  "message_ouverture_etapes": "message_ouverture_<page> → ce que Niamh dit à l’ouverture de la bulle sur cette page (remplace le message de bienvenue générique).",
-  "description_page_etapes": "description_page_<page> → ce que Niamh répond quand on lui demande “c’est quoi cette page ?” sur cette page précise.",
-  "Jeudi": "",
-  "11/19/2026": "",
+  "message_ouverture_test": "Bienvenu",
+  "description_page_test": "description page",
+  "message_ouverture_resume": "Ici, un aperçu de l'aventure, en image et en chiffres. Les détails sont sur les autres pages, avec quelques outils.",
+  "description_page_resume": "description page",
+  "message_ouverture_stats": "Ici, toutes les stats actualisée chaque jour !",
+  "description_page_stats": "description page",
+  "message_ouverture_etapes": "Ici, les étapes, mon avis et commentaire sur l'étape du jour Profitez en pour laisser un like et un commentaire",
+  "description_page_etapes": "description page",
+  "Vendredi": "",
+  "11/20/2026": "",
   "Eghezée": "",
   "Belgique": "",
   "_questions": {
@@ -416,6 +416,18 @@
       "on se reparle",
       "à la prochaine",
       "je m'en vais"
+    ],
+    "description_page_test": [
+      "C'est quoi cette page?"
+    ],
+    "description_page_resume": [
+      "C'est quoi cette page?"
+    ],
+    "description_page_stats": [
+      "C'est quoi cette page?"
+    ],
+    "description_page_etapes": [
+      "C'est quoi cette page?"
     ]
   },
   "_responses": {
@@ -446,7 +458,12 @@
     "role_niamh": "Je peux vous renseigner sur le voyage, retrouver les informations disponibles, répondre à vos questions et partager quelques anecdotes. Bref, je suis là pour rendre l'aventure encore plus vivante !",
     "conversation": "Bien sûr ! On peut parler du voyage, de la météo, des découvertes ou simplement discuter de tout et de rien. Je ne suis jamais contre une petite papote !",
     "remerciement": "Avec plaisir ! Je suis là pour ça. Et puis, un petit merci, ça fait toujours plaisir, même à une compagne numérique !",
-    "au_revoir": "À bientôt ! Prenez soin de vous, profitez de la route et gardez un peu de place pour les surprises. Je reste dans les parages !"
+    "au_revoir": "À bientôt ! Prenez soin de vous, profitez de la route et gardez un peu de place pour les surprises. Je reste dans les parages !",
+    "message_ouverture_test": "Salut ! Moi, c'est Niamh. Bienvenue chez Bivouac88 ! Tu veux découvrir le projet, parler du voyage ou simplement discuter ? Promis, je ne mords pas. Enfin… pas sans raison.",
+    "description_page_test": "Ici,  c'est l'accueil, Lost but Free présente Bivouac88, avec mon assistance!",
+    "description_page_resume": "Ici, un aperçu de l'aventure, en image et en chiffres. Les détails sont sur les autres pages, avec quelques outils.",
+    "description_page_stats": "Ici, toutes les stats actualisée chaque jour !",
+    "description_page_etapes": "Ici, les étapes, mon avis et commentaire sur l'étape du jour Profitez en pour laisser un like et un commentaire"
   },
-  "_updatedAt": "2026-11-20T05:25:33.555Z"
+  "_updatedAt": "2026-11-20T12:44:39.656Z"
 }
