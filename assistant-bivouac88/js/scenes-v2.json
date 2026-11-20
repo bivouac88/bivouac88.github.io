@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "exportedAt": "2026-11-20T13:57:07.698Z",
+  "exportedAt": "2026-11-20T14:24:30.178Z",
   "avatar": {
     "hitbox": {
       "width": 76,
@@ -305,8 +305,8 @@
         }
       ],
       "end": {
-        "action": "chain",
-        "next": 7,
+        "action": "hold",
+        "next": null,
         "repeat": 1
       },
       "recorded": {
@@ -315,7 +315,7 @@
           "height": 917
         },
         "scrollY": 93,
-        "date": "2026-11-20T13:41:05.305Z"
+        "date": "2026-11-20T14:10:03.722Z"
       }
     },
     {
@@ -400,7 +400,7 @@
     },
     {
       "id": 7,
-      "name": "Visite_tour_Resume",
+      "name": "Visite #1",
       "enabled": true,
       "priority": 0,
       "pages": [
@@ -410,8 +410,9 @@
         "pc"
       ],
       "trigger": {
-        "type": "manual",
-        "delay": 0
+        "type": "event",
+        "delay": 0,
+        "eventName": "b88:1sur9"
       },
       "conditions": {
         "frequency": "always",
@@ -475,12 +476,12 @@
           "height": 917
         },
         "scrollY": 0,
-        "date": "2026-11-20T13:50:06.617Z"
+        "date": "2026-11-20T14:15:43.538Z"
       }
     },
     {
       "id": 8,
-      "name": "Visite_Tour_#2",
+      "name": "Visite #2",
       "enabled": true,
       "priority": 0,
       "pages": [
@@ -490,11 +491,9 @@
         "pc"
       ],
       "trigger": {
-        "type": "enter",
+        "type": "event",
         "delay": 0,
-        "selector": "main > div.ligne-haut:nth-of-type(1)",
-        "threshold": 0.5,
-        "leave": "stop"
+        "eventName": "b88:2sur9"
       },
       "conditions": {
         "frequency": "always",
@@ -570,7 +569,250 @@
           "height": 917
         },
         "scrollY": 0,
-        "date": "2026-11-20T13:56:27.938Z"
+        "date": "2026-11-20T14:16:17.322Z"
+      }
+    },
+    {
+      "id": 9,
+      "name": "Visite #3",
+      "enabled": true,
+      "priority": 0,
+      "pages": [
+        "resume"
+      ],
+      "devices": [
+        "pc"
+      ],
+      "trigger": {
+        "type": "event",
+        "delay": 0,
+        "eventName": "b88:3sur9"
+      },
+      "conditions": {
+        "frequency": "always",
+        "cooldownSeconds": 0,
+        "interruptible": true
+      },
+      "points": {
+        "A": {
+          "selector": "main > div.ligne-haut:nth-of-type(1)",
+          "ax": 94.49,
+          "ay": 267.6,
+          "offsetX": 0,
+          "offsetY": 0,
+          "mode": "screen",
+          "fallback": {
+            "xPct": 88.07,
+            "yPct": 60.3
+          }
+        }
+      },
+      "steps": [
+        {
+          "animation": "Pose assi regarde droite",
+          "at": "A",
+          "duration": null,
+          "pause": 0,
+          "move": {
+            "type": "instant"
+          },
+          "rotation": {
+            "x": 0,
+            "y": 325,
+            "z": 0
+          },
+          "hitbox": {
+            "width": 78,
+            "height": 176,
+            "offsetX": 22,
+            "offsetY": -92
+          },
+          "autoFace": false,
+          "bubble": {
+            "x": -2,
+            "y": -115
+          },
+          "form": {
+            "x": 182,
+            "y": -45
+          },
+          "bubbleSide": "left"
+        }
+      ],
+      "end": {
+        "action": "hold",
+        "next": null,
+        "repeat": 1
+      },
+      "recorded": {
+        "viewport": {
+          "width": 1920,
+          "height": 917
+        },
+        "scrollY": 0,
+        "date": "2026-11-20T14:15:07.562Z"
+      }
+    },
+    {
+      "id": 10,
+      "name": "Visite #4",
+      "enabled": true,
+      "priority": 0,
+      "pages": [
+        "resume"
+      ],
+      "devices": [
+        "pc"
+      ],
+      "trigger": {
+        "type": "event",
+        "delay": 0,
+        "eventName": "b88:4sur9"
+      },
+      "conditions": {
+        "frequency": "always",
+        "cooldownSeconds": 0,
+        "interruptible": true
+      },
+      "points": {
+        "A": {
+          "selector": "main",
+          "ax": 0.09,
+          "ay": 34.77,
+          "offsetX": 0,
+          "offsetY": 0,
+          "mode": "screen",
+          "fallback": {
+            "xPct": 5.42,
+            "yPct": 57.36
+          }
+        }
+      },
+      "steps": [
+        {
+          "animation": "Pose cool",
+          "at": "A",
+          "duration": null,
+          "pause": 0,
+          "move": {
+            "type": "instant"
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "hitbox": {
+            "width": 62,
+            "height": 236,
+            "offsetX": -4,
+            "offsetY": -123
+          },
+          "autoFace": false,
+          "bubble": {
+            "x": 12,
+            "y": -230
+          },
+          "form": {
+            "x": 10,
+            "y": -121
+          },
+          "bubbleSide": "right"
+        }
+      ],
+      "end": {
+        "action": "hold",
+        "next": null,
+        "repeat": 1
+      },
+      "recorded": {
+        "viewport": {
+          "width": 1920,
+          "height": 917
+        },
+        "scrollY": 0,
+        "date": "2026-11-20T14:19:30.050Z"
+      }
+    },
+    {
+      "id": 11,
+      "name": "Visite #5",
+      "enabled": true,
+      "priority": 0,
+      "pages": [
+        "resume"
+      ],
+      "devices": [
+        "pc"
+      ],
+      "trigger": {
+        "type": "event",
+        "delay": 0,
+        "eventName": "b88:5sur9"
+      },
+      "conditions": {
+        "frequency": "always",
+        "cooldownSeconds": 0,
+        "interruptible": true
+      },
+      "points": {
+        "A": {
+          "selector": "main > footer.pied",
+          "ax": 10.27,
+          "ay": 36.54,
+          "offsetX": 0,
+          "offsetY": 0,
+          "mode": "screen",
+          "fallback": {
+            "xPct": 15.26,
+            "yPct": 4.25
+          }
+        }
+      },
+      "steps": [
+        {
+          "animation": "Sitting_Pose",
+          "at": "A",
+          "duration": null,
+          "pause": 0,
+          "move": {
+            "type": "instant"
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "hitbox": {
+            "width": 128,
+            "height": 103,
+            "offsetX": 21,
+            "offsetY": -103
+          },
+          "autoFace": false,
+          "bubble": {
+            "x": -9,
+            "y": -158
+          },
+          "form": {
+            "x": 30,
+            "y": -28
+          },
+          "bubbleSide": "top"
+        }
+      ],
+      "end": {
+        "action": "hold",
+        "next": null,
+        "repeat": 1
+      },
+      "recorded": {
+        "viewport": {
+          "width": 1920,
+          "height": 917
+        },
+        "scrollY": 93,
+        "date": "2026-11-20T14:23:54.706Z"
       }
     }
   ]
