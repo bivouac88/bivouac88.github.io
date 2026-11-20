@@ -38,6 +38,14 @@
   "conversation": "Discuter de tout et de rien",
   "remerciement": "Toujours un plaisir",
   "au_revoir": "À bientôt sur la route",
+  "message_ouverture_test": "",
+  "description_page_test": "",
+  "message_ouverture_resume": "",
+  "description_page_resume": "",
+  "message_ouverture_stats": "Rappel du rôle de chaque ligne, pour t’y retrouver quand tu rempliras :",
+  "description_page_stats": "",
+  "message_ouverture_etapes": "message_ouverture_<page> → ce que Niamh dit à l’ouverture de la bulle sur cette page (remplace le message de bienvenue générique).",
+  "description_page_etapes": "description_page_<page> → ce que Niamh répond quand on lui demande “c’est quoi cette page ?” sur cette page précise.",
   "Jeudi": "",
   "11/19/2026": "",
   "Eghezée": "",
@@ -440,5 +448,5 @@
     "remerciement": "Avec plaisir ! Je suis là pour ça. Et puis, un petit merci, ça fait toujours plaisir, même à une compagne numérique !",
     "au_revoir": "À bientôt ! Prenez soin de vous, profitez de la route et gardez un peu de place pour les surprises. Je reste dans les parages !"
   },
-  "_updatedAt": "2026-11-19T22:33:00.851Z"
+  "_updatedAt": "2026-11-20T00:09:25.117Z"
 }
