@@ -1,7 +1,5 @@
-
 import { loadKnowledge } from "./knowledge.js";
 import { createEngine } from "./engine.js";
-import { getWelcomeMessage } from "./personality.js";
 
 function loadCompromise() {
   if (typeof window.frCompromise === "function") return;
@@ -177,7 +175,7 @@ async function initDialogue(character) {
         "Oups... Mon cerveau est encore dans mes sacoches. Réessaie dans un instant !"
       );
     } else {
-      showBubble(getWelcomeMessage());
+      showBubble(engine.getWelcomeMessage());
     }
 
     input.focus();
