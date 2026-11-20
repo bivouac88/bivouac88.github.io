@@ -415,11 +415,14 @@ main.appendChild(carte);
     return true;
   }
 
-  function initialiser() {
+function initialiser() {
+    if (PAGE === 'resume.html' && PARAM_RELANCE === '1') {
+      demarrer();
+      return;
+    }
     if (PAGE === 'index.html') return;
 
     injecterStyle();
-
     if (document.getElementById('b88-tour-launch')) return;
 
     var bouton = document.createElement('button');
