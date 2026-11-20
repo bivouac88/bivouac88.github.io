@@ -68,6 +68,74 @@
   var observateur = null;
   var attente = null;
 
+  // État partagé avec scene-reader.js.
+  // Il reste disponible même si le moteur de scènes se charge plus tard.
+  var etatVisite = window.B88TourState = {
+    active: false,
+    step: null,
+    generation: 0
+  };
+
+  function publierEtatVisite(step) {
+    etatVisite.active = actif;
+    etatVisite.step = step || null;
+    etatVisite.generation++;
+
+    if (step) {
+      document.dispatchEvent(new CustomEvent(step));
+    }
+  }
+
+  // Attend que le défilement soit réellement terminé avant
+  // de déclencher la pose de Niamh.
+  function attendreFinDefilement(generation, callback) {
+    var dernierScroll = Date.now();
+    var termine = false;
+    var delai = null;
+    var limite = null;
+
+    function nettoyer() {
+      clearTimeout(delai);
+      clearTimeout(limite);
+      window.removeEventListener('scroll', auDefilement);
+    }
+
+    function finaliser() {
+      if (termine) return;
+      termine = true;
+      nettoyer();
+
+      if (actif && generation === etatVisite.generation) {
+        callback();
+      }
+    }
+
+    function verifier() {
+      if (!actif || generation !== etatVisite.generation) {
+        nettoyer();
+        return;
+      }
+
+      if (Date.now() - dernierScroll >= 140) {
+        finaliser();
+      } else {
+        delai = setTimeout(verifier, 50);
+      }
+    }
+
+    function auDefilement() {
+      dernierScroll = Date.now();
+      clearTimeout(delai);
+      delai = setTimeout(verifier, 150);
+    }
+
+    window.addEventListener('scroll', auDefilement, { passive: true });
+
+    // Sécurité si aucun événement scroll n'est émis.
+    delai = setTimeout(verifier, 160);
+    limite = setTimeout(finaliser, 2500);
+  }
+
   function injecterStyle() {
     if (document.getElementById('b88-tour-style')) return;
 
@@ -229,6 +297,13 @@
   function terminer(memoriser) {
     actif = false;
 
+    // Invalide tous les déclenchements différés d'une ancienne étape.
+    publierEtatVisite(null);
+
+    // Informe scene-reader.js que la visite est terminée.
+    document.dispatchEvent(new CustomEvent('b88:tour-end'));
+    document.removeEventListener('keydown', toucheClavier);
+
     if (observateur) {
       observateur.disconnect();
       observateur = null;
@@ -241,15 +316,15 @@
 
     nettoyerCibles();
 
-if (overlay) {
-  overlay.remove();
-  overlay = null;
-}
+    if (overlay) {
+      overlay.remove();
+      overlay = null;
+    }
 
-if (carte) {
-  carte.remove();
-  carte = null;
-}
+    if (carte) {
+      carte.remove();
+      carte = null;
+    }
 
     if (memoriser) {
       try {
@@ -336,9 +411,14 @@ main.appendChild(carte);
   function afficherEtape() {
     if (!actif || !carte) return;
 
+    // Invalide le déclenchement éventuel de l'étape précédente.
+    publierEtatVisite(null);
+    var generation = etatVisite.generation;
+
     nettoyerCibles();
 
     var etape = etapes[index];
+
     if (!etape) {
       terminer(true);
       return;
@@ -379,6 +459,11 @@ main.appendChild(carte);
 
     carte.querySelector('.b88-tour-next').textContent =
       index === etapes.length - 1 ? 'Terminer' : 'Suivant →';
+
+    // La scène de Niamh ne démarre qu'une fois le défilement terminé.
+    attendreFinDefilement(generation, function () {
+      publierEtatVisite('b88:' + (index + 1) + 'sur9');
+    });
   }
 
   function suivant() {
@@ -409,12 +494,21 @@ main.appendChild(carte);
     index = 0;
     actif = true;
 
+    // Informe immédiatement scene-reader.js que la visite commence.
+    publierEtatVisite(null);
+    document.dispatchEvent(new CustomEvent('b88:tour-start'));
+
     creerPanneau();
     afficherEtape();
 
     return true;
   }
 
+  // Permet à dialogue.js de lancer le moteur canonique de la visite.
+  document.addEventListener('b88:start-tour', function () {
+    demarrer();
+  });
+  
 function initialiser() {
     if (PAGE === 'resume.html' && PARAM_RELANCE === '1') {
       demarrer();
