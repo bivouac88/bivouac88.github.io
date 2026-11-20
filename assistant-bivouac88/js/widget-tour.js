@@ -1,4 +1,3 @@
-
 const STEPS = [
   {
     selector: ".test-nav",
@@ -49,32 +48,29 @@ function restoreTarget() {
 }
 
 function finishTour() {
+  const wasActive = Boolean(overlay);
   restoreTarget();
-
+  if (wasActive) {
+    document.dispatchEvent(new Event("b88:tour-end"));
+  }
   if (overlay) {
     overlay.remove();
     overlay = null;
   }
-
   if (escapeHandler) {
     document.removeEventListener("keydown", escapeHandler);
     escapeHandler = null;
   }
 }
-
 function showStep() {
   if (!overlay) return;
-
   restoreTarget();
-
   const step = activeSteps[currentStep];
   if (!step) {
     finishTour();
     return;
   }
-
   const target = document.querySelector(step.selector);
-
   if (!target) {
     if (currentStep < activeSteps.length - 1) {
       currentStep++;
@@ -84,9 +80,7 @@ function showStep() {
     }
     return;
   }
-
   activeTarget = target;
-
   previousTargetStyles = {
     position: target.style.position,
     zIndex: target.style.zIndex
@@ -95,7 +89,10 @@ function showStep() {
   target.style.position = "relative";
   target.style.zIndex = "10002";
   target.classList.add("b88-tour-highlight");
-
+  // Déclenche la pose de Niamh correspondant à l'étape.
+  document.dispatchEvent(
+    new Event(`b88:${currentStep + 1}sur9`)
+  );
   target.scrollIntoView({
     behavior: "smooth",
     block: "center"
@@ -160,8 +157,7 @@ export function startTour() {
     </div>
   `;
 
-  document.body.appendChild(overlay);
-
+document.dispatchEvent(new Event("b88:tour-start"));
   overlay.querySelector(".b88-tour-close")
     .addEventListener("click", finishTour);
 
