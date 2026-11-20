@@ -192,8 +192,8 @@
   let scenes = [];
   let runningScene = null;
   let positionCleanup = null;
-  let tourActive = false;
-
+  let tourActive = window.B88TourState?.active === true;
+  
 // Identification des scènes de visite guidée
 function isTourScene(scene) {
   const trigger = scene?.trigger || {};
@@ -843,13 +843,21 @@ function tryRun(scene) {
       return (Number(b.priority) || 0) - (Number(a.priority) || 0);
     });
 
-    const attachAll = () => {
-      scenes.forEach(attachTrigger);
+const attachAll = () => {
+  scenes.forEach(attachTrigger);
 
-      console.info(
-        `[scene-reader] ${scenes.length} scène(s) chargée(s) pour "${page}" / "${device}".`
-      );
-    };
+  // Synchronise l'état si la visite a démarré avant le moteur de scènes.
+  const etatVisite = window.B88TourState;
+  tourActive = etatVisite?.active === true;
+
+  // Rejoue l'étape actuelle pour que Niamh adopte la bonne pose.
+  if (tourActive && etatVisite.step) {
+    document.dispatchEvent(new CustomEvent(etatVisite.step));
+  }
+  console.info(
+    `[scene-reader] ${scenes.length} scène(s) chargée(s) pour "${page}" / "${device}".`
+  );
+};
 
     if (
       window.characterAnimations &&
