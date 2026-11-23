@@ -53,14 +53,24 @@ main { padding-bottom: 80px; }
 }
 
 /* Fallback si pas de rangee-recherche (ancien HTML) */
+.champ-recherche { position: relative; flex: 1; min-width: 0; display: flex; align-items: center; }
 .rangee input[type=search] {
-  flex: 1; min-width: 0; padding: 6px 8px;
+  flex: 1; min-width: 0; padding: 6px 26px 6px 8px;
   background: var(--fond); color: var(--papier);
   border: 1px solid var(--trait); border-radius: 8px;
   font: 400 12px var(--mono);
 }
 .rangee input[type=search]::placeholder { color: var(--discret); }
 .rangee input[type=search]:focus { border-color: var(--accent-trait); outline: none; }
+.rangee input[type=search]::-webkit-search-cancel-button { display: none; }
+#effacer-recherche {
+  position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
+  width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;
+  background: none; border: 0; border-radius: 50%; color: var(--discret);
+  font-size: 14px; line-height: 1; cursor: pointer; padding: 0;
+}
+#effacer-recherche:hover { color: var(--accent); background: var(--carte-hover); }
+#effacer-recherche:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .rangee { display: flex; gap: 6px; margin: 2px 0 4px; }
 .rangee button {
@@ -161,9 +171,13 @@ main { padding-bottom: 80px; }
 <div id="app">
   <aside id="panneau" aria-label="Filtres">
   <div class="rangee">
-    <input type="search" id="rech-lieu" placeholder="Lieu…" aria-label="Rechercher un lieu par nom">
+    <div class="champ-recherche">
+      <input type="search" id="rech-lieu" placeholder="Lieu…" aria-label="Rechercher un lieu par nom">
+      <button type="button" id="effacer-recherche" aria-label="Effacer la recherche" style="display:none">×</button>
+    </div>
     <button type="button" id="tout-toggle">✓ Tout</button>
   </div>
+  <div id="aucun-resultat" class="intro" style="display:none">Aucun lieu ne correspond à la recherche.</div>
   <div class="rangee">
     <button type="button" id="tri-az">A → Z</button>
     <button type="button" id="tri-nb">9 → 1</button>
@@ -172,7 +186,7 @@ main { padding-bottom: 80px; }
   <ul id="liste"></ul>
 </aside>
   <div id="cadre">
-    <div id="etat">Chargement…</div>
+    <div id="etat" aria-live="polite">Chargement…</div>
     <div id="carte" role="region" aria-label="Carte des points d'intérêt"></div>
   </div>
 </div>
@@ -191,6 +205,7 @@ main { padding-bottom: 80px; }
     maxZoom: 19,
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'
   }).addTo(carte);
+  L.control.scale({ metric: true, imperial: false, position: 'bottomleft' }).addTo(carte);
 
   const cadre = document.getElementById('cadre');
   // Recalcule la carte à chaque changement de taille (rotation, redimensionnement, plein écran, barre d'adresse...)
@@ -346,9 +361,28 @@ document.getElementById('tri-nb').addEventListener('click', function () {
     return Object.keys(cats).filter(function (n) { return cats[n].li.style.display !== 'none'; });
   }
 
-  document.getElementById('rech-lieu').addEventListener('input', function (e) {
-    recherche = e.target.value.trim().toLowerCase();
+  var champRecherche = document.getElementById('rech-lieu');
+  var btnEffacer = document.getElementById('effacer-recherche');
+  var minuteurRecherche = null;
+  function majBoutonEffacer() {
+    btnEffacer.style.display = champRecherche.value ? '' : 'none';
+  }
+  champRecherche.addEventListener('input', function (e) {
+    var valeur = e.target.value;
+    majBoutonEffacer();
+    clearTimeout(minuteurRecherche);
+    minuteurRecherche = setTimeout(function () {
+      recherche = valeur.trim().toLowerCase();
+      actualiser();
+    }, 180);
+  });
+  btnEffacer.addEventListener('click', function () {
+    champRecherche.value = '';
+    recherche = '';
+    majBoutonEffacer();
+    clearTimeout(minuteurRecherche);
     actualiser();
+    champRecherche.focus();
   });
   function cocherTout(valeur) {
     categoriesAffichees().forEach(function (n) { cats[n].actif = valeur; cats[n].cb.checked = valeur; });
@@ -367,6 +401,7 @@ document.getElementById('tout-toggle').addEventListener('click', function () {
     const retenus = points.filter(function (p) {
       return cats[p.cat].actif && (!recherche || p.nom.toLowerCase().indexOf(recherche) !== -1);
     });
+    document.getElementById('aucun-resultat').style.display = (recherche && !retenus.length) ? '' : 'none';
     couche.clearLayers();
     couche.addLayers(retenus.map(function (p) {
       if (!p.m) {
