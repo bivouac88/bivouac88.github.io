@@ -1,392 +1,548 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cdn.jsdelivr.net; worker-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://cdn.jsdelivr.net https://www.gstatic.com blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <link rel="canonical" href="https://bivouac88.github.io/etapes.html">
-  <title>Étapes · Bivouac88</title>
-  <link rel="icon" href="images/favicon.ico" sizes="any">
-  <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
-  <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+  <title>Stats · Bivouac88</title>
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <meta name="theme-color" content="#e58e26">
-  <meta name="description" content="Toutes les étapes du Tour d'Europe à vélo de Bivouac88 : trajets, distances, dénivelés et avancement.">
-  <meta property="og:title" content="Toutes les étapes · Bivouac88">
-  <meta property="og:description" content="Toutes les étapes du Tour d'Europe à vélo : trajets, distances, dénivelés.">
+  <meta name="description" content="Toutes les statistiques du Tour d'Europe à vélo de Bivouac88 : kilomètres, dénivelé, temps de roulage et météo.">
+  <meta property="og:title" content="Stats · Bivouac88">
+  <meta property="og:description" content="Kilomètres, dénivelé, temps de roulage et météo du Tour d'Europe à vélo.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://bivouac88.github.io/etapes.html">
-  <meta property="og:image" content="https://bivouac88.github.io/images/og-image.png">
-  <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Toutes les étapes · Bivouac88">
-<meta name="twitter:description" content="Toutes les étapes du Tour d'Europe à vélo : trajets, distances, dénivelés.">
-<meta name="twitter:image" content="https://bivouac88.github.io/images/og-image.png">
+  <meta property="og:url" content="https://bivouac88.github.io/stats.html">
+  <meta property="og:image" content="https://bivouac88.github.io/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">  
   <script src="commun.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="style.css">
-<style>
-:root { --largeur: 1700px; }
-#journal {
-  list-style: none;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-}
-/* Cartes à venir : sobres */
-.etape {
-  background: var(--carte);
-  border: 1px solid var(--trait);
-  border-radius: 14px;
-  padding: 16px 18px;
-}
-.etape.fait { border-color: var(--accent-trait); }
+  <style>
+    :root { --largeur: 1700px; }
+    /* Sections */
+    .section { margin-bottom: 30px; }
+    h2.titre-section {
+      font-size: clamp(16px, 2.5vw, 19px);
+      font-weight: 600;
+      margin: 0 0 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--trait-subtil);
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    h2.titre-section small { font: 400 12px var(--mono); color: var(--discret); }
+    .grille {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    @media (min-width: 640px) {
+      .grille { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+    }
+    /* Deux sections côte à côte sur PC */
+    .duo { display: grid; grid-template-columns: minmax(0, 1fr); gap: 30px; margin-bottom: 30px; }
+    .duo .section { margin-bottom: 0; min-width: 0; }
+    .duo .grille { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    @media (min-width: 1000px) {
+      .duo { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+    }
+    /* Cases de stats */
+    .stat-boite, .carte-stat, .carte-record {
+      background: var(--carte);
+      border: 1px solid var(--trait);
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 84px;
+      text-decoration: none;
+      color: inherit;
+    }
+    .carte-stat { padding: 12px 14px; min-height: 80px; }
+    .stat-boite small, .carte-stat small, .carte-record small {
+      font: 400 11px var(--mono);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--discret);
+      margin-bottom: 4px;
+      display: block;
+    }
+    .stat-boite b, .carte-stat b, .carte-record b {
+      display: block;
+      font-weight: 600;
+      color: var(--papier);
+      font-variant-numeric: tabular-nums;
+      line-height: 1.15;
+    }
+    .stat-boite b { font-size: clamp(22px, 3.5vw, 28px); }
+    .carte-stat b { font-size: clamp(18px, 2.5vw, 22px); }
+    .stat-boite .detail, .carte-stat .detail {
+      font: 400 11px var(--mono);
+      color: var(--discret);
+      margin-top: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .stat-boite.multi .detail { white-space: normal; line-height: 1.4; }
+    a.stat-boite { position: relative; transition: border-color 0.2s ease, background-color 0.2s ease; }
+    a.stat-boite:hover { border-color: var(--accent-trait); background: var(--carte-hover); }
+    a.stat-boite::after {
+      content: '›';
+      position: absolute;
+      top: 10px;
+      right: 14px;
+      font: 400 16px var(--mono);
+      color: var(--discret-sombre);
+    }
+    a.stat-boite:hover::after { color: var(--accent); }
+    a.stat-boite:focus-visible, .bouton-lien:focus-visible, .barre-col:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
 
-.etape-entete {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 4px;
-}
-.etape .jour {
-  font: 500 11px var(--mono);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--discret);
-}
-.etape.fait .jour { color: var(--accent); }
-.etape .badge {
-  font: 400 11px var(--mono);
-  color: var(--discret-sombre);
-}
-.etape.fait .badge { color: var(--accent); font-weight: 500; }
-.etape .trajet {
-  font-size: clamp(16px, 2vw, 19px);
-  font-weight: 600;
-  margin: 4px 0 6px;
-}
-.etape .trajet i {
-  color: var(--accent);
-  font-style: normal;
-  font-family: var(--mono);
-  font-weight: 400;
-  padding: 0 4px;
-}
-.etape .meta {
-  font: 400 12px var(--mono);
-  color: var(--discret);
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 8px;
-}
-.etape .meta span.sep { color: var(--trait-actif); }
+    /* Progression : grande case + 3 petites */
+    .progression {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 12px;
+    }
+    @media (min-width: 900px) {
+      .progression { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); }
+    }
+    .hero {
+      background: var(--carte);
+      border: 1px solid var(--accent-trait);
+      border-radius: 14px;
+      padding: 22px 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .hero small {
+      font: 500 12px var(--mono);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .hero b {
+      display: block;
+      margin: 6px 0 2px;
+      font-size: clamp(40px, 7vw, 64px);
+      font-weight: 600;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      color: var(--papier);
+      font-variant-numeric: tabular-nums;
+    }
+    .hero .hero-detail { font: 400 13px var(--mono); color: var(--discret); }
+    .progression-cote { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+    @media (min-width: 640px) and (max-width: 899px) {
+      .progression-cote { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    /* Barre */
+    .piste-avance {
+      height: 8px;
+      background: var(--trait-subtil);
+      border: 1px solid var(--trait);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 18px;
+    }
+    .barre-progression {
+      display: block;
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, #c97519, #f09a34);
+      border-radius: 999px;
+      transition: width 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .avance-infos {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 6px;
+      font: 400 12px var(--mono);
+      color: var(--discret);
+      font-variant-numeric: tabular-nums;
+    }
 
-/* Météo */
-.meteo-bloc {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid var(--trait-subtil);
-}
-.meteo-conditions {
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 4px;
-}
+    /* Records : cases plus grosses, trajet lisible */
+    .carte-record { padding: 16px 18px; min-height: 112px; gap: 6px; }
+    .carte-record b { font-size: clamp(24px, 3.2vw, 32px); }
+    .carte-record .detail {
+      font: 500 14px var(--serif);
+      color: var(--papier-doux);
+      margin-top: 6px;
+      line-height: 1.3;
+    }
 
-/* Avis + photos */
-.avis-bloc {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid var(--trait-subtil);
-  display: flex;
-  gap: 10px;
-  align-items: flex-start;
-}
-.avis-smiley { font-size: 26px; line-height: 1; flex-shrink: 0; }
-.avis-texte { flex: 1; min-width: 0; }
-.avis-commentaire {
-  color: var(--papier);
-  font-size: 13px;
-  line-height: 1.5;
-}
+    /* Graphiques en barres */
+    .graphique {
+      background: var(--carte);
+      border: 1px solid var(--trait);
+      border-radius: 12px;
+      padding: 14px 14px 10px;
+    }
+    .barres-defilement { overflow-x: auto; padding-bottom: 4px; }
+    .barres {
+      display: flex;
+      gap: 3px;
+      min-width: 100%;
+      width: max-content;
+    }
+    .barre-col {
+      flex: 1 0 18px;
+      min-width: 18px;
+      background: none;
+      border: 0;
+      padding: 0;
+      cursor: pointer;
+      color: inherit;
+      font: inherit;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .barre-zone {
+      height: 140px;
+      display: flex;
+      align-items: flex-end;
+    }
+    .barre-val {
+      display: block;
+      width: 100%;
+      border-radius: 3px 3px 0 0;
+      background: var(--trait-actif);
+      opacity: 0.55;
+      transition: opacity 0.15s ease;
+    }
+    .barre-col.fait .barre-val { background: var(--accent); opacity: 0.9; }
+    .barre-col:hover .barre-val, .barre-col.actif .barre-val { opacity: 1; }
+    .barre-col.actif .barre-val { box-shadow: 0 0 0 2px var(--papier); }
+    .barre-num {
+      display: block;
+      margin-top: 4px;
+      font: 400 10px var(--mono);
+      color: var(--discret);
+      text-align: center;
+    }
+    .graphique-info {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--trait-subtil);
+      font: 400 12px var(--mono);
+      color: var(--discret);
+      min-height: 30px;
+    }
+    .graphique-info strong { color: var(--papier); font-weight: 500; }
+    .legende {
+      display: flex;
+      gap: 14px;
+      margin-top: 10px;
+      font: 400 11px var(--mono);
+      color: var(--discret);
+    }
+    .legende i {
+      display: inline-block;
+      width: 9px;
+      height: 9px;
+      border-radius: 2px;
+      margin-right: 5px;
+      vertical-align: baseline;
+    }
 
-/* Galerie 2x2 */
-.galerie-photos {
-  margin-top: 10px;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 6px;
-}
-.galerie-photos .avis-photo {
-  width: 100%;
-  height: 110px;
-  object-fit: cover;
-  border-radius: 8px;
-  border: 1px solid var(--trait);
-  cursor: pointer;
-  transition: opacity 0.15s ease;
-  display: block;
-}
-.galerie-photos .avis-photo:hover { opacity: 0.8; }
-
-/* Lightbox */
-.lightbox {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  background: rgba(0,0,0,0.88);
-  align-items: center;
-  justify-content: center;
-  cursor: zoom-out;
-}
-.lightbox.active { display: flex; }
-.lightbox img {
-  max-width: 90vw;
-  max-height: 90vh;
-  border-radius: 10px;
-  box-shadow: 0 8px 40px rgba(0,0,0,0.6);
-}
-
-/* Zone sociale */
-.social-bloc {
-  margin-top: 14px;
-  padding-top: 14px;
-  border-top: 1px solid var(--trait-subtil);
-}
-
-/* Like */
-.like-bloc {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-.like-btn {
-  background: none;
-  border: 1px solid var(--trait);
-  border-radius: 6px;
-  padding: 4px 10px;
-  color: var(--discret);
-  cursor: pointer;
-  font: 500 12px var(--mono);
-  transition: color 0.15s, border-color 0.15s;
-}
-.like-btn.vote {
-  color: var(--accent);
-  border-color: var(--accent-trait);
-}
-.like-count {
-  font: 500 12px var(--mono);
-  color: var(--discret);
-}
-
-/* Commentaires */
-.comments-list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-bottom: 12px;
-}
-.comment {
-  font: 13px var(--mono);
-  color: var(--discret);
-  line-height: 1.4;
-}
-.comment strong {
-  color: var(--papier);
-  margin-right: 4px;
-}
-
-/* Formulaire */
-.comment-form {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: 6px;
-}
-.comment-form input {
-  background: var(--fond);
-  border: 1px solid var(--trait);
-  border-radius: 8px;
-  padding: 7px 10px;
-  color: var(--papier);
-  font: 13px var(--mono);
-  width: 100%;
-}
-.comment-form input:focus {
-  outline: none;
-  border-color: var(--trait-actif);
-}
-.comment-form button {
-  grid-column: 1;
-  justify-self: start;
-  background: var(--accent);
-  color: #1a1208;
-  border: none;
-  border-radius: 8px;
-  padding: 8px 18px;
-  font: 600 12px var(--mono);
-  letter-spacing: 0.04em;
-  cursor: pointer;
-  transition: background-color 0.15s;
-}
-.comment-form button:hover { background: var(--accent-hover); }
-.notif-envoi {
-  color: var(--accent);
-  font: 12px var(--mono);
-  margin-top: 6px;
-}
-  .etape .trajet span {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-</style>
+    .bouton-lien {
+      display: block;
+      width: 100%;
+      max-width: 420px;
+      margin: 0 auto;
+      padding: 13px 20px;
+      text-align: center;
+      text-decoration: none;
+      background: var(--carte);
+      border: 1px solid var(--trait);
+      border-radius: 10px;
+      color: var(--papier);
+      font: 500 13px var(--mono);
+      letter-spacing: 0.04em;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
+    .bouton-lien:hover { background: var(--carte-hover); border-color: var(--trait-actif); }
+    @media (prefers-reduced-motion: reduce) {
+      .barre-progression { transition: none; }
+    }
+  </style>
 </head>
-<body data-page="etapes">
-  <main>
+<body>
+<main>
   <div class="ligne-haut">
     <div id="entete-site"></div>
   </div>
-  <h1 class="titre-page">Toutes les étapes</h1>
-  <p class="sous-titre-page" id="compteur-page">chargement…</p>
-
+  <h1 class="titre-page">Toutes les stats</h1>
+  <p class="sous-titre-page" id="sous-titre">chargement…</p>
   <div id="erreur"></div>
-  <ol id="journal"></ol>
-<div id="lightbox" class="lightbox">
-  <img id="lightbox-img" src="" alt="">
-</div>
+
+  <!-- 1. Progression -->
+  <section class="section">
+    <h2 class="titre-section">Progression</h2>
+    <div class="progression">
+      <div class="hero">
+        <small>Km parcourus</small>
+        <b id="h-km">–</b>
+        <div class="hero-detail" id="h-detail"></div>
+        <div class="piste-avance"><i id="barre" class="barre-progression"></i></div>
+        <div class="avance-infos">
+          <span id="pct">0 %</span>
+          <span id="avance-resume"></span>
+        </div>
+      </div>
+      <div class="progression-cote" id="grille-principales"></div>
+    </div>
+  </section>
+
+  <!-- 2. Records -->
+  <section class="section">
+    <h2 class="titre-section">Records</h2>
+    <div class="grille" id="grille-records"></div>
+  </section>
+
+  <!-- 3. Moyennes + Temps côte à côte -->
+  <div class="duo">
+    <section class="section">
+      <h2 class="titre-section">Moyennes</h2>
+      <div class="grille" id="grille-moyennes"></div>
+    </section>
+    <section class="section">
+      <h2 class="titre-section">Temps de roulage</h2>
+      <div class="grille" id="grille-temps"></div>
+    </section>
+  </div>
+
+  <!-- 4. Météo -->
+  <section class="section" id="section-meteo" style="display: none;">
+    <h2 class="titre-section">Météo <small id="meteo-compteur"></small></h2>
+    <div class="grille" id="grille-meteo"></div>
+  </section>
+
+  <!-- 5. Graphiques côte à côte -->
+  <div class="duo">
+    <section class="section">
+      <h2 class="titre-section">Distance par étape <small>km</small></h2>
+      <div class="graphique">
+        <div class="barres-defilement"><div class="barres" id="graph-km"></div></div>
+        <div class="graphique-info" id="info-km">Touche ou survole une barre pour voir l'étape.</div>
+        <div class="legende"><span><i style="background: var(--accent)"></i>Faite</span><span><i style="background: var(--trait-actif)"></i>À venir</span></div>
+      </div>
+    </section>
+    <section class="section">
+      <h2 class="titre-section">Dénivelé par étape <small>m</small></h2>
+      <div class="graphique">
+        <div class="barres-defilement"><div class="barres" id="graph-d"></div></div>
+        <div class="graphique-info" id="info-d">Touche ou survole une barre pour voir l'étape.</div>
+        <div class="legende"><span><i style="background: var(--accent)"></i>Faite</span><span><i style="background: var(--trait-actif)"></i>À venir</span></div>
+      </div>
+    </section>
+  </div>
+
+  <section class="section" id="section-graph-temp" style="display: none;">
+    <h2 class="titre-section">Température max par étape <small>°C</small></h2>
+    <div class="graphique">
+      <div class="barres-defilement"><div class="barres" id="graph-t"></div></div>
+      <div class="graphique-info" id="info-t">Touche ou survole une barre pour voir l'étape.</div>
+    </div>
+  </section>
+
+  <a class="bouton-lien" href="etapes.html">Voir toutes les étapes</a>
 </main>
 <script>
-  // ---- Données ----
+  // ---- Outils ----
   var API = 'https://script.google.com/macros/s/AKfycbyptX2-OXsxh8yXqk9Hi_ygvcxP1_4vD0AT-KzZPcTFzR9AfEKHbQnBvgi3Pvw5a-LL/exec';
+  var EVEREST = 8849;
   var $ = function (id) { return document.getElementById(id); };
-  var fmtDec = function (n, d) {
-    return Number(n || 0).toLocaleString('fr-FR', { minimumFractionDigits: d !== undefined ? d : 1, maximumFractionDigits: d !== undefined ? d : 1 });
-  };
   var fmt = function (n) { return Number(n || 0).toLocaleString('fr-FR'); };
-  var esc = B88.esc;
-  var toutesEtapes = [];
-  var SMILEYS = { '1': '😞', '2': '🙁', '3': '😐', '4': '🙂', '5': '😍' };
-  function smileyPour(avis) {
-    if (!avis) return '';
-    var a = String(avis).trim();
-    if (SMILEYS[a]) return SMILEYS[a];
-    // Si l'avis est déjà un emoji ou un texte, on l'affiche tel quel
-    return a;
-  }
-
-  function afficherJournal(etapes, tout) {
-    var ol = $('journal');
-    ol.innerHTML = '';
-    $('compteur-page').textContent = etapes.length + ' étapes au total';
-
-    (tout ? etapes : etapes.slice(0, 6)).forEach(function (e) {
-      var li = document.createElement('li');
-      var classe = 'etape';
-      if (e.fait) classe += ' fait';
-      li.className = classe;
-
-      var badgeText = e.fait ? 'Faite' : 'À venir';
-
-      var html =
-        '<div class="etape-entete">' +
-        '<span class="jour">Étape ' + esc(e.jour) + '</span>' +
-        '<span class="badge">' + badgeText + '</span>' +
-        '</div>' +
-        '<div class="trajet"><span>' + esc(e.depart) + '</span><i>→</i><span>' + esc(e.arrivee) + '</span></div>' +
-        (e.fait
-? '<div class="meta">' +
-  '<span>' + fmtDec(e.km, 1) + ' km</span>' +
-  '<span class="sep">·</span>' +
-  '<span>+' + fmt(e.denivele) + ' m</span>' +
-  '<span class="sep">·</span>' +
-  '<span>' + esc(e.temps || '–') + '</span>' +
-  '</div>'
-  : '';
-
-        if (e.fait && e.meteo) {
-        var m = e.meteo;
-        html += '<div class="meteo-bloc">' +
-          '<div class="meteo-conditions">' + esc((m.conditions || []).join(' · ')) + '</div>' +
-          '<div class="meta">' +
-          '<span>' + fmtDec(m.tmin, 0) + '° / ' + fmtDec(m.tmax, 0) + '°</span>' +
-          '<span class="sep">·</span>' +
-          '<span>' + fmtDec(m.pluie, 1) + ' mm</span>' +
-          '</div>' +
-          '<div class="meta">' +
-            '<span>Vent ' + fmtDec(m.vent, 0) + ' km/h (Rafales ' + fmtDec(m.rafales, 0) + ')</span>' +
-          '</div></div>';
-      }
-
-      if (e.fait && e.note && (e.note.avis || e.note.commentaire || e.note.photo)) {
-        html += '<div class="avis-bloc">';
-        if (e.note.avis) {
-        html += '<div class="avis-smiley">' + esc(smileyPour(e.note.avis)) + '</div>';
-        }
-        html += '<div class="avis-texte">';
-        if (e.note.commentaire) {
-          var commentaire = String(e.note.commentaire);
-if (commentaire.length > 125) {
-  commentaire = commentaire.substring(0, 125).trimEnd() + '...';
-}
-    html += '<div class="avis-commentaire">' + esc(commentaire) + '</div>';
-}
-        var photos = [e.note.photo, e.note.photo2, e.note.photo3, e.note.photo4].filter(Boolean);
-if (photos.length) {
-  html += '<div class="galerie-photos">';
-  photos.forEach(function (url, i) {
-  if (!/^https:\/\//.test(url)) return;
-  var miniature = url.split('=')[0] + '=w200';
-  html += '<img class="avis-photo" src="' + esc(miniature) + '" alt="Photo ' + (i + 1) + '" loading="lazy" style="cursor:pointer" onclick="ouvrirLightbox(this.dataset.original)" data-original="' + esc(url) + '">';});
-  html += '</div>';
-}
-                if (e.fait) {
-html += '<div class="comments-side">';
-html += '<div class="comments-inline">';
-html += '<div class="comments-list" id="comments-' + e.jour + '"></div>';
-html += '<a class="comments-more" href="#">···</a>';
-html += '</div>';
-                  var aDejaVote = false;
-try { aDejaVote = localStorage.getItem('like-' + e.jour) === '1'; } catch(e2) {}
-html += '<div class="like-bloc">';
-html += '<button class="like-btn' + (aDejaVote ? ' vote' : '') + '" onclick="toggleLike(' + e.jour + ', this)">👍</button>';
-html += '<span id="like-count-' + e.jour + '" style="color:var(--discret)">–</span>';
-html += '</div>';
-html += '<div class="comment-form">';
-html += '<input type="text" placeholder="Nom" id="nom-' + e.jour + '" maxlength="30">';
-html += '<input type="text" placeholder="Commentaire" id="comment-' + e.jour + '" maxlength="200">';
-html += '<button onclick="postComment(' + e.jour + ')">Envoyer</button>';
-html += '</div></div>';
-}
-        html += '</div></div>';
-      }
-if (false) {
-html += '<div class="comments-bloc">';
-}
-      li.innerHTML = html;
-      ol.appendChild(li);
+  var fmtDec = function (n, d) {
+    return Number(n || 0).toLocaleString('fr-FR', {
+      minimumFractionDigits: d !== undefined ? d : 1,
+      maximumFractionDigits: d !== undefined ? d : 1
     });
-   if (!tout && etapes.length > 6) {
-  var btnPlus = document.createElement('li');
-  btnPlus.style.cssText = 'grid-column:1/-1;display:flex;justify-content:center;padding:8px 0;';
-  btnPlus.innerHTML = '<button onclick="toutAfficher()" style="background:var(--carte);border:1px solid var(--trait);border-radius:10px;padding:10px 24px;color:var(--discret);font:500 13px var(--mono);cursor:pointer;letter-spacing:0.04em;">↓ Voir toutes les étapes</button>';
-  ol.appendChild(btnPlus);
-} 
+  };
+  var pluriel = function (n, mot) { return n + ' ' + mot + (n > 1 ? 's' : ''); };
+  function parseMinutes(str) {
+    if (!str) return 0;
+    var m = String(str).match(/(\d+)\s*(?:h|:)\s*(\d+)?/i);
+    if (m) return (parseInt(m[1], 10) || 0) * 60 + (parseInt(m[2], 10) || 0);
+    var num = parseFloat(str);
+    return isNaN(num) ? 0 : Math.round(num * 60);
   }
-  // ---- Cache local (partagé avec l'accueil et les stats) : affichage immédiat, puis mise à jour ----
+  function formaterDuree(min) {
+    min = Math.round(min);
+    var h = Math.floor(min / 60), r = min % 60;
+    if (r === 0) return h + ' h';
+    return h + ' h ' + (r < 10 ? '0' : '') + r;
+  }
+
+  function creer(tag, classe, texte) {
+    var el = document.createElement(tag);
+    if (classe) el.className = classe;
+    if (texte !== undefined) el.textContent = texte;
+    return el;
+  }
+  // Une case de stats (href => la case devient un lien)
+  function carte(label, valeur, detail, classe, href) {
+    var el = creer(href ? 'a' : 'div', classe);
+    if (href) el.href = href;
+    el.appendChild(creer('small', '', label));
+    el.appendChild(creer('b', '', valeur));
+    el.appendChild(creer('div', 'detail', detail || ''));
+    return el;
+  }
+  function trajet(e) {
+    return e ? ('Étape ' + e.jour + ' · ' + e.depart + ' → ' + e.arrivee) : '';
+  }
+  // Étape avec la plus grande (ou petite) valeur > 0
+  function extreme(etapes, f, plusGrand) {
+    var meilleure = null;
+    etapes.forEach(function (e) {
+      var v = f(e);
+      if (!(v > 0)) return;
+      if (meilleure === null || (plusGrand ? v > f(meilleure) : v < f(meilleure))) meilleure = e;
+    });
+    return meilleure;
+  }
+  var kmDe = function (e) { return Number(e.km) || 0; };
+  var denDe = function (e) { return Number(e.denivele) || 0; };
+  var minDe = function (e) { return parseMinutes(e.temps); };
+  var somme = function (liste, f) { return liste.reduce(function (a, e) { return a + f(e); }, 0); };
+  function afficherStats(t, etapes) {
+    var total = t.jours || etapes.length;
+    var faits = t.jours_faits || 0;
+    var restants = Math.max(0, total - faits);
+    $('sous-titre').textContent = faits + ' / ' + total + ' étapes · ' + t.avancement + ' % du parcours';
+    // --- Progression ---
+    $('h-km').textContent = fmt(t.km_faits) + ' km';
+    $('h-detail').textContent = t.km_total ? 'sur ' + fmt(t.km_total) + ' km au total' : '';
+    var gp = $('grille-principales');
+    gp.appendChild(carte('Étapes', faits + ' / ' + total, pluriel(restants, 'restante'), 'stat-boite', 'etapes.html'));
+    gp.appendChild(carte('Km restants', fmt(t.km_restants) + ' km', pluriel(restants, 'étape'), 'stat-boite'));
+    var detailDen = t.denivele_total
+      ? 'sur +' + fmt(t.denivele_total) + ' m · soit ' + fmtDec(t.denivele_total / EVEREST, 1) + ' × l’Everest (' + fmt(EVEREST) + ' m)'
+      : '';
+    gp.appendChild(carte('Dénivelé', '+' + fmt(t.denivele_fait) + ' m', detailDen, 'stat-boite multi'));
+    $('pct').textContent = t.avancement + ' %';
+    if (t.km_total) $('avance-resume').textContent = fmt(t.km_faits) + ' / ' + fmt(t.km_total) + ' km';
+    setTimeout(function () { $('barre').style.width = t.avancement + '%'; }, 100);
+    if (!etapes.length) return;
+    var kmTotal = somme(etapes, kmDe);
+    var denTotal = somme(etapes, denDe);
+    var minTotal = somme(etapes, minDe);
+    var faites = etapes.filter(function (e) { return e.fait; });
+    var minFait = somme(faites, minDe);
+    // --- Records ---
+    var gr = $('grille-records');
+    var plusLongue = extreme(etapes, kmDe, true);
+    var plusCourte = extreme(etapes, kmDe, false);
+    var plusGrosD = extreme(etapes, denDe, true);
+    var plusPetitD = extreme(etapes, denDe, false);
+    if (plusLongue) gr.appendChild(carte('Plus longue étape', fmtDec(plusLongue.km, 1) + ' km', trajet(plusLongue), 'carte-record'));
+    if (plusCourte) gr.appendChild(carte('Plus courte étape', fmtDec(plusCourte.km, 1) + ' km', trajet(plusCourte), 'carte-record'));
+    if (plusGrosD) gr.appendChild(carte('Plus gros dénivelé', '+' + fmt(plusGrosD.denivele) + ' m', trajet(plusGrosD), 'carte-record'));
+    if (plusPetitD) gr.appendChild(carte('Plus petit dénivelé', '+' + fmt(plusPetitD.denivele) + ' m', trajet(plusPetitD), 'carte-record'));
+    // --- Moyennes ---
+    var gm = $('grille-moyennes');
+    gm.appendChild(carte('Km / étape', fmtDec(kmTotal / etapes.length, 1) + ' km', 'sur ' + etapes.length + ' étapes', 'carte-stat'));
+    gm.appendChild(carte('Dénivelé / étape', '+' + fmt(Math.round(denTotal / etapes.length)) + ' m', 'sur ' + etapes.length + ' étapes', 'carte-stat'));
+    gm.appendChild(carte('Durée / étape', formaterDuree(minTotal / etapes.length), 'temps estimé', 'carte-stat'));
+    gm.appendChild(carte('Dénivelé / 100 km', '+' + fmt(kmTotal ? Math.round(denTotal / kmTotal * 100) : 0) + ' m', 'sur tout le parcours', 'carte-stat'));
+    // --- Temps ---
+    var gt = $('grille-temps');
+    var plusLongueDuree = extreme(etapes, minDe, true);
+    gt.appendChild(carte('Temps total estimé', formaterDuree(minTotal), pluriel(etapes.length, 'étape'), 'carte-stat'));
+    gt.appendChild(carte('Déjà roulé', formaterDuree(minFait), pluriel(faites.length, 'étape') + ' faite' + (faites.length > 1 ? 's' : ''), 'carte-stat'));
+    gt.appendChild(carte('Reste à rouler', formaterDuree(minTotal - minFait), pluriel(restants, 'étape') + ' restante' + (restants > 1 ? 's' : ''), 'carte-stat'));
+    if (plusLongueDuree) gt.appendChild(carte('Plus longue durée', formaterDuree(minDe(plusLongueDuree)), trajet(plusLongueDuree), 'carte-stat'));
+    // --- Météo ---
+    var avecMeteo = etapes.filter(function (e) { return e.fait && e.meteo; });
+    if (avecMeteo.length) {
+      $('section-meteo').style.display = '';
+      $('meteo-compteur').textContent = pluriel(avecMeteo.length, 'étape');
+      var gme = $('grille-meteo');
+      var sur = 'sur ' + pluriel(avecMeteo.length, 'étape');
+      var tmin = function (e) { return Number(e.meteo.tmin); };
+      var tmax = function (e) { return Number(e.meteo.tmax); };
+      var pluieDe = function (e) { return Number(e.meteo.pluie) || 0; };
+      var rafDe = function (e) { return Number(e.meteo.rafales) || 0; };
+      var tMoy = somme(avecMeteo, function (e) { return (tmin(e) + tmax(e)) / 2; }) / avecMeteo.length;
+      var plusChaud = avecMeteo.reduce(function (a, e) { return tmax(e) > tmax(a) ? e : a; });
+      var plusFroid = avecMeteo.reduce(function (a, e) { return tmin(e) < tmin(a) ? e : a; });
+      var joursPluie = avecMeteo.filter(function (e) { return pluieDe(e) >= 1; }).length;
+      var joursSoleil = avecMeteo.filter(function (e) {
+        var c = (e.meteo.conditions && e.meteo.conditions[0]) || '';
+        return c.indexOf('Dégagé') >= 0 || c.indexOf('Peu nuageux') >= 0;
+      }).length;
+      var plusPluvieux = extreme(avecMeteo, pluieDe, true);
+      var plusVenteux = extreme(avecMeteo, rafDe, true);
+      gme.appendChild(carte('Température moyenne', fmtDec(tMoy, 1) + '°', sur, 'carte-stat'));
+      gme.appendChild(carte('Jour le plus chaud', fmtDec(tmax(plusChaud), 0) + '°', trajet(plusChaud), 'carte-stat'));
+      gme.appendChild(carte('Jour le plus froid', fmtDec(tmin(plusFroid), 0) + '°', trajet(plusFroid), 'carte-stat'));
+      gme.appendChild(carte('Pluie totale', fmtDec(somme(avecMeteo, pluieDe), 1) + ' mm', sur, 'carte-stat'));
+      gme.appendChild(carte('Jours de pluie', String(joursPluie), sur, 'carte-stat'));
+      gme.appendChild(carte('Jours ensoleillés', String(joursSoleil), sur, 'carte-stat'));
+      if (plusPluvieux) gme.appendChild(carte('Jour le plus pluvieux', fmtDec(pluieDe(plusPluvieux), 1) + ' mm', trajet(plusPluvieux), 'carte-stat'));
+      if (plusVenteux) gme.appendChild(carte('Rafales max', fmtDec(rafDe(plusVenteux), 0) + ' km/h', trajet(plusVenteux), 'carte-stat'));
+      $('section-graph-temp').style.display = '';
+      graphique('graph-t', 'info-t', etapes,
+        function (e) { return (e.fait && e.meteo) ? Number(e.meteo.tmax) : null; },
+        function (v) { return v === null ? 'pas encore de météo' : fmtDec(v, 0) + '°'; });
+    }
+    // --- Graphiques ---
+    graphique('graph-km', 'info-km', etapes, kmDe, function (v) { return fmtDec(v, 1) + ' km'; });
+    graphique('graph-d', 'info-d', etapes, denDe, function (v) { return '+' + fmt(v) + ' m'; });
+  }
+  function graphique(idBarres, idInfo, etapes, valeurDe, formater) {
+    var zone = $(idBarres), info = $(idInfo);
+    var max = 0;
+    etapes.forEach(function (e) { if (valeurDe(e) > max) max = valeurDe(e); });
+    var colActive = null;
+    function afficherInfo(e, col) {
+      if (colActive) colActive.classList.remove('actif');
+      colActive = col;
+      col.classList.add('actif');
+      info.textContent = '';
+      info.appendChild(creer('strong', '', trajet(e)));
+      info.appendChild(document.createTextNode(' · ' + formater(valeurDe(e)) + (e.fait ? ' · faite' : ' · à venir')));
+    }
+    etapes.forEach(function (e) {
+      var col = creer('button', 'barre-col' + (e.fait ? ' fait' : ''));
+      col.type = 'button';
+      col.title = trajet(e) + ' · ' + formater(valeurDe(e));
+      var z = creer('span', 'barre-zone');
+      var b = creer('span', 'barre-val');
+      b.style.height = (max ? Math.max(2, valeurDe(e) / max * 100) : 0) + '%';
+      z.appendChild(b);
+      col.appendChild(z);
+      col.appendChild(creer('span', 'barre-num', e.jour));
+      col.addEventListener('click', function () { afficherInfo(e, col); });
+      col.addEventListener('mouseenter', function () { afficherInfo(e, col); });
+      zone.appendChild(col);
+    });
+  }
+  // ---- Cache local (partagé avec l'accueil) : affichage immédiat, puis mise à jour ----
   var CLE_CACHE = 'b88-cache-v1';
   function valide(d) { return !!d && typeof d === 'object' && !d.erreur && !!d.totaux && Array.isArray(d.etapes); }
+  function vider() {
+    ['grille-principales', 'grille-moyennes', 'grille-records', 'grille-temps', 'grille-meteo', 'graph-km', 'graph-d', 'graph-t']
+      .forEach(function (id) { $(id).textContent = ''; });
+  }
   function message(txt) {
     var errEl = $('erreur');
     errEl.textContent = txt || '';
     errEl.style.display = txt ? 'block' : 'none';
-  }
-  function rendre(d, tout) {
-    toutesEtapes = d.etapes;
-    afficherJournal(d.etapes, tout);
-    d.etapes.forEach(function (e) { if (e.fait) loadComments(e.jour); });
   }
 
   var affiche = null;
@@ -394,7 +550,7 @@ html += '<div class="comments-bloc">';
     var brut = localStorage.getItem(CLE_CACHE);
     if (brut) {
       var c = JSON.parse(brut);
-      if (valide(c)) { rendre(c, false); affiche = brut; }
+      if (valide(c)) { afficherStats(c.totaux, c.etapes); affiche = brut; }
     }
   } catch (e) { affiche = null; }
 
@@ -404,85 +560,15 @@ html += '<div class="comments-bloc">';
       var d = JSON.parse(txt);
       if (!valide(d)) throw new Error('format');
       try { localStorage.setItem(CLE_CACHE, txt); } catch (e) {}
-      // On ne redessine que si les données ont changé (garde l'état « Voir toutes »)
-      if (txt !== affiche) rendre(d, $('journal').querySelectorAll('.etape').length > 6);
+      if (txt !== affiche) { vider(); afficherStats(d.totaux, d.etapes); }
       message('');
     })
     .catch(function () {
       message(affiche
         ? 'Connexion impossible : affichage de la dernière version enregistrée.'
         : 'Données indisponibles pour le moment.');
-      if (!affiche) $('compteur-page').textContent = '';
+      if (!affiche) $('sous-titre').textContent = '';
     });
-function ouvrirLightbox(url) {
-  if (!/^https:\/\//.test(url)) return;
-  var img = document.getElementById('lightbox-img');
-  img.src = url.split('=')[0] + '=s1600';
-  document.getElementById('lightbox').classList.add('active');
-}
-
-document.getElementById('lightbox').onclick = function() {
-  this.classList.remove('active');
-  document.getElementById('lightbox-img').src = '';
-};
-function postComment(jour) {
-  var nom = document.getElementById('nom-' + jour).value;
-  var comment = document.getElementById('comment-' + jour).value;
-  if (!nom || !comment) return;
-  fetch(API, {
-    method: 'POST',
-    body: JSON.stringify({ etape: jour, nom: nom, commentaire: comment })
-  }).then(function() {
-    document.getElementById('nom-' + jour).value = '';
-    document.getElementById('comment-' + jour).value = '';
-    loadComments(jour);
-    var btn = document.querySelector('#comments-' + jour + ' ~ .comment-form button') || document.evaluate("//button[@onclick='postComment(" + jour + ")']", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-    var notif = document.createElement('div');
-    notif.textContent = '✓ Commentaire envoyé !';
-    notif.style.cssText = 'color:var(--accent);font:12px var(--mono);margin-top:6px;';
-    btn.parentNode.appendChild(notif);
-    setTimeout(function() { notif.remove(); }, 3000);
-  });
-}
-  function loadComments(jour) {
-  fetch(API + '?comments=' + jour)
-    .then(function(r) { return r.json(); })
-    .then(function(d) {
-      var el = document.getElementById('comments-' + jour);
-      if (!el) return;
-      el.innerHTML = d.comments.slice(-3).map(function(c) {
-  var texte = String(c.commentaire || '');
-if (texte.length > 100) {
-    texte = texte.substring(0, 100).trimEnd() + '...';
-}
-return '<div class="comment"><strong>' + esc(c.nom) + '</strong> ' + esc(texte) + '</div>';
-    }).join('');
-    });
-}
-function toutAfficher() {
-  afficherJournal(toutesEtapes, true);
-  toutesEtapes.forEach(function(e) { if (e.fait) loadComments(e.jour); });
-}
-function toggleLike(jour, btn) {
-  var aVote = false;
-  try { aVote = localStorage.getItem('like-' + jour) === '1'; } catch(e) {}
-  if (aVote) return; // un seul vote par appareil
-  try { localStorage.setItem('like-' + jour, '1'); } catch(e) {}
-  btn.classList.add('vote');
-  fetch(API, {
-    method: 'POST',
-    body: JSON.stringify({ action: 'like', etape: jour })
-  }).then(function() { loadLikes(jour); });
-}
-
-function loadLikes(jour) {
-  fetch(API + '?likes=' + jour)
-    .then(function(r) { return r.json(); })
-    .then(function(d) {
-      var el = document.getElementById('like-count-' + jour);
-      if (el) el.textContent = d.likes + ' 👍';
-    }).catch(function() {});
-}
 </script>
 </body>
 </html>
