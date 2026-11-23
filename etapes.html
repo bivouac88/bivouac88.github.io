@@ -297,13 +297,14 @@
         '</div>' +
         '<div class="trajet"><span>' + esc(e.depart) + '</span><i>→</i><span>' + esc(e.arrivee) + '</span></div>' +
         (e.fait
-'<div class="meta">' +
+? '<div class="meta">' +
   '<span>' + fmtDec(e.km, 1) + ' km</span>' +
   '<span class="sep">·</span>' +
   '<span>+' + fmt(e.denivele) + ' m</span>' +
   '<span class="sep">·</span>' +
   '<span>' + esc(e.temps || '–') + '</span>' +
-'</div>';
+  '</div>'
+  : '';
 
         if (e.fait && e.meteo) {
         var m = e.meteo;
