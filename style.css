@@ -563,3 +563,94 @@ html.insta .pied img {
 @media (prefers-reduced-motion: reduce) {
   .revele { opacity: 1; transform: none; }
 }
+/* Consentement GPS : fenêtre modale Bivouac88 */
+.b88-geo-consent {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, .65);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.b88-geo-dialog {
+  width: 100%;
+  max-width: 440px;
+  padding: 28px;
+  background: var(--carte);
+  color: var(--papier);
+  border: 1px solid var(--trait-actif);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .4);
+  animation: b88-geo-entree .25s ease-out;
+}
+
+.b88-geo-dialog h2 {
+  font: 600 24px var(--serif);
+  margin-bottom: 12px;
+  color: var(--papier);
+}
+
+.b88-geo-dialog p {
+  font: 400 13px/1.7 var(--mono);
+  color: var(--papier-doux);
+  margin-bottom: 22px;
+}
+
+.b88-geo-dialog button {
+  display: block;
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 9px;
+  font: 500 13px var(--mono);
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+
+.b88-geo-accepter {
+  background: var(--accent);
+  color: #1a1208;
+  border: 1px solid var(--accent);
+}
+
+.b88-geo-accepter:hover {
+  background: var(--accent-hover);
+}
+
+.b88-geo-refuser {
+  margin-top: 9px;
+  background: transparent;
+  color: var(--discret);
+  border: 1px solid var(--trait);
+}
+
+.b88-geo-refuser:hover {
+  color: var(--papier);
+  background: var(--carte-hover);
+}
+
+.b88-geo-dialog button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+@keyframes b88-geo-entree {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 480px) {
+  .b88-geo-dialog {
+    padding: 23px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .b88-geo-dialog {
+    animation: none;
+  }
+}
