@@ -81,28 +81,44 @@ if (!conteneur) {
   callback(null);
   return;
 }
-  var panneau = document.createElement('section');
-  panneau.className = 'b88-geo-consent';
-  panneau.setAttribute('aria-live', 'polite');
-  var texte = document.createElement('p');
-  texte.textContent =
-    'Pour personnaliser la carte et la météo, Bivouac88 peut utiliser votre position. ' +
-    'Les coordonnées sont transmises à Open-Meteo pour les prévisions. ' +
-    'OpenStreetMap peut déduire la zone affichée sur la carte. ' +
-    'Bivouac88 ne reçoit ni ne conserve vos coordonnées. Votre choix est mémorisé 30 jours.';
+var panneau = document.createElement('section');
+panneau.className = 'b88-geo-consent';
+panneau.setAttribute('role', 'dialog');
+panneau.setAttribute('aria-modal', 'true');
+panneau.setAttribute('aria-labelledby', 'b88-geo-titre');
 
-  var accepter = document.createElement('button');
-  accepter.type = 'button';
-  accepter.textContent = 'Utiliser ma position';
+var fenetre = document.createElement('div');
+fenetre.className = 'b88-geo-dialog';
 
-  var refuser = document.createElement('button');
-  refuser.type = 'button';
-  refuser.textContent = 'Continuer sans GPS';
+var titre = document.createElement('h2');
+titre.id = 'b88-geo-titre';
+titre.textContent = 'Votre position';
 
-  panneau.appendChild(texte);
-  panneau.appendChild(accepter);
-  panneau.appendChild(refuser);
-  conteneur.appendChild(panneau);
+var texte = document.createElement('p');
+texte.textContent =
+  'Pour personnaliser la carte et la météo, Bivouac88 peut utiliser votre position. ' +
+  'Les coordonnées sont transmises à Open-Meteo pour les prévisions. ' +
+  'OpenStreetMap peut déduire la zone affichée sur la carte. ' +
+  'Bivouac88 ne reçoit ni ne conserve vos coordonnées. Votre choix est mémorisé 30 jours.';
+
+var accepter = document.createElement('button');
+accepter.type = 'button';
+accepter.className = 'b88-geo-accepter';
+accepter.textContent = 'Utiliser ma position';
+
+var refuser = document.createElement('button');
+refuser.type = 'button';
+refuser.className = 'b88-geo-refuser';
+refuser.textContent = 'Continuer sans GPS';
+
+fenetre.appendChild(titre);
+fenetre.appendChild(texte);
+fenetre.appendChild(accepter);
+fenetre.appendChild(refuser);
+panneau.appendChild(fenetre);
+
+document.body.appendChild(panneau);
+accepter.focus();
 
   accepter.addEventListener('click', function () {
     memoriser(true);
