@@ -242,10 +242,17 @@ new ResizeObserver(function () { carte.invalidateSize(); }).observe(cadre);
     chunkedLoading: true, maxClusterRadius: 20, showCoverageOnHover: false,
     disableClusteringAtZoom: 15
   }).addTo(carte);
-B88.geo(document.getElementById('consentement-gps'), function (pos) {
-  if (!pos) return;
+
+let positionUtilisateur = null;
+let marqueurPosition = null;
+function appliquerPosition(pos) {
+  if (marqueurPosition) {
+    carte.removeLayer(marqueurPosition);
+    marqueurPosition = null;
+  }
   positionUtilisateur = pos;
-  L.circleMarker([pos.lat, pos.lon], {
+  if (!pos) return;
+  marqueurPosition = L.circleMarker([pos.lat, pos.lon], {
     radius: 8,
     color: '#3b82f6',
     fillColor: '#3b82f6',
@@ -255,8 +262,16 @@ B88.geo(document.getElementById('consentement-gps'), function (pos) {
     direction: 'top',
     offset: [0, -8]
   });
-
-  boutonPosition._b.style.display = '';
+  carte.setView([pos.lat, pos.lon], 15);
+}
+  
+B88.geo(document.getElementById('consentement-gps'), appliquerPosition);
+boutonPosition._b.addEventListener('click', function () {
+  B88.geo(
+    document.getElementById('consentement-gps'),
+    appliquerPosition,
+    true
+  );
 });
   const points = [];             // {nom, groupes, lat, lon, id, cat}
   const cats = {};               // nom -> {n, actif, groupe, couleur, emoji, libelle, icone, li, cb}
@@ -304,7 +319,7 @@ B88.geo(document.getElementById('consentement-gps'), function (pos) {
       const b = L.DomUtil.create('button', 'btn-plein');
       b.type = 'button';
       b.textContent = 'Vous êtes ici';
-      b.style.display = 'none';
+      b.style.display = '';
       L.DomEvent.disableClickPropagation(b);
       L.DomEvent.on(b, 'click', function () {
         if (positionUtilisateur) carte.setView([positionUtilisateur.lat, positionUtilisateur.lon], 15);
