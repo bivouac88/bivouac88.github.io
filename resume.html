@@ -367,7 +367,7 @@ function afficherStats(t, etapes) {
         ? '<div class="meta"><span>' + fmtDec(e.km, 1) + ' km</span><span class="separateur">·</span>' +
             '<span>+' + fmt(e.denivele) + ' m</span><span class="separateur">·</span>' +
             '<span>' + esc(e.temps || '–') + '</span></div>'
-        : '');
+        : '') +
         '</div>';
       li.addEventListener('click', function () { zoomer(e.jour); });
       li.addEventListener('keydown', function (evt) {
