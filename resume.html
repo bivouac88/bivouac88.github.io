@@ -362,10 +362,12 @@ function afficherStats(t, etapes) {
         '<div class="etape-corps">' +
           '<div class="etape-entete-ligne"><span class="jour">Étape ' + esc(e.jour) + '</span>' +
             (badge ? '<span class="etape-badge-etat">' + badge + '</span>' : '') + '</div>' +
-          '<div class="trajet"><span>' + esc(e.depart) + '</span><i>→</i><span>' + esc(e.arrivee) + '</span></div>' +
-          '<div class="meta"><span>' + fmtDec(e.km, 1) + ' km</span><span class="separateur">·</span>' +
+      '<div class="trajet"><span>' + esc(e.depart) + '</span><i>→</i><span>' + esc(e.arrivee) + '</span></div>' +
+      (e.fait
+        ? '<div class="meta"><span>' + fmtDec(e.km, 1) + ' km</span><span class="separateur">·</span>' +
             '<span>+' + fmt(e.denivele) + ' m</span><span class="separateur">·</span>' +
-            '<span>' + esc(e.temps || '–') + '</span></div>' +
+            '<span>' + esc(e.temps || '–') + '</span></div>'
+        : '');
         '</div>';
       li.addEventListener('click', function () { zoomer(e.jour); });
       li.addEventListener('keydown', function (evt) {
