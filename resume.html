@@ -311,33 +311,15 @@ function afficherStats(t, etapes) {
   $('s-km-moyen').textContent = fmtDec(totalJours ? kmTotal / totalJours : 0, 1) + ' km';
   $('s-km-moyen-detail').textContent = totalJours + ' étapes au total';
 
-  // Records et temps calculés depuis les étapes déjà faites
-  var kmDe = function (e) { return Number(e.km) || 0; };
-  var denDe = function (e) { return Number(e.denivele) || 0; };
-  var minDe = function (e) { return parseMinutes(e.temps); };
-  function extreme(liste, f, plusGrand) {
-    var m = null;
-    liste.forEach(function (e) {
-      var v = f(e);
-      if (!(v > 0)) return;
-      if (m === null || (plusGrand ? v > f(m) : v < f(m))) m = e;
-    });
-    return m;
+  if (t.record_km) {
+    $('s-max-km').textContent = fmtDec(t.record_km.km, 1) + ' km';
+    $('s-max-km-detail').textContent = 'Étape ' + t.record_km.jour + ' · ' + t.record_km.depart + ' → ' + t.record_km.arrivee;
   }
-  var faites = etapes.filter(function (e) { return e.fait; });
-  var plusLongue = extreme(faites, kmDe, true);
-  var plusGrosDenivele = extreme(faites, denDe, true);
-  var tempsTotal = faites.reduce(function (a, e) { return a + minDe(e); }, 0);
-
-  if (plusLongue) {
-    $('s-max-km').textContent = fmtDec(kmDe(plusLongue), 1) + ' km';
-    $('s-max-km-detail').textContent = 'Étape ' + plusLongue.jour + ' · ' + plusLongue.depart + ' → ' + plusLongue.arrivee;
+  if (t.record_denivele) {
+    $('s-max-d').textContent = '+' + fmt(t.record_denivele.denivele) + ' m';
+    $('s-max-d-detail').textContent = 'Étape ' + t.record_denivele.jour + ' · ' + t.record_denivele.depart + ' → ' + t.record_denivele.arrivee;
   }
-  if (plusGrosDenivele) {
-    $('s-max-d').textContent = '+' + fmt(denDe(plusGrosDenivele)) + ' m';
-    $('s-max-d-detail').textContent = 'Étape ' + plusGrosDenivele.jour + ' · ' + plusGrosDenivele.depart + ' → ' + plusGrosDenivele.arrivee;
-  }
-  $('s-temps-total').textContent = formaterDuree(tempsTotal);
+  $('s-temps-total').textContent = formaterDuree(Number(t.temps_total_min) || 0);
   $('s-etapes-restantes-detail').textContent = pluriel(restantsJours, 'étape') + ' restante' + (restantsJours > 1 ? 's' : '');
   var prochaine = etapes.find(function (e) { return !e.fait; });
   var bloc = $('bloc-prochaine');
