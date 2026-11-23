@@ -465,6 +465,27 @@
       'sur tout le parcours',
       'carte-stat'
     ));
+    // --- Records ---
+var gr = $('grille-records');
+var plusLongue = extreme(faites, kmDe, true);
+var plusCourte = extreme(faites, kmDe, false);
+var plusGrosDenivele = extreme(faites, denDe, true);
+var plusPetitDenivele = extreme(faites, denDe, false);
+if (plusLongue) gr.appendChild(carte('Étape la plus longue', fmtDec(kmDe(plusLongue), 1) + ' km', trajet(plusLongue), 'carte-record'));
+if (plusCourte) gr.appendChild(carte('Étape la plus courte', fmtDec(kmDe(plusCourte), 1) + ' km', trajet(plusCourte), 'carte-record'));
+if (plusGrosDenivele) gr.appendChild(carte('Plus gros dénivelé', '+' + fmt(denDe(plusGrosDenivele)) + ' m', trajet(plusGrosDenivele), 'carte-record'));
+if (plusPetitDenivele) gr.appendChild(carte('Plus petit dénivelé', '+' + fmt(denDe(plusPetitDenivele)) + ' m', trajet(plusPetitDenivele), 'carte-record'));
+
+// --- Temps de roulage ---
+var gt = $('grille-temps');
+var tempsTotal = somme(faites, minDe);
+var tempsMoyen = faites.length ? tempsTotal / faites.length : 0;
+var plusLongTemps = extreme(faites, minDe, true);
+var plusCourtTemps = extreme(faites, minDe, false);
+gt.appendChild(carte('Temps total', formaterDuree(tempsTotal), 'sur ' + pluriel(faites.length, 'étape'), 'carte-stat'));
+gt.appendChild(carte('Temps moyen / étape', formaterDuree(tempsMoyen), 'sur ' + pluriel(faites.length, 'étape'), 'carte-stat'));
+if (plusLongTemps) gt.appendChild(carte('Étape la plus longue (temps)', formaterDuree(minDe(plusLongTemps)), trajet(plusLongTemps), 'carte-stat'));
+if (plusCourtTemps) gt.appendChild(carte('Étape la plus courte (temps)', formaterDuree(minDe(plusCourtTemps)), trajet(plusCourtTemps), 'carte-stat'));
     // --- Météo ---
     var avecMeteo = etapes.filter(function (e) { return e.fait && e.meteo; });
     if (avecMeteo.length) {
