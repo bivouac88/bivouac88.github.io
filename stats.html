@@ -2,24 +2,21 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cdn.jsdelivr.net; worker-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://cdn.jsdelivr.net https://www.gstatic.com blob:; object-src 'none'; base-uri 'self'; form-action 'self'">  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <link rel="canonical" href="https://bivouac88.github.io/stats.html">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Stats · Bivouac88</title>
-<link rel="icon" href="images/favicon.ico" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
-<link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <meta name="theme-color" content="#e58e26">
   <meta name="description" content="Toutes les statistiques du Tour d'Europe à vélo de Bivouac88 : kilomètres, dénivelé, temps de roulage et météo.">
   <meta property="og:title" content="Stats · Bivouac88">
   <meta property="og:description" content="Kilomètres, dénivelé, temps de roulage et météo du Tour d'Europe à vélo.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://bivouac88.github.io/stats.html">
-  <meta property="og:image" content="https://bivouac88.github.io/images/og-image.png">
-  <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Stats · Bivouac88">
-<meta name="twitter:description" content="Kilomètres, dénivelé, temps de roulage et météo du Tour d'Europe à vélo.">
-<meta name="twitter:image" content="https://bivouac88.github.io/images/og-image.png">  
+  <meta property="og:image" content="https://bivouac88.github.io/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">  
   <script src="commun.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -282,8 +279,8 @@
     }
   </style>
 </head>
-<body data-page="stats">
-  <main>
+<body>
+<main>
   <div class="ligne-haut">
     <div id="entete-site"></div>
   </div>
@@ -310,7 +307,7 @@
   </section>
 
   <!-- 2. Records -->
-  <section class="section" id="section-records">
+  <section class="section">
     <h2 class="titre-section">Records</h2>
     <div class="grille" id="grille-records"></div>
   </section>
@@ -321,7 +318,7 @@
       <h2 class="titre-section">Moyennes</h2>
       <div class="grille" id="grille-moyennes"></div>
     </section>
-    <section class="section" id="section-temps">
+    <section class="section">
       <h2 class="titre-section">Temps de roulage</h2>
       <div class="grille" id="grille-temps"></div>
     </section>
@@ -456,19 +453,19 @@
     if (plusCourte) gr.appendChild(carte('Plus courte étape', fmtDec(plusCourte.km, 1) + ' km', trajet(plusCourte), 'carte-record'));
     if (plusGrosD) gr.appendChild(carte('Plus gros dénivelé', '+' + fmt(plusGrosD.denivele) + ' m', trajet(plusGrosD), 'carte-record'));
     if (plusPetitD) gr.appendChild(carte('Plus petit dénivelé', '+' + fmt(plusPetitD.denivele) + ' m', trajet(plusPetitD), 'carte-record'));
-// --- Moyennes (totaux complets fournis par le serveur) ---
-var gm = $('grille-moyennes');
-var kmTotalServeur = Number(t.km_total) || 0;
-var denTotalServeur = Number(t.denivele_total) || 0;
-var minTotalServeur = Number(t.temps_total_min) || 0;
-gm.appendChild(carte('Km / étape', fmtDec(total ? kmTotalServeur / total : 0, 1) + ' km', 'sur ' + total + ' étapes', 'carte-stat'));
-gm.appendChild(carte('Dénivelé / étape', '+' + fmt(total ? Math.round(denTotalServeur / total) : 0) + ' m', 'sur ' + total + ' étapes', 'carte-stat'));
-// --- Temps ---
-var gt = $('grille-temps');
-gt.appendChild(carte('Temps total estimé', formaterDuree(minTotalServeur), pluriel(total, 'étape'), 'carte-stat'));
-gt.appendChild(carte('Déjà roulé', formaterDuree(minFait), pluriel(faites.length, 'étape') + ' faite' + (faites.length > 1 ? 's' : ''), 'carte-stat'));
-var plusLongueDuree = extreme(faites, minDe, true);
-if (plusLongueDuree) gt.appendChild(carte('Plus longue durée', formaterDuree(minDe(plusLongueDuree)), trajet(plusLongueDuree), 'carte-stat'));
+    // --- Moyennes ---
+    var gm = $('grille-moyennes');
+    gm.appendChild(carte('Km / étape', fmtDec(kmTotal / etapes.length, 1) + ' km', 'sur ' + etapes.length + ' étapes', 'carte-stat'));
+    gm.appendChild(carte('Dénivelé / étape', '+' + fmt(Math.round(denTotal / etapes.length)) + ' m', 'sur ' + etapes.length + ' étapes', 'carte-stat'));
+    gm.appendChild(carte('Durée / étape', formaterDuree(minTotal / etapes.length), 'temps estimé', 'carte-stat'));
+    gm.appendChild(carte('Dénivelé / 100 km', '+' + fmt(kmTotal ? Math.round(denTotal / kmTotal * 100) : 0) + ' m', 'sur tout le parcours', 'carte-stat'));
+    // --- Temps ---
+    var gt = $('grille-temps');
+    var plusLongueDuree = extreme(etapes, minDe, true);
+    gt.appendChild(carte('Temps total estimé', formaterDuree(minTotal), pluriel(etapes.length, 'étape'), 'carte-stat'));
+    gt.appendChild(carte('Déjà roulé', formaterDuree(minFait), pluriel(faites.length, 'étape') + ' faite' + (faites.length > 1 ? 's' : ''), 'carte-stat'));
+    gt.appendChild(carte('Reste à rouler', formaterDuree(minTotal - minFait), pluriel(restants, 'étape') + ' restante' + (restants > 1 ? 's' : ''), 'carte-stat'));
+    if (plusLongueDuree) gt.appendChild(carte('Plus longue durée', formaterDuree(minDe(plusLongueDuree)), trajet(plusLongueDuree), 'carte-stat'));
     // --- Météo ---
     var avecMeteo = etapes.filter(function (e) { return e.fait && e.meteo; });
     if (avecMeteo.length) {
