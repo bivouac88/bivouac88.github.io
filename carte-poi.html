@@ -221,13 +221,16 @@ new ResizeObserver(function () { carte.invalidateSize(); }).observe(cadre);
   }).addTo(carte);
 B88.geo(function (pos) {
   if (!pos) return;
+  positionUtilisateur = pos;
   L.circleMarker([pos.lat, pos.lon], {
     radius: 8, color: '#3b82f6', fillColor: '#3b82f6', fillOpacity: 0.9, weight: 2
   }).addTo(carte).bindTooltip('Vous êtes ici', { direction: 'top', offset: [0, -8] });
+  boutonPosition._b.style.display = '';
 });
   const points = [];             // {nom, groupes, lat, lon, id, cat}
   const cats = {};               // nom -> {n, actif, groupe, couleur, emoji, libelle, icone, li, cb}
   let recherche = '';
+  let positionUtilisateur = null;
 
   function echapper(t) {
     return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) {
@@ -250,6 +253,23 @@ B88.geo(function (pos) {
   });
   const boutonPlein = new BoutonPlein().addTo(carte);
 
+  // ----- Vous êtes ici -----
+  const BoutonPosition = L.Control.extend({
+    options: { position: 'topright' },
+    onAdd: function () {
+      const b = L.DomUtil.create('button', 'btn-plein');
+      b.type = 'button';
+      b.textContent = 'Vous êtes ici';
+      b.style.display = 'none';
+      L.DomEvent.disableClickPropagation(b);
+      L.DomEvent.on(b, 'click', function () {
+        if (positionUtilisateur) carte.setView([positionUtilisateur.lat, positionUtilisateur.lon], 15);
+      });
+      this._b = b;
+      return b;
+    }
+  });
+  const boutonPosition = new BoutonPosition().addTo(carte);
   function estPlein() {
     return cadre.classList.contains('plein') || document.fullscreenElement === cadre;
   }
