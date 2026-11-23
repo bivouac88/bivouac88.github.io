@@ -66,21 +66,24 @@ function b88Geo(conteneur, callback, forcer) {
       { enableHighAccuracy: true, timeout: 10000 }
     );
   }
-
-if (!forcer && choix === true) {
+// Si la personne a déjà accepté, le bouton sert simplement à
+// récupérer sa position et à recentrer la carte.
+if (choix === true) {
   obtenirPosition();
   return;
 }
-
-if ((!forcer && choix === false) || !conteneur) {
+// Si elle avait refusé, le bouton lui permet de changer d'avis.
+if (choix === false && !forcer) {
   callback(null);
   return;
 }
-
+if (!conteneur) {
+  callback(null);
+  return;
+}
   var panneau = document.createElement('section');
   panneau.className = 'b88-geo-consent';
   panneau.setAttribute('aria-live', 'polite');
-
   var texte = document.createElement('p');
   texte.textContent =
     'Pour personnaliser la carte et la météo, Bivouac88 peut utiliser votre position. ' +
