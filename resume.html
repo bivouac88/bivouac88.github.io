@@ -185,8 +185,8 @@ main{padding:14px 12px 64px}
       <div class="flip-unit"><div class="flip-carte"><b id="c-s">--</b></div><small>Sec</small></div>
     </div>
   </div>
-  <div id="bloc-prochaine" class="prochaine-carte" role="button" tabindex="0">
-    <div class="prochaine-etiquette">Prochaine étape</div>
+  <div id="bloc-prochaine" class="prochaine-carte">
+  <div class="prochaine-etiquette">Prochaine étape</div>
     <div class="prochaine-trajet"><span id="p-jour"></span><span id="p-dep"></span><i>→</i><span id="p-arr"></span></div>
     <div class="prochaine-meta"><span id="p-km">–</span><span id="p-denivele">–</span><span id="p-temps">–</span></div>
   </div>
@@ -287,61 +287,52 @@ main{padding:14px 12px 64px}
     });
   };
 
-  function afficherStats(t, etapes) {
-    var totalJours = t.jours || etapes.length;
-    var faitsJours = t.jours_faits || 0;
-    var restantsJours = Math.max(0, totalJours - faitsJours);
-    var pluriel = function (n, mot) { return n + ' ' + mot + (n > 1 ? 's' : ''); };
-    var avancement = Number(t.avancement) || 0;
+function afficherStats(t, etapes) {
+  var totalJours = t.jours || etapes.length;
+  var faitsJours = t.jours_faits || 0;
+  var restantsJours = Math.max(0, totalJours - faitsJours);
+  var pluriel = function (n, mot) { return n + ' ' + mot + (n > 1 ? 's' : ''); };
+  var avancement = Number(t.avancement) || 0;
 
-    $('s-etapes').textContent = faitsJours + ' / ' + totalJours;
-    $('s-etapes-detail').textContent = restantsJours + ' restante' + (restantsJours > 1 ? 's' : '');
-    $('s-km').textContent = fmt(t.km_faits) + ' km';
-    if (t.km_total) $('s-km-detail').textContent = 'sur ' + fmt(t.km_total) + ' km';
-    $('s-reste').textContent = fmt(t.km_restants) + ' km';
-    $('s-reste-detail').textContent = pluriel(restantsJours, 'étape');
-    $('s-d').textContent = '+' + fmt(t.denivele_fait) + ' m';
-    if (t.denivele_total) $('s-d-detail').textContent = 'sur +' + fmt(t.denivele_total) + ' m';
-    $('pct').textContent = avancement + ' %';
-    if (t.km_total) $('avance-resume').textContent = fmt(t.km_faits) + ' / ' + fmt(t.km_total) + ' km';
-    setTimeout(function () { $('barre').style.width = Math.min(100, Math.max(0, avancement)) + '%'; }, 100);
+  $('s-etapes').textContent = faitsJours + ' / ' + totalJours;
+  $('s-etapes-detail').textContent = restantsJours + ' restante' + (restantsJours > 1 ? 's' : '');
+  $('s-km').textContent = fmt(t.km_faits) + ' km';
+  if (t.km_total !== undefined) $('s-km-detail').textContent = 'sur ' + fmt(t.km_total) + ' km';
+  $('s-reste').textContent = fmt(t.km_restants) + ' km';
+  $('s-reste-detail').textContent = pluriel(restantsJours, 'étape');
+  $('s-d').textContent = '+' + fmt(t.denivele_fait) + ' m';
+  if (t.denivele_total !== undefined) $('s-d-detail').textContent = 'sur +' + fmt(t.denivele_total) + ' m';
+  $('pct').textContent = avancement + ' %';
+  if (t.km_total !== undefined) $('avance-resume').textContent = fmt(t.km_faits) + ' / ' + fmt(t.km_total) + ' km';
+  setTimeout(function () { $('barre').style.width = Math.min(100, Math.max(0, avancement)) + '%'; }, 100);
 
-    if (!etapes.length) return;
-    var kmTotal = t.km_total || etapes.reduce(function (a, e) { return a + (e.km || 0); }, 0);
-    $('s-km-moyen').textContent = fmtDec(kmTotal / (totalJours || 1), 1) + ' km';
-    $('s-km-moyen-detail').textContent = totalJours + ' étapes au total';
+  // Seule la moyenne globale reste calculable sans exposer le détail des étapes futures.
+  var kmTotal = Number(t.km_total) || 0;
+  $('s-km-moyen').textContent = fmtDec(totalJours ? kmTotal / totalJours : 0, 1) + ' km';
+  $('s-km-moyen-detail').textContent = totalJours + ' étapes au total';
 
-    var maxKm = null, maxD = null;
-    etapes.forEach(function (e) {
-      if (!maxKm || (e.km || 0) > (maxKm.km || 0)) maxKm = e;
-      if (!maxD || (e.denivele || 0) > (maxD.denivele || 0)) maxD = e;
-    });
-    $('s-max-km').textContent = fmtDec(maxKm.km, 1) + ' km';
-    $('s-max-km-detail').textContent = maxKm.depart + ' → ' + maxKm.arrivee;
-    $('s-max-d').textContent = '+' + fmt(maxD.denivele) + ' m';
-    $('s-max-d-detail').textContent = maxD.depart + ' → ' + maxD.arrivee;
+  // Ces records et la durée totale ne sont plus transmis par le serveur.
+  // On masque donc leurs cartes plutôt que d'afficher des valeurs partielles ou fausses.
+  var cartes = document.querySelectorAll('.stats-secondaires .stat-secondaire');
+  [1, 2, 3].forEach(function (index) {
+    if (cartes[index]) cartes[index].style.display = 'none';
+  });
 
-    $('s-temps-total').textContent = formaterDuree(etapes.reduce(function (a, e) { return a + parseMinutes(e.temps); }, 0));
-    $('s-etapes-restantes-detail').textContent = pluriel(restantsJours, 'étape') + (restantsJours > 1 ? ' restantes' : ' restante');
-
-    var prochaine = etapes.find(function (e) { return !e.fait; });
-    var bloc = $('bloc-prochaine');
-    if (prochaine) {
-      bloc.style.display = 'block';
-      $('p-jour').textContent = 'Étape ' + prochaine.jour + ' · ';
-      $('p-dep').textContent = prochaine.depart;
-      $('p-arr').textContent = prochaine.arrivee;
-      $('p-km').textContent = fmtDec(prochaine.km, 1) + ' km';
-      $('p-denivele').textContent = '+' + fmt(prochaine.denivele) + ' m';
-      $('p-temps').textContent = prochaine.temps || '';
-      bloc.onclick = function () { zoomer(prochaine.jour); };
-      bloc.onkeydown = function (evt) {
-        if (evt.key === 'Enter' || evt.key === ' ') { evt.preventDefault(); zoomer(prochaine.jour); }
-      };
-    } else {
-      bloc.style.display = 'none';
-    }
+  var prochaine = etapes.find(function (e) { return !e.fait; });
+  var bloc = $('bloc-prochaine');
+  if (prochaine) {
+    bloc.style.display = 'block';
+    $('p-jour').textContent = 'Étape ' + prochaine.jour + ' · ';
+    $('p-dep').textContent = prochaine.depart;
+    $('p-arr').textContent = prochaine.arrivee;
+    var meta = bloc.querySelector('.prochaine-meta');
+    if (meta) meta.style.display = 'none';
+    bloc.onclick = null;
+    bloc.onkeydown = null;
+  } else {
+    bloc.style.display = 'none';
   }
+}
 
   function afficherJournal(etapes) {
     var ol = $('journal');
