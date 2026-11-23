@@ -469,29 +469,6 @@
       'sur tout le parcours',
       'carte-stat'
     ));
-    // --- Records ---
-    var gr = $('grille-records');
-    var plusLongue = extreme(etapes, kmDe, true);
-    var plusCourte = extreme(etapes, kmDe, false);
-    var plusGrosD = extreme(etapes, denDe, true);
-    var plusPetitD = extreme(etapes, denDe, false);
-    if (plusLongue) gr.appendChild(carte('Plus longue étape', fmtDec(plusLongue.km, 1) + ' km', trajet(plusLongue), 'carte-record'));
-    if (plusCourte) gr.appendChild(carte('Plus courte étape', fmtDec(plusCourte.km, 1) + ' km', trajet(plusCourte), 'carte-record'));
-    if (plusGrosD) gr.appendChild(carte('Plus gros dénivelé', '+' + fmt(plusGrosD.denivele) + ' m', trajet(plusGrosD), 'carte-record'));
-    if (plusPetitD) gr.appendChild(carte('Plus petit dénivelé', '+' + fmt(plusPetitD.denivele) + ' m', trajet(plusPetitD), 'carte-record'));
-    // --- Moyennes ---
-    var gm = $('grille-moyennes');
-    gm.appendChild(carte('Km / étape', fmtDec(kmTotal / etapes.length, 1) + ' km', 'sur ' + etapes.length + ' étapes', 'carte-stat'));
-    gm.appendChild(carte('Dénivelé / étape', '+' + fmt(Math.round(denTotal / etapes.length)) + ' m', 'sur ' + etapes.length + ' étapes', 'carte-stat'));
-    gm.appendChild(carte('Durée / étape', formaterDuree(minTotal / etapes.length), 'temps estimé', 'carte-stat'));
-    gm.appendChild(carte('Dénivelé / 100 km', '+' + fmt(kmTotal ? Math.round(denTotal / kmTotal * 100) : 0) + ' m', 'sur tout le parcours', 'carte-stat'));
-    // --- Temps ---
-    var gt = $('grille-temps');
-    var plusLongueDuree = extreme(etapes, minDe, true);
-    gt.appendChild(carte('Temps total estimé', formaterDuree(minTotal), pluriel(etapes.length, 'étape'), 'carte-stat'));
-    gt.appendChild(carte('Déjà roulé', formaterDuree(minFait), pluriel(faites.length, 'étape') + ' faite' + (faites.length > 1 ? 's' : ''), 'carte-stat'));
-    gt.appendChild(carte('Reste à rouler', formaterDuree(minTotal - minFait), pluriel(restants, 'étape') + ' restante' + (restants > 1 ? 's' : ''), 'carte-stat'));
-    if (plusLongueDuree) gt.appendChild(carte('Plus longue durée', formaterDuree(minDe(plusLongueDuree)), trajet(plusLongueDuree), 'carte-stat'));
     // --- Météo ---
     var avecMeteo = etapes.filter(function (e) { return e.fait && e.meteo; });
     if (avecMeteo.length) {
