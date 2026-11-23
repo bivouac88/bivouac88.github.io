@@ -31,6 +31,30 @@ section { margin-bottom: 32px; }
 .pos { font: 500 11px var(--mono); color: var(--accent); border: 1px solid var(--accent-trait); border-radius: 6px; padding: 3px 8px; white-space: nowrap; }
 .pos.warn { color: var(--discret); border-color: var(--trait); }
 .sous-titre-page .pos { margin-left: 8px; }
+  .b88-geo-consent {
+  margin: 12px 0;
+  padding: 14px;
+  border: 1px solid var(--trait);
+  border-radius: 10px;
+  background: var(--carte);
+  color: var(--papier);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.b88-geo-consent p {
+  margin: 0 0 12px;
+}
+
+.b88-geo-consent button {
+  margin: 4px 6px 4px 0;
+  padding: 9px 12px;
+  border: 1px solid var(--trait);
+  border-radius: 6px;
+  background: var(--fond);
+  color: var(--papier);
+  cursor: pointer;
+}
 .etat { color: var(--discret); font: 400 13px var(--mono); padding: 8px 0; }
 h2.bloc { display: flex; align-items: baseline; gap: 8px; font: 600 18px var(--serif); letter-spacing: -0.01em; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--trait); }
 /* Onglets */
@@ -245,8 +269,9 @@ body.pause .couche-nuages, body.pause .sc, body.pause #fond-meteo::after { anima
       <button type="button" role="tab" data-tab="liste" aria-selected="false">Liste</button>
     </div>
   </div>
-  <div id="erreur"></div>
-  <div id="tab-meteo">
+<div id="erreur"></div>
+<div id="consentement-gps"></div>
+<div id="tab-meteo">
     <div id="meteo"><div class="etat">Localisation en cours…</div></div>
     <section id="poissons-mois"><div class="etat">Chargement des espèces…</div></section>
   </div>
@@ -1107,23 +1132,22 @@ function $(id) { return document.getElementById(id); }
     else placerAstre();
     });
   }
-  if (!navigator.geolocation) {
-    erreur('Géolocalisation indisponible sur cet appareil. Position par défaut : Namur.');
-    demarrer(50.4669, 4.8674);
-    return;
-  }
-  navigator.geolocation.getCurrentPosition(
-    function (p) {
-      demarrer(p.coords.latitude, p.coords.longitude);
-      if (p.coords.accuracy > 5000) {
-        var b = $('pos');
-        b.textContent += ' · ±' + Math.round(p.coords.accuracy / 1000) + ' km';
-        b.className = 'pos warn';
-      }
-    },
-    function () { erreur('Position refusée. Position par défaut : Namur.'); demarrer(50.4669, 4.8674); },
-    { enableHighAccuracy: true, timeout: 10000 }
-  );
+  B88.geo($('consentement-gps'), function (p) {
+    if (!p) {
+      $('pos').textContent = 'Position par défaut : Namur';
+      $('pos').className = 'pos warn';
+      demarrer(50.4669, 4.8674);
+      return;
+    }
+
+    demarrer(p.lat, p.lon);
+
+    if (p.accuracy > 5000) {
+      var b = $('pos');
+      b.textContent += ' · ±' + Math.round(p.accuracy / 1000) + ' km';
+      b.className = 'pos warn';
+    }
+  });
 })();
 </script>
 <script>
