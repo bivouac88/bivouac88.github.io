@@ -463,13 +463,10 @@ var denTotalServeur = Number(t.denivele_total) || 0;
 var minTotalServeur = Number(t.temps_total_min) || 0;
 gm.appendChild(carte('Km / étape', fmtDec(total ? kmTotalServeur / total : 0, 1) + ' km', 'sur ' + total + ' étapes', 'carte-stat'));
 gm.appendChild(carte('Dénivelé / étape', '+' + fmt(total ? Math.round(denTotalServeur / total) : 0) + ' m', 'sur ' + total + ' étapes', 'carte-stat'));
-gm.appendChild(carte('Durée / étape', formaterDuree(total ? minTotalServeur / total : 0), 'temps estimé', 'carte-stat'));
-gm.appendChild(carte('Dénivelé / 100 km', '+' + fmt(kmTotalServeur ? Math.round(denTotalServeur / kmTotalServeur * 100) : 0) + ' m', 'sur tout le parcours', 'carte-stat'));
 // --- Temps ---
 var gt = $('grille-temps');
 gt.appendChild(carte('Temps total estimé', formaterDuree(minTotalServeur), pluriel(total, 'étape'), 'carte-stat'));
 gt.appendChild(carte('Déjà roulé', formaterDuree(minFait), pluriel(faites.length, 'étape') + ' faite' + (faites.length > 1 ? 's' : ''), 'carte-stat'));
-gt.appendChild(carte('Reste à rouler', formaterDuree(minTotalServeur - minFait), pluriel(restants, 'étape') + ' restante' + (restants > 1 ? 's' : ''), 'carte-stat'));
 var plusLongueDuree = extreme(faites, minDe, true);
 if (plusLongueDuree) gt.appendChild(carte('Plus longue durée', formaterDuree(minDe(plusLongueDuree)), trajet(plusLongueDuree), 'carte-stat'));
     // --- Météo ---
