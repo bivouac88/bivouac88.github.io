@@ -242,7 +242,7 @@ new ResizeObserver(function () { carte.invalidateSize(); }).observe(cadre);
     chunkedLoading: true, maxClusterRadius: 20, showCoverageOnHover: false,
     disableClusteringAtZoom: 15
   }).addTo(carte);
-B88.geo(document.getElementById('geo-consent'), function (pos) {
+B88.geo(document.getElementById('consentement-gps'), function (pos) {
   if (!pos) return;
   positionUtilisateur = pos;
   L.circleMarker([pos.lat, pos.lon], {
