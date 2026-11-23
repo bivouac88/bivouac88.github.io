@@ -265,19 +265,10 @@ function appliquerPosition(pos) {
   carte.setView([pos.lat, pos.lon], 15);
 }
   
-B88.geo(document.getElementById('consentement-gps'), appliquerPosition);
-boutonPosition._b.addEventListener('click', function () {
-  B88.geo(
-    document.getElementById('consentement-gps'),
-    appliquerPosition,
-    true
-  );
-});
   const points = [];             // {nom, groupes, lat, lon, id, cat}
   const cats = {};               // nom -> {n, actif, groupe, couleur, emoji, libelle, icone, li, cb}
   let recherche = '';
-  let positionUtilisateur = null;
-
+  
   function echapper(t) {
     return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) {
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
@@ -329,6 +320,14 @@ boutonPosition._b.addEventListener('click', function () {
     }
   });
   const boutonPosition = new BoutonPosition().addTo(carte);
+  B88.geo(document.getElementById('consentement-gps'), appliquerPosition);
+boutonPosition._b.addEventListener('click', function () {
+  B88.geo(
+    document.getElementById('consentement-gps'),
+    appliquerPosition,
+    true
+  );
+});
   function estPlein() {
     return cadre.classList.contains('plein') || document.fullscreenElement === cadre;
   }
