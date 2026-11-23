@@ -25,22 +25,102 @@ function b88Cache(cle, fetcher, callback) {
     callback(data, true);
   });
 }
-function b88Geo(callback) {
+function b88Geo(conteneur, callback) {
+  var CLE = 'b88-gps-choice';
+  var DUREE = 30 * 24 * 60 * 60 * 1000;
+  var choix = null;
+
+  function memoriser(valeur) {
+    try {
+      localStorage.setItem(CLE, JSON.stringify({
+        value: valeur,
+        expires: Date.now() + DUREE
+      }));
+    } catch (e) {}
+  }
+
   try {
-    var brut = sessionStorage.getItem('b88-geo');
-    if (brut) { callback(JSON.parse(brut)); return; }
+    var sauvegarde = JSON.parse(localStorage.getItem(CLE));
+    if (sauvegarde && sauvegarde.expires > Date.now()) {
+      choix = sauvegarde.value === true;
+    } else {
+      localStorage.removeItem(CLE);
+    }
   } catch (e) {}
-  if (!navigator.geolocation) { callback(null); return; }
-  navigator.geolocation.getCurrentPosition(
-    function (pos) {
-      var p = { lat: pos.coords.latitude, lon: pos.coords.longitude };
-      try { sessionStorage.setItem('b88-geo', JSON.stringify(p)); } catch (e) {}
-      callback(p);
-    },
-    function () { callback(null); }
-  );
+
+  function obtenirPosition() {
+    if (!navigator.geolocation) {
+      callback(null);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      function (pos) {
+        callback({
+          lat: pos.coords.latitude,
+          lon: pos.coords.longitude,
+          accuracy: pos.coords.accuracy
+        });
+      },
+      function () { callback(null); },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }
+
+  if (choix === true) {
+    obtenirPosition();
+    return;
+  }
+
+  if (choix === false || !conteneur) {
+    callback(null);
+    return;
+  }
+
+  var panneau = document.createElement('section');
+  panneau.className = 'b88-geo-consent';
+  panneau.setAttribute('aria-live', 'polite');
+
+  var texte = document.createElement('p');
+  texte.textContent =
+    'Pour personnaliser la carte et la météo, Bivouac88 peut utiliser votre position. ' +
+    'Les coordonnées sont transmises à Open-Meteo pour les prévisions. ' +
+    'OpenStreetMap peut déduire la zone affichée sur la carte. ' +
+    'Bivouac88 ne reçoit ni ne conserve vos coordonnées. Votre choix est mémorisé 30 jours.';
+
+  var accepter = document.createElement('button');
+  accepter.type = 'button';
+  accepter.textContent = 'Utiliser ma position';
+
+  var refuser = document.createElement('button');
+  refuser.type = 'button';
+  refuser.textContent = 'Continuer sans GPS';
+
+  panneau.appendChild(texte);
+  panneau.appendChild(accepter);
+  panneau.appendChild(refuser);
+  conteneur.appendChild(panneau);
+
+  accepter.addEventListener('click', function () {
+    memoriser(true);
+    panneau.remove();
+    obtenirPosition();
+  });
+
+  refuser.addEventListener('click', function () {
+    memoriser(false);
+    panneau.remove();
+    callback(null);
+  });
 }
-window.B88 = Object.freeze({ DON_URL: DON_URL, racine: dossier, esc: esc, cache: b88Cache, geo: b88Geo });
+
+window.B88 = Object.freeze({
+  DON_URL: DON_URL,
+  racine: dossier,
+  esc: esc,
+  cache: b88Cache,
+  geo: b88Geo
+});
 
    
 // ---- Conserver le mode admin pendant la navigation interne ----
