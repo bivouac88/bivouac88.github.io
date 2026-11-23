@@ -445,10 +445,6 @@
     var denTotal = Number(t.denivele_total) || 0;
     var faites = etapes.filter(function (e) { return e.fait; });
 
-    // Les records et les temps ne sont plus calculables sans les détails futurs.
-    $('section-records').style.display = 'none';
-    $('section-temps').style.display = 'none';
-
     // --- Moyennes globales ---
     var gm = $('grille-moyennes');
     gm.appendChild(carte(
