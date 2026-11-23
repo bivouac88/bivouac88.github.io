@@ -310,7 +310,7 @@
   </section>
 
   <!-- 2. Records -->
-  <section class="section">
+  <section class="section" id="section-records">
     <h2 class="titre-section">Records</h2>
     <div class="grille" id="grille-records"></div>
   </section>
@@ -321,7 +321,7 @@
       <h2 class="titre-section">Moyennes</h2>
       <div class="grille" id="grille-moyennes"></div>
     </section>
-    <section class="section">
+    <section class="section" id="section-temps">
       <h2 class="titre-section">Temps de roulage</h2>
       <div class="grille" id="grille-temps"></div>
     </section>
@@ -440,12 +440,35 @@
     $('pct').textContent = t.avancement + ' %';
     if (t.km_total) $('avance-resume').textContent = fmt(t.km_faits) + ' / ' + fmt(t.km_total) + ' km';
     setTimeout(function () { $('barre').style.width = t.avancement + '%'; }, 100);
-    if (!etapes.length) return;
-    var kmTotal = somme(etapes, kmDe);
-    var denTotal = somme(etapes, denDe);
-    var minTotal = somme(etapes, minDe);
+    // Les totaux globaux viennent du serveur, jamais du détail des étapes publiées.
+    var kmTotal = Number(t.km_total) || 0;
+    var denTotal = Number(t.denivele_total) || 0;
     var faites = etapes.filter(function (e) { return e.fait; });
-    var minFait = somme(faites, minDe);
+
+    // Les records et les temps ne sont plus calculables sans les détails futurs.
+    $('section-records').style.display = 'none';
+    $('section-temps').style.display = 'none';
+
+    // --- Moyennes globales ---
+    var gm = $('grille-moyennes');
+    gm.appendChild(carte(
+      'Km / étape',
+      fmtDec(total ? kmTotal / total : 0, 1) + ' km',
+      'sur ' + total + ' étapes',
+      'carte-stat'
+    ));
+    gm.appendChild(carte(
+      'Dénivelé / étape',
+      '+' + fmt(total ? Math.round(denTotal / total) : 0) + ' m',
+      'sur ' + total + ' étapes',
+      'carte-stat'
+    ));
+    gm.appendChild(carte(
+      'Dénivelé / 100 km',
+      '+' + fmt(kmTotal ? Math.round(denTotal / kmTotal * 100) : 0) + ' m',
+      'sur tout le parcours',
+      'carte-stat'
+    ));
     // --- Records ---
     var gr = $('grille-records');
     var plusLongue = extreme(etapes, kmDe, true);
@@ -504,8 +527,8 @@
         function (v) { return v === null ? 'pas encore de météo' : fmtDec(v, 0) + '°'; });
     }
     // --- Graphiques ---
-    graphique('graph-km', 'info-km', etapes, kmDe, function (v) { return fmtDec(v, 1) + ' km'; });
-    graphique('graph-d', 'info-d', etapes, denDe, function (v) { return '+' + fmt(v) + ' m'; });
+    graphique('graph-km', 'info-km', faites, kmDe, function (v) { return fmtDec(v, 1) + ' km'; });
+    graphique('graph-d', 'info-d', faites, denDe, function (v) { return '+' + fmt(v) + ' m'; });
   }
   function graphique(idBarres, idInfo, etapes, valeurDe, formater) {
     var zone = $(idBarres), info = $(idInfo);
