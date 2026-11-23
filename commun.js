@@ -25,8 +25,8 @@ function b88Cache(cle, fetcher, callback) {
     callback(data, true);
   });
 }
-function b88Geo(conteneur, callback) {
-  var CLE = 'b88-gps-choice';
+function b88Geo(conteneur, callback, forcer) {
+   var CLE = 'b88-gps-choice';
   var DUREE = 30 * 24 * 60 * 60 * 1000;
   var choix = null;
 
@@ -67,15 +67,15 @@ function b88Geo(conteneur, callback) {
     );
   }
 
-  if (choix === true) {
-    obtenirPosition();
-    return;
-  }
+if (!forcer && choix === true) {
+  obtenirPosition();
+  return;
+}
 
-  if (choix === false || !conteneur) {
-    callback(null);
-    return;
-  }
+if ((!forcer && choix === false) || !conteneur) {
+  callback(null);
+  return;
+}
 
   var panneau = document.createElement('section');
   panneau.className = 'b88-geo-consent';
