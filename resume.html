@@ -314,10 +314,6 @@ function afficherStats(t, etapes) {
   // Ces records et la durée totale ne sont plus transmis par le serveur.
   // On masque donc leurs cartes plutôt que d'afficher des valeurs partielles ou fausses.
   var cartes = document.querySelectorAll('.stats-secondaires .stat-secondaire');
-  [1, 2, 3].forEach(function (index) {
-    if (cartes[index]) cartes[index].style.display = 'none';
-  });
-
   var prochaine = etapes.find(function (e) { return !e.fait; });
   var bloc = $('bloc-prochaine');
   if (prochaine) {
