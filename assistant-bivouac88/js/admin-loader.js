@@ -1,98 +1,159 @@
 
-// admin-loader.js — chargement conditionnel et sécurisé du Bivouaciste
+ // admin-loader.js — Bivouaciste avec authentification Cloudflare
 
 const B88_AUTH_URL = 'https://bivouac88-auth.antonista04.workers.dev';
 const B88_TOKEN_KEY = 'b88_admin_session';
+const B88_LOGIN_KEY = 'b88_login_started';
+
+function showAdminError(message) {
+  const box = document.createElement('div');
+  box.style.cssText = [
+    'position:fixed',
+    'z-index:999999',
+    'top:15px',
+    'left:15px',
+    'right:15px',
+    'padding:18px',
+    'background:#54201c',
+    'color:white',
+    'font:14px sans-serif',
+    'border-radius:8px',
+    'text-align:center'
+  ].join(';');
+
+  const text = document.createElement('p');
+  text.textContent = message;
+
+  const button = document.createElement('button');
+  button.textContent = 'Recommencer la connexion GitHub';
+  button.style.cssText = 'padding:10px 16px;margin-top:10px;cursor:pointer;';
+
+  button.addEventListener('click', () => {
+    sessionStorage.removeItem(B88_TOKEN_KEY);
+    sessionStorage.removeItem(B88_LOGIN_KEY);
+
+    const returnUrl = new URL(window.location.href);
+    returnUrl.hash = '';
+
+    window.location.href =
+      B88_AUTH_URL + '/login?return=' +
+      encodeURIComponent(returnUrl.toString());
+  });
+
+  box.append(text, button);
+  document.body.appendChild(box);
+}
+
+async function authenticateAdmin() {
+  const hashParams = new URLSearchParams(window.location.hash.slice(1));
+  const callbackToken = hashParams.get('b88_admin_token');
+
+  // Jeton reçu après le retour de GitHub.
+  if (callbackToken) {
+    sessionStorage.setItem(B88_TOKEN_KEY, callbackToken);
+    sessionStorage.removeItem(B88_LOGIN_KEY);
+
+    window.history.replaceState(
+      null,
+      '',
+      window.location.pathname + window.location.search
+    );
+  }
+
+  const token = sessionStorage.getItem(B88_TOKEN_KEY);
+
+  // Aucun jeton : une seule tentative de connexion.
+  if (!token) {
+    if (sessionStorage.getItem(B88_LOGIN_KEY) === '1') {
+      showAdminError(
+        'Le retour de connexion GitHub ne contient pas de session valide.'
+      );
+      return false;
+    }
+
+    sessionStorage.setItem(B88_LOGIN_KEY, '1');
+
+    const returnUrl = new URL(window.location.href);
+    returnUrl.hash = '';
+
+    window.location.replace(
+      B88_AUTH_URL + '/login?return=' +
+      encodeURIComponent(returnUrl.toString())
+    );
+
+    return false;
+  }
+
+  // Vérification auprès de Cloudflare.
+  let response;
+
+  try {
+    response = await fetch(B88_AUTH_URL + '/verify', {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer ' + token
+      },
+      cache: 'no-store'
+    });
+  } catch (error) {
+    showAdminError(
+      'Impossible de joindre le service Cloudflare. Le panneau reste verrouillé.'
+    );
+    return false;
+  }
+
+  if (!response.ok) {
+    sessionStorage.removeItem(B88_TOKEN_KEY);
+    sessionStorage.removeItem(B88_LOGIN_KEY);
+
+    showAdminError(
+      'Cloudflare a refusé ou ne reconnaît plus cette session. Recommence la connexion.'
+    );
+    return false;
+  }
+
+  let result;
+
+  try {
+    result = await response.json();
+  } catch {
+    showAdminError('Réponse invalide du service Cloudflare.');
+    return false;
+  }
+
+  if (
+    result.ok !== true ||
+    result.user?.id !== '341067011' ||
+    result.user?.login !== 'bivouac88'
+  ) {
+    sessionStorage.removeItem(B88_TOKEN_KEY);
+    sessionStorage.removeItem(B88_LOGIN_KEY);
+
+    showAdminError('Le compte authentifié ne correspond pas au compte administrateur.');
+    return false;
+  }
+
+  sessionStorage.removeItem(B88_LOGIN_KEY);
+  console.info('[Bivouaciste] Administrateur authentifié.');
+
+  return true;
+}
 
 (async function () {
   try {
     const isAdmin =
       new URLSearchParams(window.location.search).get('edit') === 'bivouac88admin';
 
-    // 1. Authentification obligatoire avant tout chargement du panneau.
+    // Authentification AVANT tout chargement du panneau.
     if (isAdmin) {
-      const hashParams = new URLSearchParams(window.location.hash.slice(1));
-      const callbackToken = hashParams.get('b88_admin_token');
-
-      // Récupérer le jeton temporaire transmis par Cloudflare.
-      if (callbackToken) {
-        sessionStorage.setItem(B88_TOKEN_KEY, callbackToken);
-
-        // Retirer le jeton de l'adresse visible.
-        window.history.replaceState(
-          null,
-          '',
-          window.location.pathname + window.location.search
-        );
-      }
-
-      let token = sessionStorage.getItem(B88_TOKEN_KEY);
-
-      // Aucun jeton : démarrer la connexion GitHub.
-      if (!token) {
-        const returnUrl = new URL(window.location.href);
-        returnUrl.hash = '';
-
-        window.location.replace(
-          B88_AUTH_URL + '/login?return=' +
-          encodeURIComponent(returnUrl.toString())
-        );
-        return;
-      }
-
-      // Vérifier le jeton auprès du Worker.
-      let authResponse;
-
-      try {
-        authResponse = await fetch(B88_AUTH_URL + '/verify', {
-          method: 'POST',
-          headers: {
-            'Authorization': 'Bearer ' + token
-          },
-          cache: 'no-store'
-        });
-      } catch (error) {
-        throw new Error(
-          'Impossible de contacter le service d’authentification Cloudflare.'
-        );
-      }
-
-      // Jeton refusé ou expiré : nouvelle connexion.
-      if (authResponse.status === 401) {
-        sessionStorage.removeItem(B88_TOKEN_KEY);
-
-        const returnUrl = new URL(window.location.href);
-        returnUrl.hash = '';
-
-        window.location.replace(
-          B88_AUTH_URL + '/login?return=' +
-          encodeURIComponent(returnUrl.toString())
-        );
-        return;
-      }
-
-      if (!authResponse.ok) {
-        throw new Error('La vérification de ton identité a échoué.');
-      }
-
-      const authData = await authResponse.json();
-
-      if (
-        authData.ok !== true ||
-        authData.user?.id !== '341067011' ||
-        authData.user?.login !== 'bivouac88'
-      ) {
-        sessionStorage.removeItem(B88_TOKEN_KEY);
-        throw new Error('Compte GitHub non autorisé.');
-      }
-
-      console.info('[Bivouaciste] Administrateur authentifié.');
+      const authorized = await authenticateAdmin();
+      if (!authorized) return;
     }
 
     const racine = window.B88?.racine || '';
     const url = racine + 'assistant-bivouac88/js/scenes-v2.json';
 
-    // 2. Charger les scènes.
+    // Charger les scènes.
     const response = await fetch(url);
     if (!response.ok) {
       throw new Error('Impossible de charger le JSON des scènes.');
@@ -104,10 +165,9 @@ const B88_TOKEN_KEY = 'b88_admin_session';
       throw new Error('JSON des scènes invalide.');
     }
 
-    // 3. Vérifier si une scène concerne cette page et cet appareil.
+    // Déterminer les scènes adaptées à la page et à l'appareil.
     const page = document.body.dataset.page || '';
-    const width = window.innerWidth;
-    const device = width < 768 ? 'mobile' : 'pc';
+    const device = window.innerWidth < 768 ? 'mobile' : 'pc';
 
     const matchingScenes = data.scenes.filter(scene =>
       scene.enabled &&
@@ -115,7 +175,7 @@ const B88_TOKEN_KEY = 'b88_admin_session';
       scene.devices.includes(device)
     );
 
-    // Hitbox initiale : définie avant le chargement du personnage.
+    // Hitbox initiale.
     const initialScene = [...matchingScenes]
       .sort((a, b) => (Number(b.priority) || 0) - (Number(a.priority) || 0))
       .find(scene => scene.trigger?.type === 'load')
@@ -127,10 +187,10 @@ const B88_TOKEN_KEY = 'b88_admin_session';
       || data.avatar?.hitbox
       || { width: 140, height: 145, offsetX: 0, offsetY: 0 };
 
-    // Visiteur : aucun personnage si aucune scène n'est prévue ici.
+    // Visiteur sans scène : rien à charger.
     if (!isAdmin && matchingScenes.length === 0) return;
 
-    // 4. Charger les styles nécessaires.
+    // Charger les styles.
     const cssDialogue = document.createElement('link');
     cssDialogue.rel = 'stylesheet';
     cssDialogue.href = racine + 'assistant-bivouac88/css/dialogue.css';
@@ -141,18 +201,17 @@ const B88_TOKEN_KEY = 'b88_admin_session';
     cssCharacter.href = racine + 'assistant-bivouac88/css/character.css';
     document.head.appendChild(cssCharacter);
 
-    // 5. Charger le personnage, les dialogues et le lecteur de scènes.
+    // Charger les modules du Bivouaciste.
     await import('./character.js');
     await import('./dialogue.js');
     await import('./scene-reader.js');
 
-    // 6. Charger le panneau uniquement après authentification.
+    // Le contrôleur n'est chargé qu'après validation Cloudflare.
     if (isAdmin) {
       window.B88_SCENES_DATA = data;
       await import('./controller.js');
     }
 
-    // 7. Initialiser les scènes.
     window.b88InitScenes(data);
 
     console.info(
@@ -162,17 +221,11 @@ const B88_TOKEN_KEY = 'b88_admin_session';
   } catch (error) {
     console.error('[Bivouaciste] Erreur de chargement :', error);
 
-    // En cas d'erreur d'authentification, le panneau reste fermé.
-    if (
-      new URLSearchParams(window.location.search).get('edit') === 'bivouac88admin'
-    ) {
-      document.documentElement.dataset.b88AdminAuth = 'failed';
-      document.body.insertAdjacentHTML(
-        'afterbegin',
-        '<div style="position:fixed;z-index:999999;top:10px;left:10px;right:10px;padding:14px;background:#5a211c;color:white;text-align:center;font:14px sans-serif;">' +
-        'Authentification administrateur impossible. Le panneau reste verrouillé. Recharge la page pour réessayer.' +
-        '</div>'
-      );
+    const isAdmin =
+      new URLSearchParams(window.location.search).get('edit') === 'bivouac88admin';
+
+    if (isAdmin) {
+      showAdminError('Erreur de chargement : ' + error.message);
     }
   }
 })();
