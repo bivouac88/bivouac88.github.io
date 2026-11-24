@@ -1,6 +1,6 @@
 {
-  "jour_actuel": "Lundi",
-  "date_actuelle": "11/23/2026",
+  "jour_actuel": "Mardi",
+  "date_actuelle": "11/24/2026",
   "region_actuelle": "Eghezée",
   "pays_actuel": "Belgique",
   "km_total_parcouru": "",
@@ -46,8 +46,8 @@
   "description_page_stats": "description page",
   "message_ouverture_etapes": "Ici, les étapes, mon avis et commentaire sur l'étape du jour Profitez en pour laisser un like et un commentaire",
   "description_page_etapes": "description page",
-  "Lundi": "",
-  "11/23/2026": "",
+  "Mardi": "",
+  "11/24/2026": "",
   "Eghezée": "",
   "Belgique": "",
   "_questions": {
@@ -465,5 +465,5 @@
     "description_page_stats": "Ici, toutes les stats actualisée chaque jour !",
     "description_page_etapes": "Ici, les étapes, l'avis et commentaire de Tito sur l'étape du jour Profitez en pour laisser un like et un commentaire"
   },
-  "_updatedAt": "2026-11-23T23:16:17.466Z"
+  "_updatedAt": "2026-11-24T08:00:24.640Z"
 }
