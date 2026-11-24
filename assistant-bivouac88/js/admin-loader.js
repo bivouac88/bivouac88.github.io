@@ -2,7 +2,6 @@
 const B88_AUTH_URL = 'https://bivouac88-auth.antonista04.workers.dev';
 const B88_TOKEN_KEY = 'b88_admin_session';
 const B88_LOGIN_KEY = 'b88_login_started';
-
 function showAdminError(message) {
   const box = document.createElement('div');
   box.style.cssText = [
@@ -18,7 +17,6 @@ function showAdminError(message) {
     'border-radius:8px',
     'text-align:center'
   ].join(';');
-
   const text = document.createElement('p');
   text.textContent = message;
   const button = document.createElement('button');
@@ -46,14 +44,12 @@ async function authenticateAdmin() {
   if (callbackToken) {
     sessionStorage.setItem(B88_TOKEN_KEY, callbackToken);
     sessionStorage.removeItem(B88_LOGIN_KEY);
-
     window.history.replaceState(
       null,
       '',
       window.location.pathname + window.location.search
     );
   }
-
   const token = sessionStorage.getItem(B88_TOKEN_KEY);
 
   // Aucun jeton : une seule tentative de connexion.
@@ -64,23 +60,18 @@ async function authenticateAdmin() {
       );
       return false;
     }
-
     sessionStorage.setItem(B88_LOGIN_KEY, '1');
-
     const returnUrl = new URL(window.location.href);
     returnUrl.hash = '';
-
     window.location.replace(
       B88_AUTH_URL + '/login?return=' +
       encodeURIComponent(returnUrl.toString())
     );
-
     return false;
   }
 
   // Vérification auprès de Cloudflare.
   let response;
-
   try {
     response = await fetch(B88_AUTH_URL + '/verify', {
       method: 'POST',
@@ -98,7 +89,6 @@ async function authenticateAdmin() {
 
 if (!response.ok) {
     const errorDetails = await response.text();
-
     console.error('[Bivouaciste] Refus du Worker :', {
       status: response.status,
       details: errorDetails
@@ -106,22 +96,18 @@ if (!response.ok) {
 
     sessionStorage.removeItem(B88_TOKEN_KEY);
     sessionStorage.removeItem(B88_LOGIN_KEY);
-
     showAdminError(
       'Cloudflare a refusé la session (' + response.status + '). Consulte la console.'
     );
     return false;
   }
-
   let result;
-
   try {
     result = await response.json();
   } catch {
     showAdminError('Réponse invalide du service Cloudflare.');
     return false;
   }
-
   if (
     result.ok !== true ||
     result.user?.id !== '341067011' ||
@@ -129,17 +115,13 @@ if (!response.ok) {
   ) {
     sessionStorage.removeItem(B88_TOKEN_KEY);
     sessionStorage.removeItem(B88_LOGIN_KEY);
-
     showAdminError('Le compte authentifié ne correspond pas au compte administrateur.');
     return false;
   }
-
   sessionStorage.removeItem(B88_LOGIN_KEY);
   console.info('[Bivouaciste] Administrateur authentifié.');
-
   return true;
 }
-
 (async function () {
   try {
     const isAdmin =
@@ -150,7 +132,6 @@ if (!response.ok) {
       const authorized = await authenticateAdmin();
       if (!authorized) return;
     }
-
     const racine = window.B88?.racine || '';
     const url = racine + 'assistant-bivouac88/js/scenes-v2.json';
 
@@ -159,17 +140,13 @@ if (!response.ok) {
     if (!response.ok) {
       throw new Error('Impossible de charger le JSON des scènes.');
     }
-
     const data = await response.json();
-
     if (!data || data.version !== 2 || !Array.isArray(data.scenes)) {
       throw new Error('JSON des scènes invalide.');
     }
-
     // Déterminer les scènes adaptées à la page et à l'appareil.
     const page = document.body.dataset.page || '';
     const device = window.innerWidth < 768 ? 'mobile' : 'pc';
-
     const matchingScenes = data.scenes.filter(scene =>
       scene.enabled &&
       scene.pages.includes(page) &&
@@ -181,7 +158,6 @@ if (!response.ok) {
       .sort((a, b) => (Number(b.priority) || 0) - (Number(a.priority) || 0))
       .find(scene => scene.trigger?.type === 'load')
       || matchingScenes[0];
-
     window.B88_INITIAL_HITBOX =
       initialScene?.steps?.[0]?.hitbox
       || initialScene?.hitbox
