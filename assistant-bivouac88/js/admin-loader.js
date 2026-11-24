@@ -1,6 +1,4 @@
-
- // admin-loader.js — Bivouaciste avec authentification Cloudflare
-
+// admin-loader.js — Bivouaciste avec authentification Cloudflare
 const B88_AUTH_URL = 'https://bivouac88-auth.antonista04.workers.dev';
 const B88_TOKEN_KEY = 'b88_admin_session';
 const B88_LOGIN_KEY = 'b88_login_started';
@@ -23,18 +21,14 @@ function showAdminError(message) {
 
   const text = document.createElement('p');
   text.textContent = message;
-
   const button = document.createElement('button');
   button.textContent = 'Recommencer la connexion GitHub';
   button.style.cssText = 'padding:10px 16px;margin-top:10px;cursor:pointer;';
-
   button.addEventListener('click', () => {
     sessionStorage.removeItem(B88_TOKEN_KEY);
     sessionStorage.removeItem(B88_LOGIN_KEY);
-
     const returnUrl = new URL(window.location.href);
     returnUrl.hash = '';
-
     window.location.href =
       B88_AUTH_URL + '/login?return=' +
       encodeURIComponent(returnUrl.toString());
@@ -102,12 +96,19 @@ async function authenticateAdmin() {
     return false;
   }
 
-  if (!response.ok) {
+if (!response.ok) {
+    const errorDetails = await response.text();
+
+    console.error('[Bivouaciste] Refus du Worker :', {
+      status: response.status,
+      details: errorDetails
+    });
+
     sessionStorage.removeItem(B88_TOKEN_KEY);
     sessionStorage.removeItem(B88_LOGIN_KEY);
 
     showAdminError(
-      'Cloudflare a refusé ou ne reconnaît plus cette session. Recommence la connexion.'
+      'Cloudflare a refusé la session (' + response.status + '). Consulte la console.'
     );
     return false;
   }
