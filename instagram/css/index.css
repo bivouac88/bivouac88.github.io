@@ -70,6 +70,7 @@ html.insta .test-burger {
   html.insta .test-nav-links a {
     padding: 11px 2px;
     font-size: 14px;
+    text-align: right;
   }
 
   /* -----------------------------------------
