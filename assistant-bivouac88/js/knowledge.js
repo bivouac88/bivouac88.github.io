@@ -84,6 +84,18 @@ export async function loadKnowledge() {
 
 const DYNAMIC_PREFIXES = ["message_ouverture_", "description_page_"];
 
+// Clés "structurelles" (politesse, identité de l'IA...), pas de vrais
+// sujets de voyage. Elles ne doivent pas être retenues comme "sujet en
+// cours" dans la mémoire de contexte. Pour ajouter une nouvelle clé de
+// ce type un jour : il suffit de rajouter son nom ici.
+const CONVERSATIONAL_SHEET_KEYS = new Set([
+  "niamh",
+  "role_niamh",
+  "conversation",
+  "remerciement",
+  "au_revoir"
+]);
+
 export function buildIntentsFromLiveData(liveData = {}) {
   const questionCatalog = liveData._questions || {};
   const responses = liveData._responses || {};
@@ -111,7 +123,8 @@ export function buildIntentsFromLiveData(liveData = {}) {
       label: key.replace(/_/g, " "),
       keywords: formulations, // tes phrases de la colonne "questions", déjà splittées sur ";"
       answers: [answerText],
-      source: "sheet" // marqueur utile pour debug/filtrage plus tard
+      source: "sheet",
+      conversational: CONVERSATIONAL_SHEET_KEYS.has(key)
     });
   }
 
