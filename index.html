@@ -70,48 +70,22 @@
       background: var(--carte, #1b1612);
       border-bottom: 1px solid var(--trait, #342a22);
     }
-
-.test-logo {
-  position: absolute;
-  z-index: 4;
-  top: 24px;
-  left: clamp(24px, calc(5vw + 20px), 100px);
-  width: 200px;
-  height: 200px;
-  display: block;
-  overflow: visible;
-  transform: scale(1.5);
-  transform-origin: top left;
-}
-
-    /* Logo rond, centré dans la couronne de feuilles */
-    .test-logo img.logo-photo {
+    /* Logo unique Lost but Free */
+    .test-logo {
       position: absolute;
-      z-index: 3;
-      top: 52px;
-      left: 52px;
+      z-index: 4;
+      top: 24px;
+      left: clamp(24px, calc(5vw + 20px), 100px);
       display: block;
-      width: 100px;
-      height: 100px;
-      object-fit: contain;
-      border-radius: 50%;
-      box-shadow: 0 6px 22px rgba(0, 0, 0, .6);
+      width: 200px;
+      height: auto;
     }
 
-    /* Couronne de feuilles (aquarelle, fond transparent) */
-    .test-logo img.logo-wreath {
-  position: absolute;
-  z-index: 3;
-  top: 50%;
-  left: 50%;
-  width: 140px;
-  height: 140px;
-  transform: translate(-50%, -50%);
-  display: block;
-  pointer-events: none;
-  filter: brightness(1.2) saturate(1.15) drop-shadow(0 2px 6px rgba(0, 0, 0, .6));
-}
-
+    .test-logo img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
     /* Menu déroulant (ouvert par le burger, à droite) */
     .test-nav-links {
       position: absolute;
@@ -527,46 +501,20 @@
       outline-offset: 4px;
     }
 
+    /* Adaptation tablette et mobile */
     @media (max-width: 760px) {
       .test-nav {
-align-items: center;
-flex-direction: row;
-gap: 14px;
+        align-items: center;
+        flex-direction: row;
+        gap: 14px;
         padding: 17px 22px;
       }
-.test-logo {
-  width: 140px;
-  height: 140px;
-  transform: scale(1.2);
-  left: 22px;
-  top: 17px;
-}
-      @media (max-width: 480px) {
-  .test-logo {
-    width: 100px;
-    height: 100px;
-    transform: scale(1);
-    left: 16px;
-    top: 12px;
-  }
 
-  .test-logo img.logo-photo {
-    top: 26px;
-    left: 26px;
-    width: 48px;
-    height: 48px;
-  }
+      .test-burger {
+        flex-shrink: 0;
+        margin-left: auto;
+      }
 
-  .test-logo img.logo-wreath {
-    width: 100px;
-    height: 100px;
-  }
-
-  .test-burger {
-    flex-shrink: 0;
-    margin-left: auto;
-  }
-}
       .test-nav-links {
         justify-content: flex-start;
         gap: 12px 20px;
@@ -624,10 +572,9 @@ gap: 14px;
   <div class="test-page">
     <!-- Navigation du site : les liens pointent vers les pages publiques existantes -->
     <nav class="test-nav" aria-label="Navigation principale">
-      <a class="test-logo" href="/index.html" aria-label="Lost but Free — Accueil">
-        <img class="logo-wreath" src="/images/cadre-feuilles.webp" alt="" aria-hidden="true">
-        <img class="logo-photo" src="/images/lost-but-free.jpg" alt="Lost but Free">
-      </a>
+<a class="test-logo" href="/index.html" aria-label="Lost but Free — Accueil">
+  <img src="/images/lost_but_free.webp" alt="Lost but Free">
+</a>
       <button class="test-burger" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="menu-principal">
         <span></span><span></span><span></span>
       </button>
