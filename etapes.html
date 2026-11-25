@@ -542,7 +542,9 @@ function postComment(jour) {
     var notif = document.createElement('div');
     notif.textContent = '✓ Commentaire envoyé !';
     notif.style.cssText = 'color:var(--accent);font:12px var(--mono);margin-top:6px;';
-    btn.parentNode.appendChild(notif);
+    if (btn && btn.parentNode) {
+  btn.parentNode.appendChild(notif);
+}
 
     setTimeout(function () {
       notif.remove();
@@ -552,7 +554,9 @@ function postComment(jour) {
     var notif = document.createElement('div');
     notif.textContent = '⚠ ' + err.message;
     notif.style.cssText = 'color:#e58e26;font:12px var(--mono);margin-top:6px;';
-    btn.parentNode.appendChild(notif);
+    if (btn && btn.parentNode) {
+  btn.parentNode.appendChild(notif);
+}
 
     setTimeout(function () {
       notif.remove();
@@ -562,8 +566,8 @@ function postComment(jour) {
     if (btn) btn.disabled = false;
   });
 }
-})();
-  function loadComments(jour) {
+
+function loadComments(jour) {
   fetch(API + '?comments=' + jour)
     .then(function(r) { return r.json(); })
     .then(function(d) {
