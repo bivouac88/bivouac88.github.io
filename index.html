@@ -71,17 +71,18 @@
       border-bottom: 1px solid var(--trait, #342a22);
     }
 
-    .test-logo {
-      position: absolute;
-      z-index: 10;
-      top: 24px;
-      left: clamp(24px, calc(5vw + 20px), 100px);
-      width: 200px;
-      height: 200px;
-      display: block;
-      overflow: visible;
-      transform: scale(1.5);
-    }
+.test-logo {
+  position: absolute;
+  z-index: 4;
+  top: 24px;
+  left: clamp(24px, calc(5vw + 20px), 100px);
+  width: 200px;
+  height: 200px;
+  display: block;
+  overflow: visible;
+  transform: scale(1.5);
+  transform-origin: top left;
+}
 
     /* Logo rond, centré dans la couronne de feuilles */
     .test-logo img.logo-photo {
@@ -528,12 +529,44 @@
 
     @media (max-width: 760px) {
       .test-nav {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 14px;
+align-items: center;
+flex-direction: row;
+gap: 14px;
         padding: 17px 22px;
       }
+.test-logo {
+  width: 140px;
+  height: 140px;
+  transform: scale(1.2);
+  left: 22px;
+  top: 17px;
+}
+      @media (max-width: 480px) {
+  .test-logo {
+    width: 100px;
+    height: 100px;
+    transform: scale(1);
+    left: 16px;
+    top: 12px;
+  }
 
+  .test-logo img.logo-photo {
+    top: 26px;
+    left: 26px;
+    width: 48px;
+    height: 48px;
+  }
+
+  .test-logo img.logo-wreath {
+    width: 100px;
+    height: 100px;
+  }
+
+  .test-burger {
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+}
       .test-nav-links {
         justify-content: flex-start;
         gap: 12px 20px;
