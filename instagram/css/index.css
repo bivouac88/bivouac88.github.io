@@ -1,35 +1,47 @@
-
 /*
  * Bivouac88 — Accueil optimisé pour le navigateur Instagram
  * Ciblage exclusif : html.insta et écrans jusqu'à 760px.
  * Le rendu ordinateur et le mobile classique restent inchangés.
  */
-
 /* -----------------------------------------
    Navigation et logo
    ----------------------------------------- */
-
 @media (max-width: 760px) {
 
+  /*
+   * Espace réservé au logo au-dessus de la navigation.
+   * Le logo reste dans le HTML mais ne participe plus
+   * au calcul de la hauteur de la barre.
+   */
+  html.insta .test-page {
+    padding-top: clamp(112px, 34vw, 148px);
+  }
+   
   html.insta .test-nav {
-    min-height: 72px;
-    padding: 10px 16px;
+    position: relative;
+    min-height: 42px;
+    height: 42px;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
     gap: 12px;
   }
 
   /*
-   * Le logo reprend sa place dans le flux.
-   * Il ne flotte plus au-dessus de la navigation.
+   * Logo indépendant, centré au-dessus du burger.
    */
   html.insta .test-logo {
-    position: relative;
-    top: auto;
-    left: auto;
+    position: absolute;
+    top: calc(-1 * clamp(112px, 34vw, 148px));
+    left: 50%;
+    transform: translateX(-50%);
     display: block;
-    flex: 0 1 auto;
     width: clamp(112px, 34vw, 148px);
     height: auto;
-    margin: 0 auto 0 0;
+    margin: 0;
+    padding: 0;
+    background: transparent;
   }
 
   html.insta .test-logo img {
@@ -39,6 +51,10 @@
     object-fit: contain;
   }
 
+  /*
+   * Le burger est le seul élément qui détermine
+   * la hauteur de la barre de navigation.
+   */
   html.insta .test-burger {
     flex: 0 0 42px;
     width: 42px;
@@ -65,7 +81,6 @@
   /* -----------------------------------------
      Bannière principale
      ----------------------------------------- */
-
   html.insta .test-hero {
     min-height: 0;
     padding: 58px 20px 64px;
@@ -107,7 +122,6 @@
   /* -----------------------------------------
      Présentation du projet et cartes
      ----------------------------------------- */
-
   html.insta .test-content {
     width: calc(100% - 36px);
     padding: 42px 0 52px;
@@ -181,7 +195,6 @@
   /* -----------------------------------------
      Bandeau éditorial
      ----------------------------------------- */
-
   html.insta .test-story-inner {
     width: calc(100% - 36px);
     padding: 44px 0;
@@ -201,7 +214,6 @@
   /* -----------------------------------------
      Galerie
      ----------------------------------------- */
-
   html.insta .test-photo-section {
     padding: 48px 18px;
   }
@@ -229,7 +241,6 @@
   /* -----------------------------------------
      Pied de page
      ----------------------------------------- */
-
   html.insta .test-footer {
     padding: 20px 14px;
     font-size: 9px;
@@ -240,16 +251,10 @@
 /* -----------------------------------------
    Très petits écrans
    ----------------------------------------- */
-
 @media (max-width: 380px) {
-
   html.insta .test-nav {
     padding-right: 12px;
     padding-left: 12px;
-  }
-
-  html.insta .test-logo {
-    width: 112px;
   }
 
   html.insta .test-hero {
@@ -262,7 +267,9 @@
   }
 }
 
-/* Respect des préférences de mouvement */
+/* -----------------------------------------
+   Respect des préférences de mouvement
+   ----------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   html.insta .test-page *,
   html.insta .test-page *::before,
