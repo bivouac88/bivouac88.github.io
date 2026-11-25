@@ -100,6 +100,7 @@
   };
 
   const PANEL_POSITION_KEY = 'b88-admin-panel-position';
+  const PANEL_COLLAPSED_KEY = 'b88-admin-panel-collapsed';
   const SCENES_DRAFT_KEY = 'b88-admin-scenes-draft';
   const PANEL_WIDTH = 360;
 
@@ -109,7 +110,6 @@
   let ANIMATIONS = window.characterAnimations || [];
   let currentAnimation = ANIMATIONS[0] || 'Angry';
   let currentRotation = { x: 0, y: 0, z: 0 };
-
   function doPlay(name) {
     currentAnimation = name;
     window.characterPlay?.(name);
@@ -208,7 +208,6 @@
   const style = document.createElement('style');
   style.textContent = `#ctrl-panel *{box-sizing:border-box}#ctrl-panel input,#ctrl-panel select,#ctrl-panel textarea{width:100%;background:#2a2520;color:#eee;border:1px solid #514638;border-radius:5px;padding:7px;font:inherit}#ctrl-panel button{cursor:pointer;border:1px solid #514638;border-radius:5px;padding:7px 9px;background:#302a23;color:#eee;font:inherit}#ctrl-panel button.primary{background:#e58e26;color:#17120c;border-color:#e58e26;font-weight:bold}#ctrl-panel button.danger{border-color:#8a3b2e;color:#ffb3a8}#ctrl-panel .muted{color:#aaa;font-size:11px}#ctrl-panel .field{display:grid;gap:4px;margin:8px 0}#ctrl-panel .field>label{color:#c7b9a5;font-size:11px}#ctrl-panel .row{display:flex;gap:7px;align-items:center}#ctrl-panel .row>*{min-width:0;flex:1}#ctrl-panel .card{border:1px solid #514638;background:#211e19;border-radius:7px;padding:9px;margin:7px 0}#ctrl-panel .pill{display:inline-block;border-radius:20px;padding:3px 7px;background:#383126;color:#e9bd7c;font-size:10px}#ctrl-panel .step{border-left:3px solid #e58e26;padding:7px 8px;margin:7px 0;background:#242019;border-radius:4px}#ctrl-panel .step.editing{border-left-color:#ffd27a;background:#302516}#ctrl-panel .checkgrid{display:grid;grid-template-columns:1fr 1fr;gap:5px}#ctrl-panel .checkgrid label{display:flex;gap:6px;align-items:center;font-size:12px}#ctrl-panel .checkgrid input{width:auto}#ctrl-panel .listitem{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:4px 7px;margin-bottom:4px;background:#2a2520;border:1px solid #38332b;border-radius:4px;font-size:11px;color:#ccc}#ctrl-panel .listitem>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#ctrl-panel .listitem>div{display:flex;gap:4px;flex-shrink:0}#ctrl-panel .anim-widget{position:relative}#ctrl-panel .anim-current{display:flex;justify-content:space-between;text-align:left}#ctrl-panel .anim-list{display:none;max-height:220px;overflow-y:auto;margin-top:3px;background:#2a2520;border:1px solid #514638;border-radius:5px}#ctrl-panel .anim-list>div{padding:6px 8px;font-size:12px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}`;
   document.head.appendChild(style);
-
   document.body.appendChild(panel);
 
   // ---------------------------------------------------------------
@@ -240,7 +239,6 @@
   const panelPos = loadPanelPosition();
   panel.style.left = panelPos.x + 'px';
   panel.style.top = panelPos.y + 'px';
-
   const header = el('div');
   Object.assign(header.style, { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', cursor: 'move' });
   const title = el('strong', '🧭 Éditeur de scénarios');
@@ -248,16 +246,24 @@
   const toggleArrow = el('span', '▾');
   header.append(title, toggleArrow);
   panel.append(header);
-
   const body = el('div');
   panel.append(body);
 
   let collapsed = false;
+  function loadPanelCollapsed() {
+    try {
+      const saved = localStorage.getItem(PANEL_COLLAPSED_KEY);
+      if (saved !== null) return saved === 'true';
+    } catch (e) {}
+    return true; // fermé par défaut si jamais enregistré
+  }
   function setCollapsed(value) {
     collapsed = value;
     body.style.display = collapsed ? 'none' : 'block';
     toggleArrow.textContent = collapsed ? '▸' : '▾';
+    try { localStorage.setItem(PANEL_COLLAPSED_KEY, String(collapsed)); } catch (e) {}
   }
+  setCollapsed(loadPanelCollapsed());
 
   const DRAG_THRESHOLD_PX = 5;
   header.addEventListener('pointerdown', (event) => {
