@@ -41,7 +41,29 @@
   nav.appendChild(pv); nav.appendChild(cpt); nav.appendChild(nx);
   pv.addEventListener('click', function () { aller(cur - 1); });
   nx.addEventListener('click', function () { aller(cur + 1); });
+/* Glissement gauche/droite dans Instagram */
+var x0 = null, y0 = null;
 
+carnet.addEventListener('touchstart', function (e) {
+  if (!ouvert || e.touches.length !== 1) {
+    x0 = null;
+    return;
+  }
+  x0 = e.touches[0].clientX;
+  y0 = e.touches[0].clientY;
+}, { passive: true });
+
+carnet.addEventListener('touchend', function (e) {
+  if (x0 === null) return;
+
+  var dx = e.changedTouches[0].clientX - x0;
+  var dy = e.changedTouches[0].clientY - y0;
+  x0 = null;
+
+  if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+
+  aller(cur + (dx < 0 ? 1 : -1));
+}, { passive: true });
   function aller(i) {
     if (i < 0 || i >= N) return;
     cur = i;
