@@ -25,7 +25,7 @@ html.insta .test-logo {
   left: 16px;
   transform: translateY(-50%);
   display: block;
-  width: clamp(78px, 22vw, 96px);
+  width: clamp(90px, 25vw, 110px);
   height: auto;
   margin: 0;
   padding: 0;
@@ -49,15 +49,15 @@ html.insta .test-logo img {
   /Le burger est le seul élément qui détermine/
   /la hauteur de la barre de navigation/
    */
-  html.insta .test-burger {
-    flex: 0 0 42px;
-    width: 42px;
-    height: 42px;
-    margin: 0;
-    align-self: center;
-    padding: 10px;
-    touch-action: manipulation;
-  }
+html.insta .test-burger {
+  flex: 0 0 42px;
+  width: 42px;
+  height: 42px;
+  margin: 0 0 0 auto;
+  align-self: center;
+  padding: 10px;
+  touch-action: manipulation;
+}
 
   html.insta .test-nav-links {
     right: 12px;
@@ -250,17 +250,14 @@ html.insta .test-logo img {
     padding-right: 12px;
     padding-left: 12px;
   }
-html.insta .test-logo {
-  left: 12px;
-  width: 78px;
-}
+
   html.insta .test-hero {
     padding-right: 16px;
     padding-left: 16px;
   }
 html.insta .test-logo {
-  top: -112px;
-  left: 12px;
+  top: -12px;
+  left: 90px;
 }
   html.insta .test-hero > p:not(.test-eyebrow) {
     font-size: 13px;
