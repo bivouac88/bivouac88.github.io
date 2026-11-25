@@ -8,38 +8,36 @@
    ----------------------------------------- */
 @media (max-width: 760px) {
 
-  /*
-   * Logo à gauche, indépendant de la barre du burger.
-   * Il est positionné au-dessus de la navigation.
-   */
+/* Logo à cheval entre le bandeau du menu et le fond du hero */
+html.insta .test-page {
+  padding-top: 0;
+}
 
-  html.insta .test-page {
-    padding-top: 0;
-  }
+html.insta .test-nav {
+  position: relative;
+  overflow: visible;
+}
 
-  html.insta .test-nav {
-    position: relative;
-    min-height: 42px;
-    height: 42px;
-    padding: 0 16px;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 12px;
-  }
+/* Logo réduit, aligné à gauche, chevauchant les deux bandeaux */
+html.insta .test-logo {
+  position: absolute;
+  top: 100%;
+  left: 16px;
+  transform: translateY(-50%);
+  display: block;
+  width: clamp(78px, 22vw, 96px);
+  height: auto;
+  margin: 0;
+  padding: 0;
+  z-index: 5;
+}
 
-  html.insta .test-logo {
-    position: absolute;
-    top: -112px;
-    left: 16px;
-    transform: none;
-    display: block;
-    width: clamp(112px, 34vw, 148px);
-    height: auto;
-    margin: 0;
-    padding: 0;
-    background: transparent;
-  }
+html.insta .test-logo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
 
   html.insta .test-logo img {
     display: block;
@@ -252,7 +250,10 @@
     padding-right: 12px;
     padding-left: 12px;
   }
-
+html.insta .test-logo {
+  left: 12px;
+  width: 78px;
+}
   html.insta .test-hero {
     padding-right: 16px;
     padding-left: 16px;
