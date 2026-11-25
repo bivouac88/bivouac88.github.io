@@ -214,6 +214,15 @@
 
 /* Formulaire */
 .comment-form {
+  /* Honeypot anti-robots : invisible pour les visiteurs */
+.comment-honeypot {
+  position: absolute !important;
+  left: -10000px !important;
+  top: auto !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+}
   display: grid;
   grid-template-columns: 1fr 2fr;
   gap: 6px;
@@ -403,6 +412,10 @@ html += '</div>';
 html += '<div class="comment-form">';
 html += '<input type="text" placeholder="Nom" id="nom-' + e.jour + '" maxlength="30">';
 html += '<input type="text" placeholder="Commentaire" id="comment-' + e.jour + '" maxlength="200">';
+html += '<div class="comment-honeypot" aria-hidden="true">';
+html += '<label for="website-' + e.jour + '">Site web</label>';
+html += '<input type="text" id="website-' + e.jour + '" name="website" tabindex="-1" autocomplete="off">';
+html += '</div>';
 html += '<button onclick="postComment(' + e.jour + ')">Envoyer</button>';
 html += '</div></div>';
 }
@@ -470,6 +483,67 @@ document.getElementById('lightbox').onclick = function() {
   document.getElementById('lightbox-img').src = '';
 };
 function postComment(jour) {
+  var nomEl = document.getElementById('nom-' + jour);
+  var commentEl = document.getElementById('comment-' + jour);
+  var websiteEl = document.getElementById('website-' + jour);
+
+  var nom = nomEl.value.trim();
+  var comment = commentEl.value.trim();
+  var website = websiteEl.value;
+
+  if (!nom || !comment) return;
+
+  var btn = document.querySelector('button[onclick="postComment(' + jour + ')"]');
+  if (btn) btn.disabled = true;
+
+  fetch(API, {
+    method: 'POST',
+    body: JSON.stringify({
+      etape: jour,
+      nom: nom,
+      commentaire: comment,
+      website: website,
+      visitorId: VISITOR_ID
+    })
+  })
+  .then(function (r) {
+    return r.json();
+  })
+  .then(function (d) {
+    if (!d.ok) {
+      throw new Error(d.erreur || 'Commentaire refusé');
+    }
+
+    nomEl.value = '';
+    commentEl.value = '';
+    websiteEl.value = '';
+
+    loadComments(jour);
+
+    var notif = document.createElement('div');
+    notif.textContent = '✓ Commentaire envoyé !';
+    notif.style.cssText = 'color:var(--accent);font:12px var(--mono);margin-top:6px;';
+    btn.parentNode.appendChild(notif);
+
+    setTimeout(function () {
+      notif.remove();
+    }, 3000);
+  })
+  .catch(function (err) {
+    var notif = document.createElement('div');
+    notif.textContent = '⚠ ' + err.message;
+    notif.style.cssText = 'color:#e58e26;font:12px var(--mono);margin-top:6px;';
+    btn.parentNode.appendChild(notif);
+
+    setTimeout(function () {
+      notif.remove();
+    }, 4000);
+  })
+  .finally(function () {
+    if (btn) btn.disabled = false;
+  });
+}
+})();
   var nom = document.getElementById('nom-' + jour).value;
   var comment = document.getElementById('comment-' + jour).value;
   if (!nom || !comment) return;
