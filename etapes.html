@@ -341,9 +341,8 @@ function afficherJournal(etapes, tout) {
         '</div>' +
         '<div class="trajet"><span>' + esc(e.depart) + '</span><i>→</i><span>' + esc(e.arrivee) + '</span></div>';
 
-      // Km / dénivelé / temps : seulement une fois l'étape faite
-      // (la prochaine étape affiche juste départ → arrivée, sans détails)
-      if (e.fait) {
+      // Km / dénivelé / temps : affichés pour les étapes faites ET pour la prochaine
+      if (e.fait || e.jour === premierAVenir) {
         html += '<div class="meta">' +
           '<span>' + fmtDec(e.km, 1) + ' km</span>' +
           '<span class="sep">·</span>' +
