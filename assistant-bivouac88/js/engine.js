@@ -1,4 +1,3 @@
-
 import { detectIntent, normalizeText } from "./intent.js";
 import { pickAnswer } from "./knowledge.js";
 import {
@@ -47,7 +46,6 @@ export function createEngine(knowledge) {
   // --------------------------------------------------
   // DONNÉES DYNAMIQUES DU VOYAGE
   // --------------------------------------------------
-
 
   function getTripDataAnswer(question) {
     const text = normalizeText(question);
@@ -128,107 +126,6 @@ export function createEngine(knowledge) {
     return null;
   }
 
-  
-  function getLiveDataAnswer(question) {
-    const text = normalizeText(question);
-    const data = knowledge.liveData || {};
-
-    console.log("[Niamh diagnostic]", {
-      question,
-      normalized: text,
-      liveDataLoaded: Object.keys(data).length,
-      questionsLoaded: Object.keys(data._questions || {}).length
-    });
-
-    // 1. Recherche dans le catalogue dynamique Google Sheets
-    const questionCatalog = data._questions || {};
-
-    for (const [key, formulations] of Object.entries(questionCatalog)) {
-      if (!Array.isArray(formulations)) continue;
-
-      const matched = formulations.some(formulation => {
-        const normalizedFormulation = normalizeText(formulation);
-
-        return normalizedFormulation &&
-          text.includes(normalizedFormulation);
-      });
-
-      if (!matched) continue;
-
-      const value = data[key];
-
-      console.log("[Niamh diagnostic] Correspondance dynamique :", key, value);
-
-      if (value === undefined || value === null || value === "") {
-        return "Je n'ai pas encore cette information dans mes données de voyage.";
-      }
-
-// Réponse personnalisée complète (colonne D)
-const customResponse = data._responses?.[key];
-
-if (customResponse) {
-  return customResponse;
-}
-
-// Réponse générique si aucune personnalisation n'existe
-const label = key.replace(/_/g, " ");
-
-return `Concernant ${label}, j'ai noté : ${value}.`;
-    }
-
-    // 2. Conservation des anciennes questions
-    const checks = [
-      {
-        test: text.includes("ou sommes nous") ||
-              text.includes("dans quelle region"),
-        key: "region_actuelle",
-        label: "Nous sommes actuellement dans la région suivante :"
-      },
-      {
-        test: text.includes("dans quel pays") ||
-              text.includes("quel pays traversons"),
-        key: "pays_actuel",
-        label: "Nous sommes actuellement en"
-      },
-      {
-        test: text.includes("combien de kilometres") ||
-              text.includes("combien de km") ||
-              text.includes("quelle distance avons nous parcouru"),
-        key: "km_total_parcouru",
-        label: "Nous avons parcouru"
-      },
-      {
-        test: text.includes("quel jour sommes nous") ||
-              text.includes("combien de jours") ||
-              text.includes("jour du voyage"),
-        key: "jour_actuel",
-        label: "Nous sommes au jour"
-      },
-      {
-        test: text.includes("quelle est la prochaine etape") ||
-              text.includes("ou allons nous ensuite") ||
-              text.includes("quelle est notre prochaine destination"),
-        key: "prochaine_etape",
-        label: "Notre prochaine étape est :"
-      }
-    ];
-
-    const match = checks.find(item => item.test);
-
-    if (!match) {
-      console.log("[Niamh diagnostic] Aucune question reconnue.");
-      return null;
-    }
-
-    const value = data[match.key];
-
-    if (value === undefined || value === null || value === "") {
-      return "Je n'ai pas encore cette information dans mes données de voyage.";
-    }
-
-    return `${match.label} ${value}.`;
-  }
-
   // --------------------------------------------------
   // MESSAGES SPÉCIFIQUES À LA PAGE COURANTE
   // --------------------------------------------------
@@ -282,7 +179,7 @@ return `Concernant ${label}, j'ai noté : ${value}.`;
       text: description
     };
   }
-  
+
   // --------------------------------------------------
   // GESTION DES INTENTIONS
   // --------------------------------------------------
@@ -485,21 +382,6 @@ return `Concernant ${label}, j'ai noté : ${value}.`;
       return pageDescriptionAnswer;
     }
 
-    const liveDataAnswer = getLiveDataAnswer(cleanQuestion);
-
-    if (liveDataAnswer) {
-      
-      const response = {
-        type: "liveData",
-        text: liveDataAnswer
-      };
-
-      remember("user", cleanQuestion);
-      saveExchange(response);
-
-      return response;
-    }
-
     const tripDataAnswer = getTripDataAnswer(cleanQuestion);
 
     if (tripDataAnswer) {
@@ -513,7 +395,7 @@ return `Concernant ${label}, j'ai noté : ${value}.`;
 
       return response;
     }
-    
+
     // La personnalité traite uniquement les questions qui la concernent.
     // Les autres questions continuent vers le moteur de compréhension.
     const personalityAnswer = getPersonalityAnswer(cleanQuestion);
