@@ -282,6 +282,7 @@
   var fmt = function (n) { return Number(n || 0).toLocaleString('fr-FR'); };
   var esc = B88.esc;
   var toutesEtapes = [];
+  var totalJours = 0;
   var SMILEYS = { '1': '😞', '2': '🙁', '3': '😐', '4': '🙂', '5': '😍' };
   function smileyPour(avis) {
     if (!avis) return '';
@@ -291,19 +292,26 @@
     return a;
   }
 
-  function afficherJournal(etapes, tout) {
+function afficherJournal(etapes, tout) {
     var ol = $('journal');
     ol.innerHTML = '';
-    $('compteur-page').textContent = etapes.length + ' étapes au total';
+    $('compteur-page').textContent = totalJours + ' étapes au total';
 
-    // La toute prochaine étape non réalisée : la seule "à venir" dont on
-    // dévoile le départ/arrivée. Toutes les suivantes restent secrètes.
-    var premierAVenir = null;
-    for (var i = 0; i < etapes.length; i++) {
-      if (!etapes[i].fait) { premierAVenir = etapes[i].jour; break; }
+    // On complète avec des étapes "fantômes" tant qu'on n'a pas assez
+    // de lignes connues pour remplir les cases (6, ou tout si demandé)
+    var dernierJour = etapes.length ? etapes[etapes.length - 1].jour : 0;
+    var cible = tout ? totalJours : Math.min(6, totalJours || 6);
+    var liste = etapes.slice(0, tout ? etapes.length : 6);
+    for (var j = dernierJour + 1; j <= cible; j++) {
+      liste.push({ jour: j, fait: false });
     }
 
-    (tout ? etapes : etapes.slice(0, 6)).forEach(function (e) {
+    var premierAVenir = null;
+    for (var i = 0; i < liste.length; i++) {
+      if (!liste[i].fait) { premierAVenir = liste[i].jour; break; }
+    }
+
+    liste.forEach(function (e) {
       var li = document.createElement('li');
       var estSecrete = !e.fait && e.jour !== premierAVenir;
 
@@ -404,8 +412,8 @@ html += '</div></div>';
       li.innerHTML = html;
       ol.appendChild(li);
     });
-   if (!tout && etapes.length > 6) {
-  var btnPlus = document.createElement('li');
+   if (!tout && totalJours > 6) {
+     var btnPlus = document.createElement('li');
   btnPlus.style.cssText = 'grid-column:1/-1;display:flex;justify-content:center;padding:8px 0;';
   btnPlus.innerHTML = '<button onclick="toutAfficher()" style="background:var(--carte);border:1px solid var(--trait);border-radius:10px;padding:10px 24px;color:var(--discret);font:500 13px var(--mono);cursor:pointer;letter-spacing:0.04em;">↓ Voir toutes les étapes</button>';
   ol.appendChild(btnPlus);
@@ -419,8 +427,9 @@ html += '</div></div>';
     errEl.textContent = txt || '';
     errEl.style.display = txt ? 'block' : 'none';
   }
-  function rendre(d, tout) {
+function rendre(d, tout) {
     toutesEtapes = d.etapes;
+    totalJours = (d.totaux && d.totaux.jours) || d.etapes.length;
     afficherJournal(d.etapes, tout);
     d.etapes.forEach(function (e) { if (e.fait) loadComments(e.jour); });
   }
