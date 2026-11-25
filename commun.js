@@ -7,7 +7,6 @@
   // Les liens <a data-don> de toutes les pages reçoivent cette adresse.
   var DON_URL = 'https://www.leetchi.com/fr/c/bivouac88-4670104';
   var DON_OK = DON_URL.indexOf('https://www.leetchi.com/') === 0;
-
   var dossier = /\/peche\//.test(location.pathname) ? '../' : '';
   // Échappe le texte avant de l'insérer dans du HTML (à utiliser sur toute donnée venant d'une API)
   function esc(s) {
