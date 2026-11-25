@@ -197,7 +197,11 @@ export function createEngine(knowledge) {
   }
 
   function rememberTopic(intent) {
-    if (!intent || conversationalIntents.has(intent.id)) {
+    if (
+      !intent ||
+      conversationalIntents.has(intent.id) ||
+      intent.conversational // <-- changé : ignore aussi les clés "conversational" du sheet
+    ) {
       return;
     }
 
@@ -300,7 +304,11 @@ export function createEngine(knowledge) {
     for (const message of previousUserMessages) {
       const intent = getIntent(message.intentId);
 
-      if (intent && !conversationalIntents.has(intent.id)) {
+      if (
+        intent &&
+        !conversationalIntents.has(intent.id) &&
+        !intent.conversational // <-- changé : même logique ici
+      ) {
         return intent;
       }
     }
