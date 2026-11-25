@@ -214,7 +214,12 @@
 
 /* Formulaire */
 .comment-form {
-  /* Honeypot anti-robots : invisible pour les visiteurs */
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 6px;
+}
+
+/* Honeypot anti-robots : invisible pour les visiteurs */
 .comment-honeypot {
   position: absolute !important;
   left: -10000px !important;
@@ -222,10 +227,6 @@
   width: 1px !important;
   height: 1px !important;
   overflow: hidden !important;
-}
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: 6px;
 }
 .comment-form input {
   background: var(--fond);
@@ -482,6 +483,24 @@ document.getElementById('lightbox').onclick = function() {
   this.classList.remove('active');
   document.getElementById('lightbox-img').src = '';
 };
+  var VISITOR_ID = (function () {
+  try {
+    var id = localStorage.getItem('b88-comment-visitor');
+    if (!id) {
+      id = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0;
+        return (c === 'x' ? r : (r & 3 | 8)).toString(16);
+      });
+      localStorage.setItem('b88-comment-visitor', id);
+    }
+    return id;
+  } catch (e) {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      var r = Math.random() * 16 | 0;
+      return (c === 'x' ? r : (r & 3 | 8)).toString(16);
+    });
+  }
+})();
 function postComment(jour) {
   var nomEl = document.getElementById('nom-' + jour);
   var commentEl = document.getElementById('comment-' + jour);
@@ -544,24 +563,6 @@ function postComment(jour) {
   });
 }
 })();
-  var nom = document.getElementById('nom-' + jour).value;
-  var comment = document.getElementById('comment-' + jour).value;
-  if (!nom || !comment) return;
-  fetch(API, {
-    method: 'POST',
-    body: JSON.stringify({ etape: jour, nom: nom, commentaire: comment })
-  }).then(function() {
-    document.getElementById('nom-' + jour).value = '';
-    document.getElementById('comment-' + jour).value = '';
-    loadComments(jour);
-    var btn = document.querySelector('#comments-' + jour + ' ~ .comment-form button') || document.evaluate("//button[@onclick='postComment(" + jour + ")']", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-    var notif = document.createElement('div');
-    notif.textContent = '✓ Commentaire envoyé !';
-    notif.style.cssText = 'color:var(--accent);font:12px var(--mono);margin-top:6px;';
-    btn.parentNode.appendChild(notif);
-    setTimeout(function() { notif.remove(); }, 3000);
-  });
-}
   function loadComments(jour) {
   fetch(API + '?comments=' + jour)
     .then(function(r) { return r.json(); })
