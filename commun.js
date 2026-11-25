@@ -366,7 +366,7 @@ var marque = el('a');
 marque.href = 'https://bivouac88.github.io/index.html';
 
 var logo = document.createElement('img');
-logo.src = dossier + 'images/lost-but-free.jpg';
+logo.src = dossier + 'images/lost_but_free.webp';
 logo.alt = '';
 logo.height = 20;
 logo.loading = 'lazy';
