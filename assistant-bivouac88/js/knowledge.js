@@ -1,4 +1,3 @@
-
 export async function loadKnowledge() {
   const knowledgeUrl = new URL("../data/knowledge.json", import.meta.url);
   const niamhDataUrl = new URL("../data/niamh-data.json", import.meta.url);
@@ -36,6 +35,17 @@ export async function loadKnowledge() {
 
     knowledge.liveData = {};
   }
+
+  // Pont : transforme les lignes du Google Sheet en intents compris
+  // par le moteur intelligent (synonymes, fautes de frappe, contexte...)
+  const sheetIntents = buildIntentsFromLiveData(knowledge.liveData);
+  const existingIds = new Set((knowledge.intents || []).map(i => i.id));
+
+  knowledge.intents = [
+    ...(knowledge.intents || []).filter(i => !existingIds.has(i.id)),
+    ...sheetIntents
+  ];
+
   // Chargement des totaux et des étapes depuis la source publique du site
   try {
     const voyageResponse = await fetch(voyageApiUrl, {
@@ -66,6 +76,46 @@ export async function loadKnowledge() {
     };
   }
   return knowledge;
+}
+
+// --------------------------------------------------
+// PONT : transforme les lignes du Google Sheet en intents
+// --------------------------------------------------
+
+const DYNAMIC_PREFIXES = ["message_ouverture_", "description_page_"];
+
+export function buildIntentsFromLiveData(liveData = {}) {
+  const questionCatalog = liveData._questions || {};
+  const responses = liveData._responses || {};
+  const intents = [];
+
+  for (const [key, formulations] of Object.entries(questionCatalog)) {
+    if (!Array.isArray(formulations) || !formulations.length) continue;
+    if (DYNAMIC_PREFIXES.some(prefix => key.startsWith(prefix))) continue;
+
+    const value = liveData[key];
+    const customAnswer = responses[key];
+
+    // Clé "dynamique pure" (valeur vide, pas de réponse perso) :
+    // on laisse getTripDataAnswer / les données calculées s'en occuper.
+    if (!customAnswer && (value === undefined || value === null || value === "")) {
+      continue;
+    }
+
+    const answerText =
+      customAnswer ||
+      `Concernant ${key.replace(/_/g, " ")}, j'ai noté : ${value}.`;
+
+    intents.push({
+      id: `sheet_${key}`,
+      label: key.replace(/_/g, " "),
+      keywords: formulations, // tes phrases de la colonne "questions", déjà splittées sur ";"
+      answers: [answerText],
+      source: "sheet" // marqueur utile pour debug/filtrage plus tard
+    });
+  }
+
+  return intents;
 }
 
 export function pickAnswer(intent) {
