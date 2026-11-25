@@ -25,7 +25,7 @@ html.insta .test-logo {
   left: 16px;
   transform: translateY(-50%);
   display: block;
-  width: clamp(100px, 25vw, 120px);
+  width: clamp(90px, 30vw, 140px);
   height: auto;
   margin: 0;
   padding: 0;
