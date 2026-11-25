@@ -337,16 +337,21 @@ function afficherStats(t, etapes) {
   }
 }
 
-  function afficherJournal(etapes) {
+function afficherJournal(etapes) {
     var ol = $('journal');
     ol.innerHTML = '';
     $('journal-compteur').textContent = etapes.length + ' étapes';
 
     var premierNonFait = -1;
     for (var i = 0; i < etapes.length; i++) { if (!etapes[i].fait) { premierNonFait = i; break; } }
-    // Visibles : la prochaine étape + les 3 suivantes (ou les 4 dernières si tout est fait)
-    var debut = (premierNonFait === -1) ? Math.max(0, etapes.length - 4) : premierNonFait;
-    var fin = debut + 3;
+
+    // Centre de la fenêtre : la prochaine étape, ou la dernière si tout est fait
+    var centre = (premierNonFait === -1) ? etapes.length - 1 : premierNonFait;
+
+    // Fenêtre de 4 étapes autour du centre (1-2 faites avant + la prochaine + les suivantes),
+    // ajustée pour ne jamais dépasser les bornes réelles du tableau
+    var debut = Math.max(0, Math.min(centre - 1, etapes.length - 4));
+    var fin = Math.min(etapes.length - 1, debut + 3);
 
     etapesParJour = {};
     etapes.forEach(function (e, index) {
