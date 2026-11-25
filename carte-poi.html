@@ -240,9 +240,7 @@ function appliquerPosition(pos) {
     direction: 'top',
     offset: [0, -8]
   });
-  carte.setView([pos.lat, pos.lon], 15);
-}
-  
+}  
   const points = [];             // {nom, groupes, lat, lon, id, cat}
   const cats = {};               // nom -> {n, actif, groupe, couleur, emoji, libelle, icone, li, cb}
   let recherche = '';
