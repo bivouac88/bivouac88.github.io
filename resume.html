@@ -394,7 +394,7 @@ function afficherJournal(etapes) {
     map.fitBounds(cible, { padding: [40, 40], maxZoom: 13 });
   }
 
-  function afficherVilles(etapes) {
+function afficherVilles(etapes) {
     marqueursVilles.forEach(function (it) { map.removeLayer(it.marker); });
     marqueursVilles = [];
     toutesLesVillesCoords = [];
@@ -402,6 +402,10 @@ function afficherJournal(etapes) {
     var villes = {}, premierJourNonFait = -1;
     for (var k = 0; k < etapes.length; k++) { if (!etapes[k].fait) { premierJourNonFait = etapes[k].jour; break; } }
     etapes.forEach(function (e) {
+      // On ignore toute étape future au-delà de la prochaine : seules les
+      // étapes faites et la toute prochaine doivent apposer un point sur la carte
+      if (!e.fait && e.jour !== premierJourNonFait) return;
+
       [[e.depart, e.dep], [e.arrivee, e.arr]].forEach(function (c) {
         if (!c[1] || isNaN(+c[1].lat) || isNaN(+c[1].lng)) return;
         var v = villes[c[0]] || (villes[c[0]] = { lat: +c[1].lat, lng: +c[1].lng, atteinte: false, prochaine: false });
