@@ -9,14 +9,14 @@
 @media (max-width: 760px) {
 
   /*
-   * Espace réservé au logo au-dessus de la navigation.
-   * Le logo reste dans le HTML mais ne participe plus
-   * au calcul de la hauteur de la barre.
+   * Logo à gauche, indépendant de la barre du burger.
+   * Il est positionné au-dessus de la navigation.
    */
+
   html.insta .test-page {
-    padding-top: clamp(112px, 34vw, 148px);
+    padding-top: 0;
   }
-   
+
   html.insta .test-nav {
     position: relative;
     min-height: 42px;
@@ -28,14 +28,11 @@
     gap: 12px;
   }
 
-  /*
-   * Logo indépendant, centré au-dessus du burger.
-   */
   html.insta .test-logo {
     position: absolute;
-    top: calc(-1 * clamp(112px, 34vw, 148px));
-    left: 50%;
-    transform: translateX(-50%);
+    top: -112px;
+    left: 16px;
+    transform: none;
     display: block;
     width: clamp(112px, 34vw, 148px);
     height: auto;
@@ -51,10 +48,9 @@
     object-fit: contain;
   }
 
-  /*
-   * Le burger est le seul élément qui détermine
-   * la hauteur de la barre de navigation.
-   */
+  //Le burger est le seul élément qui détermine//
+  //la hauteur de la barre de navigation//
+   
   html.insta .test-burger {
     flex: 0 0 42px;
     width: 42px;
