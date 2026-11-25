@@ -77,6 +77,24 @@
 }
 .etape .meta span.sep { color: var(--trait-actif); }
 
+/* Étapes secrètes : case vide, rien ne doit filtrer */
+.etape.mystere {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 108px;
+  border-style: dashed;
+  opacity: 0.7;
+}
+.etape.mystere .badge { color: var(--discret-sombre); }
+.mystere-contenu {
+  text-align: center;
+  font: 500 15px var(--mono);
+  letter-spacing: 0.08em;
+  color: var(--discret);
+  padding: 14px 0 4px;
+}
+
 /* Météo */
 .meteo-bloc {
   margin-top: 12px;
@@ -278,11 +296,33 @@
     ol.innerHTML = '';
     $('compteur-page').textContent = etapes.length + ' étapes au total';
 
+    // La toute prochaine étape non réalisée : la seule "à venir" dont on
+    // dévoile le départ/arrivée. Toutes les suivantes restent secrètes.
+    var premierAVenir = null;
+    for (var i = 0; i < etapes.length; i++) {
+      if (!etapes[i].fait) { premierAVenir = etapes[i].jour; break; }
+    }
+
     (tout ? etapes : etapes.slice(0, 6)).forEach(function (e) {
       var li = document.createElement('li');
+      var estSecrete = !e.fait && e.jour !== premierAVenir;
+
       var classe = 'etape';
       if (e.fait) classe += ' fait';
+      if (estSecrete) classe += ' mystere';
       li.className = classe;
+
+      // Étape secrète : case "vide", aucune donnée ne doit filtrer
+      if (estSecrete) {
+        li.innerHTML =
+          '<div class="etape-entete">' +
+          '<span class="jour">Étape ' + esc(e.jour) + '</span>' +
+          '<span class="badge">Secret</span>' +
+          '</div>' +
+          '<div class="mystere-contenu">🔒 **** → ****</div>';
+        ol.appendChild(li);
+        return;
+      }
 
       var badgeText = e.fait ? 'Faite' : 'À venir';
 
@@ -291,14 +331,19 @@
         '<span class="jour">Étape ' + esc(e.jour) + '</span>' +
         '<span class="badge">' + badgeText + '</span>' +
         '</div>' +
-        '<div class="trajet"><span>' + esc(e.depart) + '</span><i>→</i><span>' + esc(e.arrivee) + '</span></div>' +
-        '<div class="meta">' +
+        '<div class="trajet"><span>' + esc(e.depart) + '</span><i>→</i><span>' + esc(e.arrivee) + '</span></div>';
+
+      // Km / dénivelé / temps : seulement une fois l'étape faite
+      // (la prochaine étape affiche juste départ → arrivée, sans détails)
+      if (e.fait) {
+        html += '<div class="meta">' +
           '<span>' + fmtDec(e.km, 1) + ' km</span>' +
           '<span class="sep">·</span>' +
           '<span>+' + fmt(e.denivele) + ' m</span>' +
           '<span class="sep">·</span>' +
           '<span>' + esc(e.temps || '–') + '</span>' +
         '</div>';
+      }
 
         if (e.fait && e.meteo) {
         var m = e.meteo;
@@ -356,9 +401,6 @@ html += '</div></div>';
 }
         html += '</div></div>';
       }
-if (false) {
-html += '<div class="comments-bloc">';
-}
       li.innerHTML = html;
       ol.appendChild(li);
     });
