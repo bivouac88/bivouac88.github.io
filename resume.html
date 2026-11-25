@@ -311,13 +311,29 @@ function afficherStats(t, etapes) {
   $('s-km-moyen').textContent = fmtDec(totalJours ? kmTotal / totalJours : 0, 1) + ' km';
   $('s-km-moyen-detail').textContent = totalJours + ' étapes au total';
 
+  // Le chiffre du record reste visible même pour une étape future (aucune
+  // fuite d'info), mais les noms de villes ne s'affichent que si l'étape
+  // est déjà faite ou si c'est la toute prochaine — sinon on les masque.
+  var premierNonFaitJour = null;
+  for (var pi = 0; pi < etapes.length; pi++) {
+    if (!etapes[pi].fait) { premierNonFaitJour = etapes[pi].jour; break; }
+  }
+
+  function detailRecord(rec) {
+    if (!rec) return '';
+    var e = etapes.find(function (x) { return Number(x.jour) === Number(rec.jour); });
+    var visible = e && (e.fait || e.jour === premierNonFaitJour);
+    var trajet = visible ? (rec.depart + ' → ' + rec.arrivee) : '**** → ****';
+    return 'Étape ' + rec.jour + ' · ' + trajet;
+  }
+
   if (t.record_km) {
     $('s-max-km').textContent = fmtDec(t.record_km.km, 1) + ' km';
-    $('s-max-km-detail').textContent = 'Étape ' + t.record_km.jour + ' · ' + t.record_km.depart + ' → ' + t.record_km.arrivee;
+    $('s-max-km-detail').textContent = detailRecord(t.record_km);
   }
   if (t.record_denivele) {
     $('s-max-d').textContent = '+' + fmt(t.record_denivele.denivele) + ' m';
-    $('s-max-d-detail').textContent = 'Étape ' + t.record_denivele.jour + ' · ' + t.record_denivele.depart + ' → ' + t.record_denivele.arrivee;
+    $('s-max-d-detail').textContent = detailRecord(t.record_denivele);
   }
   $('s-temps-total').textContent = formaterDuree(Number(t.temps_total_min) || 0);
   $('s-etapes-restantes-detail').textContent = pluriel(restantsJours, 'étape') + ' restante' + (restantsJours > 1 ? 's' : '');
