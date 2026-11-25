@@ -47,10 +47,10 @@
     height: auto;
     object-fit: contain;
   }
-
-  //Le burger est le seul élément qui détermine//
-  //la hauteur de la barre de navigation//
-   
+   /*
+  /Le burger est le seul élément qui détermine/
+  /la hauteur de la barre de navigation/
+   */
   html.insta .test-burger {
     flex: 0 0 42px;
     width: 42px;
