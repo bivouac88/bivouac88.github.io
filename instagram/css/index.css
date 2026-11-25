@@ -257,7 +257,10 @@
     padding-right: 16px;
     padding-left: 16px;
   }
-
+html.insta .test-logo {
+  top: -112px;
+  left: 12px;
+}
   html.insta .test-hero > p:not(.test-eyebrow) {
     font-size: 13px;
   }
