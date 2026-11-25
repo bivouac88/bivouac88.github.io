@@ -114,15 +114,15 @@ export function buildIntentsFromLiveData(liveData = {}) {
       continue;
     }
 
-    const answerText =
-      customAnswer ||
-      `Concernant ${key.replace(/_/g, " ")}, j'ai noté : ${value}.`;
+    const answerVariants = customAnswer
+      ? customAnswer.split("||").map(a => a.trim()).filter(Boolean)
+      : [`Concernant ${key.replace(/_/g, " ")}, j'ai noté : ${value}.`];
 
     intents.push({
       id: `sheet_${key}`,
       label: key.replace(/_/g, " "),
-      keywords: formulations, // tes phrases de la colonne "questions", déjà splittées sur ";"
-      answers: [answerText],
+      keywords: formulations,
+      answers: answerVariants,
       source: "sheet",
       conversational: CONVERSATIONAL_SHEET_KEYS.has(key)
     });
