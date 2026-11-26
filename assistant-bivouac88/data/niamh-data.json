@@ -3,10 +3,10 @@
   "date_actuelle": "11/25/2026",
   "region_actuelle": "Eghezée",
   "pays_actuel": "Belgique",
-  "km_total_parcouru": "",
-  "km_total_prévu": "",
-  "denivele_cumule": "",
-  "jours_velo": "",
+  "km_total_parcouru": "0",
+  "km_total_prévu": "2202.8",
+  "denivele_cumule": "0",
+  "jours_velo": "0",
   "derniere_anecdote": "Il pleut dans la tente..",
   "poi_du_moment": "Le jardin d'un pote",
   "humeur_du_jour": "motivé malgré la pluie!",
@@ -32,7 +32,6 @@
   "organisation": "Un voyage préparé mais vivant",
   "imprevu": "Une place pour l'improvisation",
   "souvenir": "Les souvenirs de l'aventure",
-  "anecdote": "Les petites histoires du quotidien",
   "niamh": "Je suis Niamh, votre compagne numérique",
   "role_niamh": "Accompagner et informer",
   "conversation": "Discuter de tout et de rien",
@@ -46,6 +45,18 @@
   "description_page_stats": "description page",
   "message_ouverture_etapes": "Ici, les étapes, mon avis et commentaire sur l'étape du jour Profitez en pour laisser un like et un commentaire",
   "description_page_etapes": "description page",
+  "solo_duo": "En solo",
+  "budget": "Un voyage pensé pour coûter peu",
+  "recharge_electronique": "Panneau solaire et batterie externe",
+  "nom_bivouac88": "Bivouac88, dans l'esprit Lost but Free",
+  "reseaux_sociaux": "Sur Instagram : lostbutfree420",
+  "don_soutien": "Les boutons de soutien sont sur le site",
+  "apres_le_voyage": "Pas de fin programmée",
+  "recette_riz_thon": "Riz + thon + bouillon",
+  "recette_pates_oeuf": "Pâtes + œuf à la carbo minute",
+  "recette_pain_fromage": "Pain + fromage grillé",
+  "histoire_reims": "Capitale des sacres royaux",
+  "histoire_verdun": "Symbole de la Première Guerre mondiale",
   "Mercredi": "",
   "11/25/2026": "",
   "Eghezée": "",
@@ -125,7 +136,15 @@
       "il s'est passé quoi dernièrement",
       "une anecdote récente",
       "raconte-moi la dernière galère",
-      "une histoire amusante à raconter"
+      "une histoire amusante à raconter",
+      "raconte une anecdote",
+      "une histoire à raconter",
+      "quoi de neuf",
+      "il s'est passé quelque chose",
+      "raconte-moi un truc drôle",
+      "une petite histoire",
+      "une anecdote du voyage",
+      "il y a du nouveau"
     ],
     "poi_du_moment": [
       "quel est le point d'intérêt du moment",
@@ -140,7 +159,6 @@
       "comment va le moral",
       "comment vous sentez-vous",
       "quelle est votre humeur aujourd'hui",
-      "toujours motivés",
       "le moral est bon",
       "ça va aujourd'hui",
       "dans quel état d'esprit êtes-vous",
@@ -332,13 +350,12 @@
       "vous êtes organisés",
       "comment vous planifiez les journées",
       "tout est prévu",
-      "vous improvisez parfois",
       "vous suivez un programme",
       "comment vous organisez le voyage"
     ],
     "imprevu": [
       "et si vous changez de programme",
-      "vous improvisez",
+      "vous improvisez sur le moment",
       "vous pouvez modifier votre itinéraire",
       "rien n'est figé",
       "vous faites comme vous voulez",
@@ -353,16 +370,6 @@
       "votre plus belle journée",
       "vous avez vécu quoi de spécial",
       "quel souvenir garderez-vous"
-    ],
-    "anecdote": [
-      "raconte une anecdote",
-      "une histoire à raconter",
-      "quoi de neuf",
-      "il s'est passé quelque chose",
-      "raconte-moi un truc drôle",
-      "une petite histoire",
-      "une anecdote du voyage",
-      "il y a du nouveau"
     ],
     "niamh": [
       "qui es-tu",
@@ -402,7 +409,6 @@
       "c'est gentil",
       "top merci",
       "je te remercie",
-      "sympa",
       "bien joué Niamh",
       "merci pour ton aide"
     ],
@@ -428,9 +434,80 @@
     ],
     "description_page_etapes": [
       "C'est quoi cette page?"
+    ],
+    "solo_duo": [
+      "vous êtes seul ou à plusieurs",
+      "vous êtes combien",
+      "vous voyagez seul",
+      "c'est un voyage en solo",
+      "pas de compagnon de route",
+      "vous êtes tout seul"
+    ],
+    "budget": [
+      "ça coûte combien ce genre de voyage",
+      "quel est votre budget",
+      "comment vous financez le voyage",
+      "vous avez un gros budget",
+      "comment vous gérez l'argent sur la route"
+    ],
+    "recharge_electronique": [
+      "vous rechargez votre téléphone comment",
+      "pas de batterie",
+      "comment vous rechargez vos appareils",
+      "vous avez de l'électricité en route",
+      "comment vous chargez votre matériel"
+    ],
+    "nom_bivouac88": [
+      "pourquoi ce nom Bivouac88",
+      "ça veut dire quoi 88",
+      "d'où vient le nom Bivouac88",
+      "c'est quoi le lien avec Lost but Free"
+    ],
+    "reseaux_sociaux": [
+      "on peut vous suivre où",
+      "vous êtes sur Instagram",
+      "c'est quoi votre compte Instagram",
+      "où suivre l'aventure",
+      "un réseau social pour suivre le voyage"
+    ],
+    "don_soutien": [
+      "comment vous soutenir",
+      "on peut faire un don",
+      "comment aider le projet",
+      "où faire un don",
+      "vous avez besoin de soutien"
+    ],
+    "apres_le_voyage": [
+      "vous ferez quoi après",
+      "et une fois arrivés",
+      "c'est quoi la suite après le voyage",
+      "vous rentrerez quand",
+      "il y a une fin prévue"
+    ],
+    "recette_riz_thon": [
+      "recette avec du riz et du thon",
+      "que cuisiner avec du riz et du thon",
+      "j'ai du riz et du thon"
+    ],
+    "recette_pates_oeuf": [
+      "recette avec des pâtes et des œufs",
+      "que cuisiner avec des pâtes et des œufs"
+    ],
+    "recette_pain_fromage": [
+      "recette avec du pain et du fromage",
+      "que faire avec du pain et du fromage"
+    ],
+    "histoire_reims": [
+      "l'histoire de Reims",
+      "que s'est-il passé à Reims"
+    ],
+    "histoire_verdun": [
+      "l'histoire de Verdun",
+      "que s'est-il passé à Verdun"
     ]
   },
   "_responses": {
+    "derniere_anecdote": "Ah, les anecdotes ! Il suffit parfois d'un petit imprévu pour avoir une histoire à raconter. C'est aussi ça, la magie du voyage : ne jamais savoir exactement ce que la journée nous réserve.",
     "petit_dej": "Ce matin, j'ai mangé des Kellogg's",
     "boisson_matin": "Pour commencer la journée, rien de tel qu'un bon thé vert",
     "type_voyage": "Nous sommes partis pour une belle aventure à vélo ! Des kilomètres, des découvertes, des rencontres et quelques surprises en chemin. C'est ça, l'esprit du voyage !",
@@ -453,7 +530,6 @@
     "organisation": "Un peu d'organisation, un peu d'improvisation : c'est souvent le meilleur mélange. On prépare la route, mais on laisse toujours une place aux surprises.",
     "imprevu": "Un voyage ne se déroule jamais exactement comme prévu. Et c'est justement ce qui le rend intéressant ! Il faut savoir s'adapter et profiter des occasions qui se présentent.",
     "souvenir": "Chaque journée apporte son lot de souvenirs. Certains sont spectaculaires, d'autres tout simples... mais ce sont souvent les petits moments qui restent longtemps en mémoire.",
-    "anecdote": "Ah, les anecdotes ! Il suffit parfois d'un petit imprévu pour avoir une histoire à raconter. C'est aussi ça, la magie du voyage : ne jamais savoir exactement ce que la journée nous réserve.",
     "niamh": "Je suis Niamh ! Votre petite compagne numérique de voyage. Je suis là pour partager les informations, raconter les petites histoires et mettre un peu de bonne humeur dans l'aventure.",
     "role_niamh": "Je peux vous renseigner sur le voyage, retrouver les informations disponibles, répondre à vos questions et partager quelques anecdotes. Bref, je suis là pour rendre l'aventure encore plus vivante !",
     "conversation": "Bien sûr ! On peut parler du voyage, de la météo, des découvertes ou simplement discuter de tout et de rien. Je ne suis jamais contre une petite papote !",
@@ -463,7 +539,19 @@
     "description_page_test": "Ici,  c'est l'accueil, Lost but Free présente Bivouac88, avec mon assistance!",
     "description_page_resume": "Ici, un aperçu de l'aventure, en image et en chiffres. Les détails sont sur les autres pages, avec quelques outils.",
     "description_page_stats": "Ici, toutes les stats actualisée chaque jour !",
-    "description_page_etapes": "Ici, les étapes, l'avis et commentaire de Tito sur l'étape du jour Profitez en pour laisser un like et un commentaire"
+    "description_page_etapes": "Ici, les étapes, l'avis et commentaire de Tito sur l'étape du jour Profitez en pour laisser un like et un commentaire",
+    "solo_duo": "Je voyage en solo ! Pas de compagnon de route, mais jamais vraiment seul non plus : entre les rencontres, les paysages et le vélo, la compagnie ne manque pas. Et puis, seul, on avance à son rythme, on écoute ses envies. C'est un choix qui va bien à l'aventure.",
+    "budget": "L'esprit bivouac, c'est justement ça : voyager avec peu. Je dors sous tente, je mange simple, et je compte bien travailler ici et là sur la route, le temps d'un repas, d'une nuit ou d'un coup de pouce au budget. Le chiffre exact, on verra avec le temps !",
+    "recharge_electronique": "J'ai un petit panneau solaire et une grosse batterie externe pour tenir le coup. On verra à l'usage si ça suffit ! Si ça évolue, ce sera sûrement raconté dans le journal de bord, photo à l'appui.",
+    "nom_bivouac88": "Bivouac, parce que ça résume bien l'esprit Lost but Free. Et 88, c'est mon année de naissance. Rien de très original, mais c'est simple et ça parle direct ! Tout ça fait partie du même univers : Lost but Free, Bivouac88, et le compte Instagram lostbutfree420.",
+    "reseaux_sociaux": "Tu peux suivre l'aventure sur Instagram : lostbutfree420 ! Photos, coulisses et moments du voyage y seront partagés au fil de la route.",
+    "don_soutien": "Si tu as envie de soutenir l'aventure, les boutons sont juste là sur le site ! Chaque petit geste fait toujours plaisir, mais le plus important reste de suivre et partager le voyage.",
+    "apres_le_voyage": "Il n'y a pas vraiment de ligne d'arrivée programmée ! Je ne sais pas encore où ça va mener, mais si ça ne tenait qu'à moi, j'y passerais bien le reste de ma vie.",
+    "recette_riz_thon": "Fais cuire le riz, égoutte le thon, mélange avec un bouillon cube si tu en as. Simple et efficace.",
+    "recette_pates_oeuf": "Cuis les pâtes, bats un œuf avec un peu de sel/poivre, mélange hors du feu avec les pâtes encore chaudes. Ça fait illusion de carbonara !",
+    "recette_pain_fromage": "Pose le fromage sur le pain, chauffe à la poêle ou au réchaud quelques minutes. Croque-monsieur de bivouac !",
+    "histoire_reims": "Reims a longtemps été la ville des sacres des rois de France, notamment à sa célèbre cathédrale.",
+    "histoire_verdun": "Verdun est marquée par une des batailles les plus meurtrières de la Première Guerre mondiale, en 1916."
   },
-  "_updatedAt": "2026-11-25T16:41:05.094Z"
+  "_updatedAt": "2026-11-26T01:28:06.241Z"
 }
