@@ -1,6 +1,6 @@
 {
-  "jour_actuel": "Jeudi",
-  "date_actuelle": "11/26/2026",
+  "jour_actuel": "Vendredi",
+  "date_actuelle": "11/27/2026",
   "region_actuelle": "Eghezée",
   "pays_actuel": "Belgique",
   "km_total_parcouru": "0",
@@ -57,8 +57,8 @@
   "recette_pain_fromage": "Pain + fromage grillé",
   "histoire_reims": "Capitale des sacres royaux",
   "histoire_verdun": "Symbole de la Première Guerre mondiale",
-  "Jeudi": "",
-  "11/26/2026": "",
+  "Vendredi": "",
+  "11/27/2026": "",
   "Eghezée": "",
   "Belgique": "",
   "_questions": {
@@ -553,5 +553,5 @@
     "histoire_reims": "Reims a longtemps été la ville des sacres des rois de France, notamment à sa célèbre cathédrale.",
     "histoire_verdun": "Verdun est marquée par une des batailles les plus meurtrières de la Première Guerre mondiale, en 1916."
   },
-  "_updatedAt": "2026-11-27T03:27:05.321Z"
+  "_updatedAt": "2026-11-27T15:59:50.493Z"
 }
