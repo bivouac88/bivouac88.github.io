@@ -3,10 +3,10 @@
   "date_actuelle": "11/27/2026",
   "region_actuelle": "Eghezée",
   "pays_actuel": "Belgique",
-  "km_total_parcouru": "0",
+  "km_total_parcouru": "203.1",
   "km_total_prévu": "2202.8",
-  "denivele_cumule": "0",
-  "jours_velo": "0",
+  "denivele_cumule": "865",
+  "jours_velo": "4",
   "derniere_anecdote": "Il pleut dans la tente..",
   "poi_du_moment": "Le jardin d'un pote",
   "humeur_du_jour": "motivé malgré la pluie!",
@@ -553,5 +553,5 @@
     "histoire_reims": "Reims a longtemps été la ville des sacres des rois de France, notamment à sa célèbre cathédrale.",
     "histoire_verdun": "Verdun est marquée par une des batailles les plus meurtrières de la Première Guerre mondiale, en 1916."
   },
-  "_updatedAt": "2026-11-27T15:59:50.493Z"
+  "_updatedAt": "2026-11-28T00:58:22.001Z"
 }
